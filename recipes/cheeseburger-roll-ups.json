@@ -1,0 +1,207 @@
+{
+  "id": "cheeseburger-roll-ups",
+  "title": "High-Protein Cheeseburger Roll-Ups",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "U5nz5KJK4Sg",
+    "url": "https://www.youtube.com/shorts/U5nz5KJK4Sg"
+  },
+  "creator": {
+    "name": "Louis Howard",
+    "handle": "@LouisHowardpt",
+    "url": "https://www.youtube.com/@LouisHowardpt"
+  },
+  "uploaded": "2025-11-29",
+  "analyzed": "2026-10-12",
+  "summary": "Lean minced beef cooked with onion and smoky spices, made creamy with stock, cream cheese, ketchup, mustard and pickles. It's rolled into tortillas with cheese and baked until golden. Makes 9 and freezes well.",
+  "serves": "9 rolls",
+  "tags": [
+    "beef",
+    "minced beef",
+    "wraps",
+    "high protein",
+    "meal prep",
+    "freezer",
+    "oven"
+  ],
+  "components": [
+    {
+      "name": "Cheeseburger beef",
+      "ingredients": [
+        {
+          "item": "Lean minced beef",
+          "key": "minced beef",
+          "amount": "800 g",
+          "basis": "description"
+        },
+        {
+          "item": "Onion, diced",
+          "key": "onion",
+          "amount": "1 medium",
+          "basis": "description"
+        },
+        {
+          "item": "Smoked paprika",
+          "key": "paprika",
+          "amount": "2 tsp",
+          "basis": "description"
+        },
+        {
+          "item": "Garlic powder",
+          "key": "garlic powder",
+          "amount": "2 tsp",
+          "basis": "description"
+        },
+        {
+          "item": "Black pepper",
+          "key": "black pepper",
+          "amount": "2 tsp",
+          "basis": "description"
+        },
+        {
+          "item": "Cayenne pepper",
+          "key": "cayenne",
+          "amount": "1 tsp",
+          "basis": "description",
+          "note": "“Not too much”"
+        },
+        {
+          "item": "Salt",
+          "key": "salt",
+          "amount": "2 tsp",
+          "basis": "description"
+        },
+        {
+          "item": "Beef stock",
+          "key": "beef stock",
+          "amount": "200 ml",
+          "basis": "description"
+        },
+        {
+          "item": "Light cream cheese",
+          "key": "cream cheese",
+          "amount": "120 g",
+          "basis": "description"
+        },
+        {
+          "item": "Low-sugar ketchup",
+          "key": "ketchup",
+          "amount": "90 g",
+          "basis": "description"
+        },
+        {
+          "item": "Mustard (American/yellow)",
+          "key": "mustard",
+          "amount": "10 g",
+          "basis": "description"
+        },
+        {
+          "item": "Diced pickles / gherkins",
+          "key": "pickles",
+          "amount": "120 g",
+          "basis": "description"
+        },
+        {
+          "item": "Cooking spray",
+          "key": "cooking spray",
+          "amount": "a little",
+          "basis": "spoken"
+        }
+      ],
+      "steps": [
+        {
+          "text": "Spray a pan with cooking spray, add the 800 g lean beef and get a crispy sear before breaking it up.",
+          "t": 8
+        },
+        {
+          "text": "Add the diced onion.",
+          "t": 16
+        },
+        {
+          "text": "Season with 2 tsp smoked paprika, 2 tsp garlic powder, 2 tsp black pepper, 1 tsp cayenne and 2 tsp salt, and mix well.",
+          "t": 18
+        },
+        {
+          "text": "Add 200 ml beef stock, 120 g light cream cheese, 90 g ketchup, 10 g mustard and 120 g diced pickles. Mix until creamy and let it simmer.",
+          "t": 26
+        }
+      ]
+    },
+    {
+      "name": "Each roll (×9)",
+      "ingredients": [
+        {
+          "item": "Protein tortilla",
+          "key": "tortilla",
+          "amount": "1 per roll",
+          "basis": "description",
+          "note": "He suggests a low-carb wrap as an alternative"
+        },
+        {
+          "item": "Low-fat grated cheese",
+          "key": "cheese",
+          "amount": "20 g per roll",
+          "basis": "description"
+        },
+        {
+          "item": "Parsley flakes",
+          "key": "parsley",
+          "amount": "a sprinkle",
+          "basis": "spoken"
+        },
+        {
+          "item": "Lettuce (optional)",
+          "key": "lettuce",
+          "amount": null,
+          "basis": "unstated",
+          "note": "His own suggested tweak, to make it taste more like a cheeseburger"
+        }
+      ],
+      "steps": [
+        {
+          "text": "Lay a tortilla flat and add one ninth of the beef mix and 20 g low-fat cheese.",
+          "t": 37
+        },
+        {
+          "text": "Fold in the sides and roll it up tight. Repeat to make 9 rolls.",
+          "t": 46
+        },
+        {
+          "text": "Lay the rolls on a lined tray, spray them with cooking spray and sprinkle with parsley.",
+          "t": 65
+        },
+        {
+          "text": "Bake at 180 °C for 10–12 minutes, until golden.",
+          "t": 69
+        },
+        {
+          "text": "To meal prep, wrap the rolls and freeze them; reheat when needed.",
+          "t": 74
+        }
+      ]
+    }
+  ],
+  "nutrition": {
+    "per": "roll",
+    "basis": "description",
+    "calories": 360,
+    "protein_g": 38,
+    "carbs_g": 32,
+    "fat_g": 11
+  },
+  "notes": [
+    "A remake: the description credits the original recipe to @Panacea Palm. Louis rates it 8/10.",
+    "The video sears the beef first and then adds the onion. The written method cooks the onion first. Either works.",
+    "The oven setting (180 °C, 10–12 min) is shown on screen. The description says “toast or air fry until golden and crispy” instead."
+  ],
+  "gaps": [
+    "How long to brown the beef and simmer the sauce isn't given.",
+    "How to reheat from frozen isn't given."
+  ],
+  "source": {
+    "finding": "Hermes Personal topic (75757) session 20261011_163434_055961df; not yet filed in the vault",
+    "evidence": "YouTube captions + video description + on-screen frame at 1:10",
+    "quantity_basis": "Amounts are from the creator's written recipe in the video description. The oven setting is shown on screen; cooking spray and parsley amounts are only spoken."
+  }
+}

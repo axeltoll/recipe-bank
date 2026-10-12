@@ -1,0 +1,67 @@
+{
+  "id": "air-fried-chicken-nuggets",
+  "title": "Crispy Air-Fried High-Protein Chicken Nuggets",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "irttbs0P-KE",
+    "url": "https://www.youtube.com/shorts/irttbs0P-KE"
+  },
+  "creator": {
+    "name": "Louis Howard",
+    "handle": "@LouisHowardpt",
+    "url": "https://www.youtube.com/@LouisHowardpt"
+  },
+  "uploaded": "2026-08-20",
+  "analyzed": "2026-10-12",
+  "summary": "Chicken breast blended with an egg, garlic and spices, shaped into nuggets, coated in crushed cornflakes and air-fried until crisp. Makes about 12.",
+  "serves": "about 12 nuggets",
+  "tags": ["chicken", "air fryer", "high protein", "kid-friendly", "blender"],
+  "components": [
+    {
+      "name": "Nuggets",
+      "ingredients": [
+        { "item": "Chicken breast, diced", "key": "chicken", "amount": "680 g", "basis": "description" },
+        { "item": "Egg", "key": "egg", "amount": "1 large", "basis": "description" },
+        { "item": "Garlic cloves", "key": "garlic", "amount": "2", "basis": "description" },
+        { "item": "Onion powder", "key": "onion powder", "amount": "1 tsp", "basis": "description", "note": "He ran out and used a little fresh onion in the video" },
+        { "item": "Garlic powder", "key": "garlic powder", "amount": "1 tsp", "basis": "description" },
+        { "item": "Paprika", "key": "paprika", "amount": "1 tsp", "basis": "description" },
+        { "item": "Salt", "key": "salt", "amount": "1 tsp", "basis": "description" },
+        { "item": "Black pepper", "key": "black pepper", "amount": "½ tsp", "basis": "description" },
+        { "item": "Cornflakes, crushed", "key": "cornflakes", "amount": "60 g", "basis": "description" },
+        { "item": "Cooking spray", "key": "cooking spray", "amount": "a light spray", "basis": "spoken" }
+      ],
+      "steps": [
+        { "text": "Put the diced chicken breast in a blender or food processor with the egg, garlic cloves, onion powder, garlic powder, paprika, salt and black pepper.", "t": 0 },
+        { "text": "Blend into a thick mixture. Stop once it's combined; don't blitz it to a paste.", "t": 47 },
+        { "text": "Crush the cornflakes into crumbs in a separate bowl.", "t": 53 },
+        { "text": "Shape the mixture into small nuggets and press each one into the cornflakes until fully coated.", "t": 50 },
+        { "text": "Give them a light spray of cooking spray.", "t": 55 },
+        { "text": "Air fry at 200 °C (400 °F) for 10–12 minutes, flipping halfway, until golden, crispy and cooked through.", "t": 57 },
+        { "text": "Serve with your favourite dipping sauce. He uses ketchup.", "t": 72 }
+      ]
+    }
+  ],
+  "nutrition": {
+    "per": "nugget",
+    "basis": "description",
+    "calories": 94,
+    "protein_g": 14,
+    "carbs_g": 5,
+    "fat_g": 2,
+    "note": "Based on 12 nuggets. The creator says the macros vary with the cornflakes and chicken used."
+  },
+  "notes": [
+    "A remake: the description credits @hunt4shredz. Louis rates it 9/10.",
+    "The middle of the video (0:19–0:47) is a promo for his 28-day challenge, not recipe content."
+  ],
+  "gaps": [
+    "No oven alternative is given; only air-fryer times."
+  ],
+  "source": {
+    "finding": "Hermes Personal topic (75757) session 20261011_163434_055961df; not yet filed in the vault",
+    "evidence": "YouTube captions + video description",
+    "quantity_basis": "Amounts are from the written recipe in the video description; the cooking spray amount is only spoken."
+  }
+}

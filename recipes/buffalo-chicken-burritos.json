@@ -1,0 +1,95 @@
+{
+  "id": "buffalo-chicken-burritos",
+  "title": "Buffalo Chicken Burritos with Dill Slaw",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "LC-6GfoS4No",
+    "url": "https://www.youtube.com/shorts/LC-6GfoS4No"
+  },
+  "creator": {
+    "name": "Louis Howard",
+    "handle": "@LouisHowardpt",
+    "url": "https://www.youtube.com/@LouisHowardpt"
+  },
+  "uploaded": "2026-02-12",
+  "analyzed": "2026-10-12",
+  "summary": "Cajun-coated chicken, air-fried or baked and then tossed in a honey buffalo sauce. It's wrapped with cheese and a creamy red-cabbage, carrot and dill slaw. A 20-minute dinner that makes 2.",
+  "serves": "2 burritos",
+  "tags": ["chicken", "wraps", "high protein", "air fryer", "20 minutes", "spicy"],
+  "components": [
+    {
+      "name": "Chicken",
+      "ingredients": [
+        { "item": "Chicken breast, diced", "key": "chicken", "amount": "350 g", "basis": "description" },
+        { "item": "Cornflour (cornstarch)", "key": "cornflour", "amount": "2 tbsp", "basis": "description" },
+        { "item": "Cajun seasoning", "key": "cajun seasoning", "amount": "2 tsp", "basis": "description" }
+      ],
+      "steps": [
+        { "text": "Put the diced chicken in a bowl, add the Cajun seasoning and cornflour, and mix until coated.", "t": 16 },
+        { "text": "Air fry at 200 °C for 12 minutes. With no air fryer, bake at 200 °C for 20–25 minutes, flipping halfway.", "t": 25 }
+      ]
+    },
+    {
+      "name": "Dill slaw",
+      "ingredients": [
+        { "item": "Low-fat mayo", "key": "mayonnaise", "amount": "4 tbsp", "basis": "description" },
+        { "item": "Garlic clove", "key": "garlic", "amount": "1", "basis": "description" },
+        { "item": "Onion powder", "key": "onion powder", "amount": "½ tsp", "basis": "description" },
+        { "item": "Dried dill", "key": "dill", "amount": "½ tsp", "basis": "description" },
+        { "item": "Salt", "key": "salt", "amount": "a pinch", "basis": "spoken" },
+        { "item": "Black pepper", "key": "black pepper", "amount": null, "basis": "unstated" },
+        { "item": "Red cabbage, finely sliced", "key": "red cabbage", "amount": null, "basis": "unstated" },
+        { "item": "Carrot, grated", "key": "carrot", "amount": null, "basis": "unstated" },
+        { "item": "Onion, finely sliced", "key": "onion", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Mix the low-fat mayo with the garlic, onion powder, dried dill, a pinch of salt and some black pepper.", "t": 39 },
+        { "text": "Finely slice the red cabbage and onion, grate the carrot, and stir them through the dressing.", "t": 57 }
+      ]
+    },
+    {
+      "name": "Buffalo sauce",
+      "ingredients": [
+        { "item": "Hot sauce (buffalo-style)", "key": "hot sauce", "amount": "4 tbsp", "basis": "description" },
+        { "item": "Low-fat butter", "key": "butter", "amount": "1 tsp", "basis": "description" },
+        { "item": "Honey", "key": "honey", "amount": "1 tsp", "basis": "description" }
+      ],
+      "steps": [
+        { "text": "Melt the butter in a pan, add the hot sauce and honey, and simmer gently for a couple of minutes.", "t": 65 },
+        { "text": "Add the cooked chicken and toss until it's fully coated.", "t": 72 }
+      ]
+    },
+    {
+      "name": "Assemble",
+      "ingredients": [
+        { "item": "Tortilla wraps", "key": "tortilla", "amount": "2", "basis": "description" },
+        { "item": "Low-fat cheese", "key": "cheese", "amount": "20 g (for both)", "basis": "description" }
+      ],
+      "steps": [
+        { "text": "Put the buffalo chicken on a wrap and top with cheese and slaw.", "t": 79 },
+        { "text": "Tuck in the sides and roll it up tight. Toast it if you want it crisp.", "t": 86 }
+      ]
+    }
+  ],
+  "nutrition": {
+    "per": "burrito",
+    "basis": "spoken",
+    "calories": 511,
+    "protein_g": 63,
+    "note": "Only calories and protein are given."
+  },
+  "notes": [
+    "A remake: the description credits the recipe to @mealswithmax on Instagram.",
+    "Louis has no air fryer in this video and uses the oven option."
+  ],
+  "gaps": [
+    "The cabbage, carrot and onion amounts for the slaw aren't given.",
+    "How long to toast the burritos isn't given."
+  ],
+  "source": {
+    "finding": "Hermes Personal topic (75757) session 20261011_163434_055961df; not yet filed in the vault",
+    "evidence": "YouTube captions + video description",
+    "quantity_basis": "Amounts are from the written recipe in the video description; the salt pinch is only spoken."
+  }
+}

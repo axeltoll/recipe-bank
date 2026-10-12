@@ -1,0 +1,79 @@
+{
+  "id": "beefy-5-layer-burritos",
+  "title": "High-Protein Beefy 5-Layer Burritos",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "01MVCrlejz8",
+    "url": "https://www.youtube.com/shorts/01MVCrlejz8"
+  },
+  "creator": {
+    "name": "FeastRecipes",
+    "handle": "@FeastRecipes",
+    "url": "https://www.youtube.com/@FeastRecipes"
+  },
+  "uploaded": "2026-10-09",
+  "analyzed": "2026-10-12",
+  "summary": "A homemade Taco Bell-style 5-layer burrito: taco-seasoned lean beef with refried beans and cheese, over a Greek-yoghurt queso sauce in a toasted low-carb tortilla. Makes 7 for meal prep.",
+  "serves": "7 burritos",
+  "tags": ["beef", "minced beef", "wraps", "high protein", "meal prep", "tex-mex"],
+  "components": [
+    {
+      "name": "Beef & bean filling",
+      "ingredients": [
+        { "item": "Lean minced beef", "key": "minced beef", "amount": "2 lb (~907 g)", "basis": "spoken" },
+        { "item": "Taco Bell taco seasoning", "key": "taco seasoning", "amount": "2 packets", "basis": "spoken" },
+        { "item": "Refried beans", "key": "refried beans", "amount": "1 can", "basis": "spoken" },
+        { "item": "Fat-free shredded cheese", "key": "cheese", "amount": "1 bag", "basis": "spoken" }
+      ],
+      "steps": [
+        { "text": "Cook 2 lb lean minced beef with 2 packets of Taco Bell seasoning, breaking it up as it browns.", "t": 5 },
+        { "text": "While it cooks, stir in 1 can of refried beans and 1 bag of fat-free cheese.", "t": 9 }
+      ]
+    },
+    {
+      "name": "Queso sauce",
+      "ingredients": [
+        { "item": "Plain Greek yoghurt", "key": "greek yoghurt", "amount": "280 g", "basis": "spoken" },
+        { "item": "Tostitos cheese dip (queso)", "key": "queso", "amount": "240 g", "basis": "spoken" },
+        { "item": "Taco Bell sauce", "key": "hot sauce", "amount": "20 g", "basis": "spoken" }
+      ],
+      "steps": [
+        { "text": "Mix 280 g Greek yoghurt, 240 g Tostitos cheese dip and 20 g Taco Bell sauce into a smooth nacho cheese sauce.", "t": 15 }
+      ]
+    },
+    {
+      "name": "Assemble",
+      "ingredients": [
+        { "item": "Carb Balance tortillas (large)", "key": "tortilla", "amount": "7", "basis": "spoken" }
+      ],
+      "steps": [
+        { "text": "Lay out the 7 tortillas. Spread the queso sauce on first, in a circular motion, keeping about an inch from the edges.", "t": 22 },
+        { "text": "Add the beef filling, fold into burritos, and toast them until golden.", "t": 32 },
+        { "text": "Pack them into containers for the week.", "t": 40 }
+      ]
+    }
+  ],
+  "nutrition": {
+    "per": "burrito",
+    "basis": "description",
+    "calories": 454,
+    "protein_g": 53,
+    "carbs_g": 51,
+    "fat_g": 14,
+    "note": "The description marks these as estimated. The voiceover says 52 g protein."
+  },
+  "notes": [
+    "Unlike this channel's pesto chicken subs, this video does give the full recipe. The description still pushes the $34.99 cookbook at “50% off”.",
+    "The video shows the beans and cheese going into the pan with the beef. The queso is spread on the tortilla first, then the beef goes on top."
+  ],
+  "gaps": [
+    "The beef cook time and how to toast the burritos (pan, press or oven) aren't given.",
+    "Packet sizes for the taco seasoning and the beans aren't given (US retail packs)."
+  ],
+  "source": {
+    "finding": "Hermes Personal topic (75757) session 20261011_163434_055961df; not yet filed in the vault",
+    "evidence": "YouTube captions + video frames (0:05–0:40) + video description",
+    "quantity_basis": "Amounts are spoken; the order of the layers was checked against video frames. The macros are from the description."
+  }
+}
