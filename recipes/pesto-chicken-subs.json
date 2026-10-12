@@ -1,0 +1,62 @@
+{
+  "id": "pesto-chicken-subs",
+  "title": "Pesto Chicken Subs with Swiss & Hot Honey",
+  "status": "partial",
+  "video": {
+    "platform": "youtube",
+    "id": "ge4oPMjBAII",
+    "url": "https://www.youtube.com/shorts/ge4oPMjBAII"
+  },
+  "creator": {
+    "name": "FeastRecipes",
+    "handle": "@FeastRecipes",
+    "url": "https://www.youtube.com/@FeastRecipes"
+  },
+  "uploaded": "2026-08-20",
+  "analyzed": "2026-10-02",
+  "summary": "A meal-prep batch of 12 subs: pesto chicken in hollowed-out baguettes with melted Swiss and hot honey. The video gives only four tips for making them lighter and keeps the actual recipe for a paid cookbook.",
+  "serves": "12 subs",
+  "tags": ["chicken", "sandwich", "meal prep", "high protein"],
+  "components": [
+    {
+      "name": "Subs",
+      "ingredients": [
+        { "item": "Chicken, trimmed of fat", "key": "chicken", "amount": null, "basis": "unstated" },
+        { "item": "Homemade pesto, made with minimal oil", "key": "pesto", "amount": null, "basis": "unstated" },
+        { "item": "Swiss cheese, sliced ultra-thin", "key": "swiss cheese", "amount": null, "basis": "unstated" },
+        { "item": "Hot honey", "key": "hot honey", "amount": null, "basis": "unstated" },
+        { "item": "Baguettes, hollowed out", "key": "baguette", "amount": "enough for 12 subs", "basis": "spoken" }
+      ],
+      "steps": [
+        { "text": "Trim the fat off the chicken.", "t": 35 },
+        { "text": "Make the pesto with as little oil as possible.", "t": 36 },
+        { "text": "Slice the Swiss cheese ultra-thin.", "t": 38 },
+        { "text": "Hollow out the baguettes.", "t": 39 },
+        { "text": "Build 12 subs: pesto chicken, melted Swiss and hot honey.", "t": 18 }
+      ]
+    }
+  ],
+  "nutrition": {
+    "per": "sub",
+    "basis": "description",
+    "calories": 517,
+    "protein_g": 43,
+    "carbs_g": 39,
+    "fat_g": 21,
+    "note": "The voiceover claims 50 g protein per sub; the description says 43 g. The cost claim is $3.25 per sub (spoken)."
+  },
+  "notes": [
+    "The full recipe is sold as a $34.99 PDF cookbook through a link in the creator's bio. Treat this card as a starting point and fill in the method yourself."
+  ],
+  "gaps": [
+    "No quantities are given for anything.",
+    "How the chicken is cooked (method, seasoning, time) isn't given.",
+    "There's no pesto recipe, only “minimal oil”.",
+    "How the subs are assembled, how the cheese is melted, and how to store or reheat them aren't given."
+  ],
+  "source": {
+    "finding": "axels-vault/research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md#finding-3",
+    "evidence": "axels-vault/research/findings/food-content-culture/evidence/feastrecipes-pesto-chicken-subs-cookbook-funnel/",
+    "quantity_basis": "None given. The yield (12) is spoken; the macros come from the video description."
+  }
+}

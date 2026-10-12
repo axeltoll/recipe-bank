@@ -1,0 +1,14 @@
+{
+  "name": "recipe-bank",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal recipe bank: social-media recipe videos analyzed into ingredients and step-by-step guides, with an ingredient-filter dashboard.",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch-path=server.mjs --watch-path=lib server.mjs",
+    "validate": "node scripts/validate.mjs",
+    "test": "node --test \"test/*.test.mjs\""
+  }
+}

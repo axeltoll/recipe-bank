@@ -1,0 +1,61 @@
+{
+  "id": "banana-milk",
+  "title": "Banana Milk (“Banana Water”)",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "OVElVWCYbxA",
+    "url": "https://www.youtube.com/shorts/OVElVWCYbxA"
+  },
+  "creator": {
+    "name": "Jose.elcook",
+    "url": "https://www.youtube.com/channel/UCXvCI4YnkGhGV8ei4vE9h4A"
+  },
+  "uploaded": "2026-07-02",
+  "analyzed": "2026-09-27",
+  "summary": "A blended banana drink: semi-ripe bananas, cinnamon, evaporated and sweetened condensed milk, vanilla, a little salt and water. The creator says it tastes like banana cream pie with graham crackers.",
+  "serves": null,
+  "tags": ["drink", "blender", "no-cook", "sweet"],
+  "components": [
+    {
+      "name": "Banana milk",
+      "ingredients": [
+        { "item": "Semi-ripe bananas", "key": "banana", "amount": "4", "basis": "spoken", "note": "The creator's were riper than ideal" },
+        { "item": "Ground cinnamon", "key": "cinnamon", "amount": "a whole bunch", "basis": "spoken", "note": "Plus a little more at the end" },
+        { "item": "Evaporated milk", "key": "evaporated milk", "amount": "1 can", "basis": "spoken" },
+        { "item": "Sweetened condensed milk", "key": "sweetened condensed milk", "amount": "1 can", "basis": "spoken", "note": "Scrape the whole can out" },
+        { "item": "Vanilla extract", "key": "vanilla", "amount": "1 tsp", "basis": "spoken" },
+        { "item": "Salt", "key": "salt", "amount": "a little", "basis": "spoken", "note": "“Optional, but not really”" },
+        { "item": "Water", "key": "water", "amount": "2 cups", "basis": "spoken", "note": "The audio is unclear at this point; the analysis reads it as water" }
+      ],
+      "steps": [
+        { "text": "Put 4 semi-ripe bananas in the blender.", "t": 5 },
+        { "text": "Add a generous amount of cinnamon.", "t": 11 },
+        { "text": "Add 1 can of evaporated milk and 1 whole can of sweetened condensed milk.", "t": 14 },
+        { "text": "Add 1 tsp vanilla extract and a little salt.", "t": 26 },
+        { "text": "Add 2 cups of water and blend until smooth.", "t": 37 },
+        { "text": "Pour, dust with a little more cinnamon and top with a few banana slices.", "t": 45 }
+      ]
+    },
+    {
+      "name": "To serve",
+      "ingredients": [
+        { "item": "Banana slices (“medallions”)", "key": "banana", "amount": "a couple", "basis": "spoken" }
+      ],
+      "steps": []
+    }
+  ],
+  "notes": [
+    "This video copies another creator's recipe step by step and doesn't say whose it is. Commenters name “Chef Boyd(e) Brown III”, but no public page for that person could be found.",
+    "Commenters link it to agua de plátano and coquito. It is high in sugar: a whole can of condensed milk."
+  ],
+  "gaps": [
+    "Serving size, blend time and whether to chill it aren't given.",
+    "The quantities are only spoken; nothing is shown on screen."
+  ],
+  "source": {
+    "finding": "axels-vault/research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md#finding-1",
+    "evidence": "axels-vault/research/findings/food-content-culture/evidence/jose-elcook-banana-water-remake-attribution/",
+    "quantity_basis": "Spoken only. A check of 40 video frames found no on-screen recipe text."
+  }
+}

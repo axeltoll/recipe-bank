@@ -1,0 +1,80 @@
+{
+  "id": "cold-pan-chicken",
+  "title": "Cold Pan Chicken with Lemon Butter Pan Sauce",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "NcYdt03nz8Q",
+    "url": "https://www.youtube.com/shorts/NcYdt03nz8Q"
+  },
+  "creator": {
+    "name": "SaeriJane",
+    "handle": "@saerijane",
+    "url": "https://www.youtube.com/@saerijane"
+  },
+  "uploaded": "2026-05-05",
+  "analyzed": "2026-09-28",
+  "summary": "Skin-on chicken started in a cold, dry pan so the fat renders slowly and the skin goes crisp. A pan sauce follows: shallot, garlic, white wine, stock, lemon and cold butter. Served with asparagus and potatoes.",
+  "serves": null,
+  "tags": ["chicken", "pan sauce", "cold-pan", "dinner", "french technique"],
+  "components": [
+    {
+      "name": "Chicken",
+      "ingredients": [
+        { "item": "Skin-on chicken", "key": "chicken", "amount": null, "basis": "unstated", "note": "The cut isn't named" },
+        { "item": "Salt", "key": "salt", "amount": null, "basis": "unstated", "note": "Salt ahead and rest 15 min" }
+      ],
+      "steps": [
+        { "text": "Salt the chicken, let it rest for 15 minutes, then pat it dry.", "t": 12 },
+        { "text": "Put the chicken skin side down in a cold, empty pan. No oil.", "t": 3 },
+        { "text": "Turn the heat to medium and wait. Season the top side now; she keeps it simple.", "t": 16 },
+        { "text": "Let the fat render out. If the skin is still stuck to the pan, it isn't ready: leave it alone until it releases.", "t": 28 },
+        { "text": "Flip and cook the other side, then take the chicken out to rest.", "t": 38 }
+      ]
+    },
+    {
+      "name": "Pan sauce",
+      "ingredients": [
+        { "item": "Shallots", "key": "shallot", "amount": null, "basis": "unstated" },
+        { "item": "Garlic", "key": "garlic", "amount": null, "basis": "unstated" },
+        { "item": "Dry white wine", "key": "white wine", "amount": "enough to cover the bottom of the pan", "basis": "spoken" },
+        { "item": "Chicken stock", "key": "chicken stock", "amount": "about 1 cup", "basis": "spoken" },
+        { "item": "Lemon", "key": "lemon", "amount": "a squeeze", "basis": "spoken" },
+        { "item": "Cold butter", "key": "butter", "amount": null, "basis": "unstated", "note": "It must be cold" },
+        { "item": "Parsley", "key": "parsley", "amount": "some", "basis": "spoken" }
+      ],
+      "steps": [
+        { "text": "Keep the browned bits (the fond) in the pan. Add the shallots, then the garlic, and stir briefly.", "t": 46 },
+        { "text": "Deglaze with dry white wine, just enough to cover the bottom of the pan.", "t": 58 },
+        { "text": "Add about 1 cup of chicken stock. Keep stirring while it reduces.", "t": 68 },
+        { "text": "Once it has reduced, add a squeeze of lemon.", "t": 76 },
+        { "text": "Turn the heat to low and stir in cold butter.", "t": 80 },
+        { "text": "Finish with parsley.", "t": 86 }
+      ]
+    },
+    {
+      "name": "To serve",
+      "ingredients": [
+        { "item": "Asparagus", "key": "asparagus", "amount": null, "basis": "unstated" },
+        { "item": "Potatoes", "key": "potato", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Plate the chicken with asparagus and potatoes and spoon the pan sauce over.", "t": 92 }
+      ]
+    }
+  ],
+  "notes": [
+    "The technique matches published cold-start guides: render the skin fat slowly, cold pan for skin and hot pan for crust, pat dry and salt first.",
+    "The transcript is machine-generated (Whisper). “a pan sauce with the bun” almost certainly means “with the fond”."
+  ],
+  "gaps": [
+    "The chicken cut, weight, cook time and target internal temperature aren't given.",
+    "The butter and shallot/garlic amounts aren't given.",
+    "How the asparagus and potatoes are cooked isn't shown."
+  ],
+  "source": {
+    "finding": "axels-vault/research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md#finding-2",
+    "evidence": "axels-vault/research/findings/food-content-culture/evidence/saerijane-cold-pan-chicken-counterintuitive-hook/",
+    "quantity_basis": "Spoken only. No text shows on screen. Transcribed from the creator's TikTok original after YouTube blocked the download."
+  }
+}

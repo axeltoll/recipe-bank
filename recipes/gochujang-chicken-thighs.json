@@ -1,0 +1,124 @@
+{
+  "id": "gochujang-chicken-thighs",
+  "title": "Gochujang Chicken Thighs with Soju Pan Sauce",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "mhNQ8y5ud0A",
+    "url": "https://www.youtube.com/shorts/mhNQ8y5ud0A"
+  },
+  "creator": {
+    "name": "Eat Like an Adult (Russell Clamp)",
+    "handle": "@EatLikeAnAdult",
+    "url": "https://www.youtube.com/@EatLikeAnAdult"
+  },
+  "uploaded": "2026-02-11",
+  "analyzed": "2026-10-02",
+  "summary": "Cold-pan, skin-on chicken thighs painted with gochujang and finished in the oven. Served with a ginger, shallot and soju pan sauce sharpened with cucumber pickle juice, quick pickled cucumbers, crispy crushed potatoes and gochujang mayo.",
+  "serves": "2 thighs per person",
+  "tags": ["chicken", "korean", "pan sauce", "cold-pan", "dinner", "oven"],
+  "components": [
+    {
+      "name": "Chicken",
+      "ingredients": [
+        { "item": "Skin-on chicken thighs", "key": "chicken", "amount": "2 per person", "basis": "spoken" },
+        { "item": "Salt", "key": "salt", "amount": "lightly", "basis": "spoken" },
+        { "item": "Gochujang", "key": "gochujang", "amount": "a good amount", "basis": "spoken" }
+      ],
+      "steps": [
+        { "text": "Lightly salt two skin-on chicken thighs per person. Just before cooking, dab off any excess moisture.", "t": 10 },
+        { "text": "Lay them skin side down in a cold pan with no oil. Start on low heat, about 2 out of 10, to render out the skin fat.", "t": 17 },
+        { "text": "As they brown they unstick from the pan; then flip them.", "t": 23 },
+        { "text": "Paint with a good amount of gochujang and put them in the oven for 5–10 minutes, until 75 °C inside.", "t": 26 }
+      ]
+    },
+    {
+      "name": "Pickled cucumbers (make ahead)",
+      "ingredients": [
+        { "item": "Cucumbers, thinly sliced", "key": "cucumber", "amount": null, "basis": "unstated" },
+        { "item": "Rice wine vinegar", "key": "rice wine vinegar", "amount": "a good amount", "basis": "spoken" },
+        { "item": "Sugar", "key": "sugar", "amount": null, "basis": "unstated" },
+        { "item": "Salt", "key": "salt", "amount": null, "basis": "unstated" },
+        { "item": "Korean chili flakes (gochugaru)", "key": "gochugaru", "amount": null, "basis": "unstated" },
+        { "item": "Toasted sesame seeds", "key": "sesame seeds", "amount": null, "basis": "unstated" },
+        { "item": "Spring onions, thinly sliced", "key": "spring onion", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Ahead of time, thinly slice the cucumbers. Add a good amount of rice wine vinegar, some sugar and some salt, and mix.", "t": 83 },
+        { "text": "After about 15 minutes, pour off the pickle juice that has collected and keep it for the pan sauce.", "t": 88 },
+        { "text": "Finish the cucumbers with Korean chili flakes, toasted sesame seeds and sliced spring onions.", "t": 95 }
+      ]
+    },
+    {
+      "name": "Soju pan sauce",
+      "ingredients": [
+        { "item": "Shallots, diced", "key": "shallot", "amount": null, "basis": "unstated" },
+        { "item": "Fresh ginger, grated", "key": "ginger", "amount": null, "basis": "unstated" },
+        { "item": "Garlic", "key": "garlic", "amount": null, "basis": "unstated" },
+        { "item": "Gochujang", "key": "gochujang", "amount": null, "basis": "unstated" },
+        { "item": "Soju (or sake, or white wine)", "key": "soju", "amount": "enough to deglaze", "basis": "spoken" },
+        { "item": "Chicken stock or kombu dashi", "key": "chicken stock", "amount": null, "basis": "unstated" },
+        { "item": "Pickle juice from the cucumbers", "key": "cucumber", "amount": "all of it", "basis": "spoken" },
+        { "item": "Butter", "key": "butter", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Pour off about 80% of the fat from the chicken pan (keep it in the fridge for other cooking).", "t": 42 },
+        { "text": "Add the diced shallots on low heat. When they turn translucent, grate in fresh ginger and cook for about a minute, then do the same with the garlic.", "t": 47 },
+        { "text": "Once it smells fragrant, add gochujang. Keep the heat low or the sugar in it will burn.", "t": 56 },
+        { "text": "Deglaze with soju (sake or white wine also work). Cook it down until jammy: a spatula drawn through it should leave a trail.", "t": 62 },
+        { "text": "Add chicken stock or kombu dashi and reduce by half.", "t": 75 },
+        { "text": "Add the cucumber pickle juice and reduce by half again to concentrate the tang.", "t": 100 },
+        { "text": "Take it off the heat and stir in butter until melted.", "t": 107 }
+      ]
+    },
+    {
+      "name": "Crushed potatoes",
+      "ingredients": [
+        { "item": "New potatoes", "key": "potato", "amount": null, "basis": "unstated" },
+        { "item": "Olive oil", "key": "olive oil", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Boil the new potatoes ahead of time.", "t": 118 },
+        { "text": "Crush them on a tray by pressing a second tray on top, for as much crispy surface as possible.", "t": 120 },
+        { "text": "Drizzle with olive oil and roast at 200 °C for 30 minutes until golden and crispy.", "t": 124 }
+      ]
+    },
+    {
+      "name": "Gochujang mayo",
+      "ingredients": [
+        { "item": "Mayonnaise", "key": "mayonnaise", "amount": null, "basis": "unstated" },
+        { "item": "Gochujang", "key": "gochujang", "amount": null, "basis": "unstated" },
+        { "item": "Rice wine vinegar", "key": "rice wine vinegar", "amount": null, "basis": "unstated" },
+        { "item": "Toasted sesame oil", "key": "sesame oil", "amount": null, "basis": "unstated" },
+        { "item": "Honey", "key": "honey", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "While the potatoes roast, mix mayo, gochujang, rice wine vinegar, toasted sesame oil and honey.", "t": 130 }
+      ]
+    },
+    {
+      "name": "To serve",
+      "ingredients": [
+        { "item": "Sesame seeds", "key": "sesame seeds", "amount": null, "basis": "unstated" },
+        { "item": "Fresh coriander", "key": "coriander", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Spoon the pan sauce onto the plate and set the gochujang thighs on top.", "t": 110 },
+        { "text": "Add the cucumbers, crushed potatoes and gochujang mayo, then finish with sesame seeds and fresh coriander.", "t": 139 }
+      ]
+    }
+  ],
+  "notes": [
+    "This is the third video in the creator's “two-ingredient chicken” series: just salt and gochujang on the chicken.",
+    "The video shows the whole method. The written recipe with exact quantities is on eatlikeanadult.com behind a $5/month membership."
+  ],
+  "gaps": [
+    "Most quantities are spoken loosely (“some”, “a good amount”); none are shown on screen.",
+    "The oven temperature for the chicken isn't given; the 200 °C is for the potatoes."
+  ],
+  "source": {
+    "finding": "axels-vault/research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md#finding-4",
+    "evidence": "axels-vault/research/findings/food-content-culture/evidence/eatlikeanadult-gochujang-membership-funnel/",
+    "quantity_basis": "Spoken only (from the YouTube captions). No recipe text shows on screen."
+  }
+}

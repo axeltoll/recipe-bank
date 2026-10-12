@@ -1,0 +1,62 @@
+[
+  {
+    "id": "6f1d6c2e-8f0a-4d1e-9b0a-1a2b3c4d5e01",
+    "video": {
+      "platform": "youtube",
+      "id": "U5nz5KJK4Sg",
+      "url": "https://www.youtube.com/shorts/U5nz5KJK4Sg"
+    },
+    "title": "Cheeseburger burritos",
+    "creator": "Louis Howard",
+    "creatorUrl": "https://www.youtube.com/@LouisHowardpt",
+    "note": null,
+    "addedAt": "2026-10-12T14:00:00.000Z",
+    "addedBy": "axel (chat)",
+    "status": "analyzing"
+  },
+  {
+    "id": "6f1d6c2e-8f0a-4d1e-9b0a-1a2b3c4d5e02",
+    "video": {
+      "platform": "youtube",
+      "id": "LC-6GfoS4No",
+      "url": "https://www.youtube.com/shorts/LC-6GfoS4No"
+    },
+    "title": "Buffalo chicken burrito recipe",
+    "creator": "Louis Howard",
+    "creatorUrl": "https://www.youtube.com/@LouisHowardpt",
+    "note": null,
+    "addedAt": "2026-10-12T14:00:00.000Z",
+    "addedBy": "axel (chat)",
+    "status": "analyzing"
+  },
+  {
+    "id": "6f1d6c2e-8f0a-4d1e-9b0a-1a2b3c4d5e03",
+    "video": {
+      "platform": "youtube",
+      "id": "irttbs0P-KE",
+      "url": "https://www.youtube.com/shorts/irttbs0P-KE"
+    },
+    "title": "Crispy air-fried high-protein chicken nuggets",
+    "creator": "Louis Howard",
+    "creatorUrl": "https://www.youtube.com/@LouisHowardpt",
+    "note": null,
+    "addedAt": "2026-10-12T14:00:00.000Z",
+    "addedBy": "axel (chat)",
+    "status": "analyzing"
+  },
+  {
+    "id": "6f1d6c2e-8f0a-4d1e-9b0a-1a2b3c4d5e04",
+    "video": {
+      "platform": "youtube",
+      "id": "01MVCrlejz8",
+      "url": "https://www.youtube.com/shorts/01MVCrlejz8"
+    },
+    "title": "High Protein Beefy 5-Layer Burritos",
+    "creator": "FeastRecipes",
+    "creatorUrl": "https://www.youtube.com/@FeastRecipes",
+    "note": "Same channel as the pesto chicken subs, which held back its recipe for a paid cookbook. Expect the same here.",
+    "addedAt": "2026-10-12T14:00:00.000Z",
+    "addedBy": "axel (chat)",
+    "status": "analyzing"
+  }
+]
