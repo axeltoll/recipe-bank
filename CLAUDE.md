@@ -74,7 +74,7 @@ Rules that matter more than the format:
 - Project card: `~/dev/axels-vault/Projects/Recipe-Bank/README.md`
 - Lane note: `~/dev/axels-vault/ops/lanes/recipe-bank.md`
 - Topic Creator handoff: `~/dev/axels-vault/handoffs/2026-10-12-recipe-bank-topic-creator-handoff.md`
-- Delivery category `recipe_bank`; notify prefix `recipebank-`. The Telegram thread id is recorded by Topic Creator in `_system/config/telegram-topic-map.yaml` and `ops/topics.md` once the topic exists. Never guess it.
+- Delivery category `recipe_bank`; notify prefix `recipebank-`. The Telegram thread is `180986` (Recipe Bank); Topic Creator recorded it in `_system/config/telegram-topic-map.yaml` and `ops/topics.md` on 2026-10-12.
 - The first four recipes were analyzed from the Personal topic (75757). The research findings are F1–F4 in `research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md`.
 
 ## Conventions
