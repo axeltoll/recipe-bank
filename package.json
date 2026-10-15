@@ -4,11 +4,15 @@
   "private": true,
   "description": "Personal recipe bank: social-media recipe videos analyzed into ingredients and step-by-step guides, with an ingredient-filter dashboard.",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "start": "node server.mjs",
     "dev": "node --watch-path=server.mjs --watch-path=lib server.mjs",
     "validate": "node scripts/validate.mjs",
-    "test": "node --test \"test/*.test.mjs\""
+    "test": "node --test \"test/*.test.mjs\"",
+    "build": "node scripts/build-static.mjs",
+    "deploy": "node scripts/build-static.mjs && npx wrangler pages deploy dist --project-name=recipe-bank --branch=main --commit-dirty=true"
   }
 }

@@ -2,6 +2,9 @@ import { parseVideoUrl, embedUrl, thumbnailUrl } from '/lib/video.mjs';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const view = $('#view');
+// The Cloudflare Pages copy (scripts/build-static.mjs) has no server: it reads JSON files and can't change the queue.
+const STATIC = document.documentElement.dataset.static === '1';
+const apiPath = (name) => (STATIC ? `/api/${name}.json` : `/api/${name}`);
 
 const state = {
   recipes: [],
@@ -77,7 +80,7 @@ function matches(r) {
 
 // ---------- data ----------
 async function load() {
-  const [r, q] = await Promise.all([fetch('/api/recipes'), fetch('/api/queue')]);
+  const [r, q] = await Promise.all([fetch(apiPath('recipes')), fetch(apiPath('queue'))]);
   if (!r.ok || !q.ok) throw new Error('API unavailable');
   const rj = await r.json();
   state.recipes = rj.recipes.sort((a, b) => b.analyzed.localeCompare(a.analyzed) || a.title.localeCompare(b.title));
@@ -239,7 +242,7 @@ function renderQueue() {
           <div class="q-actions">
             <a class="btn btn-sm" href="#/q/${esc(x.id)}">Watch</a>
             <button class="btn btn-sm btn-quiet" type="button" data-copy="${esc(x.id)}" title="Copy a message for the Recipe Bank topic in Telegram">Copy request</button>
-            ${x.status === 'queued' ? `<button class="btn btn-sm btn-quiet" type="button" data-remove="${esc(x.id)}">Remove</button>` : ''}
+            ${x.status === 'queued' && !STATIC ? `<button class="btn btn-sm btn-quiet" type="button" data-remove="${esc(x.id)}">Remove</button>` : ''}
           </div>
         </div>
       </div>`;
@@ -434,9 +437,20 @@ function setupAdd() {
     hint.className = 'field-hint' + (v ? ' ok' : '');
     hint.textContent = url.value.trim() === '' ? '' : v ? `✓ ${PLATFORM[v.platform]} video` : 'Not a supported video link yet';
   });
+  if (STATIC) {
+    $('#add-dialog .muted').textContent =
+      'Paste a YouTube Short, TikTok or Instagram Reel. This online copy cannot queue it, so it copies a request for the Recipe Bank topic in Telegram.';
+    $('#add-submit').textContent = 'Copy request';
+  }
   $('#add-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     err.textContent = '';
+    if (STATIC) {
+      if (!parseVideoUrl(url.value)) { err.textContent = 'Not a supported video link yet'; return; }
+      dlg.close();
+      return copy(analysisRequest({ video: { url: url.value.trim() }, note: $('#add-note').value.trim() }),
+        'Request copied. Paste it in the Recipe Bank topic');
+    }
     const submit = $('#add-submit');
     submit.disabled = true;
     try {
@@ -479,5 +493,7 @@ window.addEventListener('hashchange', route);
 load()
   .then(() => { renderStats(); route(); })
   .catch(() => {
-    view.innerHTML = `<div class="empty">Couldn't load the recipes. Start the server with <code>npm start</code> and open <code>http://127.0.0.1:4780</code>.</div>`;
+    view.innerHTML = STATIC
+      ? `<div class="empty">Couldn't load the recipes. Try reloading the page.</div>`
+      : `<div class="empty">Couldn't load the recipes. Start the server with <code>npm start</code> and open <code>http://127.0.0.1:4780</code>.</div>`;
   });
