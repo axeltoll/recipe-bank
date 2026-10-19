@@ -1,0 +1,143 @@
+{
+  "id": "tandoori-butter-chicken-bowls",
+  "title": "High Protein Tandoori Butter Chicken Bowls",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "37z_-6ukoLs",
+    "url": "https://www.youtube.com/shorts/37z_-6ukoLs"
+  },
+  "creator": {
+    "name": "FeastRecipes",
+    "handle": "@FeastRecipes",
+    "url": "https://www.youtube.com/@FeastRecipes"
+  },
+  "uploaded": "2026-10-18",
+  "analyzed": "2026-10-19",
+  "summary": "Meal-prep tandoori chicken baked on a sheet pan, folded into a blended cashew-tomato butter chicken sauce, served over seasoned basmati rice with a Middle Eastern salad. Makes 10 bowls at 634 calories and 47 g protein each. The method and the timings are all on screen, but the ingredient cards give names only.",
+  "serves": "10 bowls",
+  "tags": ["chicken", "high protein", "meal prep", "indian", "rice bowl"],
+  "components": [
+    {
+      "name": "Marinated chicken",
+      "ingredients": [
+        { "item": "Boneless chicken thighs, cut into cubes", "key": "chicken", "amount": "1600g", "basis": "on-screen" },
+        { "item": "Salt", "key": "salt", "amount": null, "basis": "unstated", "note": "listed in the seasoning mix" },
+        { "item": "Turmeric", "key": "turmeric", "amount": null, "basis": "unstated", "note": "listed in the seasoning mix" },
+        { "item": "Tandoori masala", "key": "tandoori masala", "amount": null, "basis": "unstated", "note": "listed in the seasoning mix" },
+        { "item": "Garam masala", "key": "garam masala", "amount": null, "basis": "unstated", "note": "listed in the seasoning mix" },
+        { "item": "Paprika", "key": "paprika", "amount": null, "basis": "unstated", "note": "listed in the seasoning mix" },
+        { "item": "Minced garlic", "key": "garlic", "amount": null, "basis": "unstated" },
+        { "item": "Low-fat yogurt", "key": "yoghurt", "amount": null, "basis": "unstated" },
+        { "item": "Lemon juice", "key": "lemon", "amount": null, "basis": "unstated", "note": "“a squeeze”" },
+        { "item": "Olive oil", "key": "olive oil", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Cut the boneless chicken thighs into cubes.", "t": 9 },
+        { "text": "Add the seasoning mix — salt, turmeric, tandoori masala, garam masala, paprika — with minced garlic, low-fat yogurt, a squeeze of lemon juice and olive oil.", "t": 12 },
+        { "text": "Mix until the colour of the chicken changes.", "t": 19 },
+        { "text": "Spread the marinated chicken evenly on a large sheet pan.", "t": 62 },
+        { "text": "Oven bake and grill 20 minutes at 200 °C / 400 °F, then 5–7 extra minutes on grill/broil until golden brown and juicy.", "t": 64 }
+      ]
+    },
+    {
+      "name": "Rice",
+      "ingredients": [
+        { "item": "Light butter", "key": "butter", "amount": null, "basis": "unstated" },
+        { "item": "Onion, chopped", "key": "onion", "amount": null, "basis": "unstated" },
+        { "item": "Tandoori masala", "key": "tandoori masala", "amount": null, "basis": "unstated" },
+        { "item": "Parsley", "key": "parsley", "amount": null, "basis": "unstated" },
+        { "item": "Cumin", "key": "cumin", "amount": null, "basis": "unstated" },
+        { "item": "Cinnamon sticks", "key": "cinnamon", "amount": null, "basis": "unstated" },
+        { "item": "Tomato paste", "key": "tomato paste", "amount": null, "basis": "unstated" },
+        { "item": "Cooked basmati rice", "key": "rice", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "On medium heat, melt the light butter with the chopped onion.", "t": 21 },
+        { "text": "Cook 8–10 minutes until browned.", "t": 23 },
+        { "text": "Add the seasoning — tandoori masala, parsley, cumin — with cinnamon sticks and tomato paste; mix and toast 3–4 minutes.", "t": 25 },
+        { "text": "Add the cooked basmati rice and mix until fluffy and golden yellow.", "t": 30 }
+      ]
+    },
+    {
+      "name": "Butter chicken sauce",
+      "ingredients": [
+        { "item": "Light butter", "key": "butter", "amount": null, "basis": "unstated" },
+        { "item": "Onion, sliced", "key": "onion", "amount": null, "basis": "unstated" },
+        { "item": "Minced garlic", "key": "garlic", "amount": null, "basis": "unstated" },
+        { "item": "Garam masala", "key": "garam masala", "amount": null, "basis": "unstated" },
+        { "item": "Paprika", "key": "paprika", "amount": null, "basis": "unstated" },
+        { "item": "Turmeric", "key": "turmeric", "amount": null, "basis": "unstated" },
+        { "item": "Chilli powder", "key": "chilli flakes", "amount": null, "basis": "unstated" },
+        { "item": "Cashew nuts", "key": "cashew", "amount": null, "basis": "unstated" },
+        { "item": "Canned peeled tomatoes", "key": "tomato", "amount": null, "basis": "unstated" },
+        { "item": "Evaporated milk", "key": "evaporated milk", "amount": null, "basis": "unstated" },
+        { "item": "Light cream cheese", "key": "cream cheese", "amount": null, "basis": "unstated" },
+        { "item": "Extra butter", "key": "butter", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "In a large deep pan on medium heat, add light butter, sliced onion, garlic and the seasoning — garam masala, paprika, turmeric, chilli powder.", "t": 37 },
+        { "text": "Cook 8–10 minutes until soft.", "t": 42 },
+        { "text": "Add the cashew nuts and canned peeled tomatoes; cook 5 more minutes.", "t": 44 },
+        { "text": "Let it cool down, then blend 2–3 minutes until completely smooth.", "t": 46 },
+        { "text": "Return it to the pan with evaporated milk, light cream cheese and extra butter; stir until silky, rich and creamy.", "t": 53 },
+        { "text": "Add the baked tandoori chicken to the sauce and mix until creamy and indulgent.", "t": 70 }
+      ]
+    },
+    {
+      "name": "Middle Eastern salad",
+      "ingredients": [
+        { "item": "Cucumber", "key": "cucumber", "amount": null, "basis": "unstated" },
+        { "item": "Red onion", "key": "red onion", "amount": null, "basis": "unstated" },
+        { "item": "Coriander", "key": "coriander", "amount": null, "basis": "unstated" },
+        { "item": "Parsley", "key": "parsley", "amount": null, "basis": "unstated" },
+        { "item": "Pomegranate", "key": "pomegranate", "amount": null, "basis": "unstated" },
+        { "item": "Honey", "key": "honey", "amount": null, "basis": "unstated" },
+        { "item": "Sumac", "key": "sumac", "amount": null, "basis": "unstated" },
+        { "item": "Chilli flakes", "key": "chilli flakes", "amount": null, "basis": "unstated" },
+        { "item": "Lemon juice", "key": "lemon", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Put all the salad ingredients listed on screen in a large bowl.", "t": 77 },
+        { "text": "Give it a good mix, then store in the fridge to keep fresh and crisp for the week.", "t": 79 }
+      ]
+    },
+    {
+      "name": "To serve",
+      "ingredients": [
+        { "item": "Yogurt, to top", "key": "yoghurt", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Serve the fluffy rice with the creamy butter chicken, topped with yogurt; divide into 10 bowls.", "t": 86 }
+      ]
+    }
+  ],
+  "nutrition": {
+    "per": "bowl",
+    "basis": "description",
+    "calories": 634,
+    "protein_g": 47,
+    "carbs_g": 62,
+    "fat_g": 23,
+    "note": "Number matches the end card shown on screen. The voiceover says “only 600 calories”, 34 kcal below the card and description — the spoken figure is a rounded hook."
+  },
+  "notes": [
+    "On-screen cards name the ingredients but give almost no amounts: the only quantity in the whole video is 1600 g of chicken thighs. The rest is kept for the creator's paid cookbook (link in bio, advertised at 50% off, 200+ recipes).",
+    "Voiceover says bake/grill 25 minutes; the card says 20 minutes at 200 °C / 400 °F plus 5–7 minutes grill/broil, which lands on 25–27 minutes.",
+    "The salad card also lists pomegranate, honey, sumac and chilli flakes, which the voiceover skips (“all the ingredients listed on screen”).",
+    "FeastRecipes runs the same funnel as its pesto chicken subs short: teach the method free, withhold the written quantities, sell the PDF — see the pesto-chicken-subs card for the companion capture."
+  ],
+  "gaps": [
+    "No amounts for the marinade: seasoning mix (salt, turmeric, tandoori masala, garam masala, paprika), garlic, yogurt, lemon juice or olive oil.",
+    "No amounts for the rice: butter, onion, the rice seasoning, cinnamon sticks, tomato paste or basmati rice.",
+    "No amounts for the sauce: butter, onion, garlic, spices, cashews, tomatoes, evaporated milk, cream cheese.",
+    "No amounts for the salad or the yogurt topping.",
+    "Rice cooking itself (water ratio, absorption) is not covered — the video starts from “cooked basmati rice”.",
+    "No storage/reheat instructions beyond “store the salad in the fridge”."
+  ],
+  "source": {
+    "finding": "axels-vault/research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md#finding-5",
+    "evidence": "axels-vault/research/findings/food-content-culture/evidence/feastrecipes-tandoori-butter-chicken-bowls/",
+    "quantity_basis": "1600 g chicken from the on-screen card (pixels); every other amount is unstated — the cards list ingredient names only. Macros from the end card and the video description. Times from the on-screen cook cards, cross-checked against the voiceover."
+  }
+}
