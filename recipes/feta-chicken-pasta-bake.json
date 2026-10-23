@@ -1,0 +1,69 @@
+{
+  "id": "feta-chicken-pasta-bake",
+  "title": "Feta & Chicken Pasta Bake",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "luabBmh9_Rw",
+    "url": "https://www.youtube.com/shorts/luabBmh9_Rw"
+  },
+  "creator": {
+    "name": "Louis Howard",
+    "handle": "@LouisHowardpt",
+    "url": "https://www.youtube.com/@LouisHowardpt"
+  },
+  "uploaded": "2026-10-22",
+  "analyzed": "2026-10-23",
+  "summary": "Chicken breasts bake with cherry tomatoes, feta and garlic, then get shredded into the sauce and mixed with pasta. Finish with basil and Parmesan and bake for another 5 minutes; the creator's written recipe serves 4.",
+  "serves": "4",
+  "tags": ["chicken", "pasta", "high protein", "oven", "pasta bake"],
+  "components": [
+    {
+      "name": "Pasta bake",
+      "ingredients": [
+        { "item": "Olive oil", "key": "olive oil", "amount": "30ml", "basis": "description" },
+        { "item": "Cherry tomatoes", "key": "tomato", "amount": "500g", "basis": "description" },
+        { "item": "Feta, in a block", "key": "feta", "amount": "200g", "basis": "description" },
+        { "item": "Chicken breasts", "key": "chicken", "amount": "600g", "basis": "description" },
+        { "item": "Salt", "key": "salt", "amount": null, "basis": "unstated" },
+        { "item": "Black pepper", "key": "black pepper", "amount": null, "basis": "unstated" },
+        { "item": "Smoked paprika", "key": "smoked paprika", "amount": null, "basis": "unstated" },
+        { "item": "Garlic head", "key": "garlic", "amount": "½ a garlic head", "basis": "description" },
+        { "item": "Pasta, uncooked", "key": "pasta", "amount": "200g", "basis": "description", "note": "The reviewer's voiceover says he uses protein pasta; the written recipe says pasta." },
+        { "item": "Basil leaves", "key": "basil", "amount": null, "basis": "unstated" },
+        { "item": "Parmesan", "key": "parmesan", "amount": "70g", "basis": "description" }
+      ],
+      "steps": [
+        { "text": "Put the cherry tomatoes, block of feta, chicken breasts, olive oil, salt, black pepper, smoked paprika and garlic in a large baking dish.", "t": 0 },
+        { "text": "Bake at 200 °C fan for 35 minutes, until the chicken is cooked through.", "t": 24 },
+        { "text": "Meanwhile, boil the pasta until tender, then drain." },
+        { "text": "Take out the garlic and squeeze the roasted garlic from its cloves into the dish.", "t": 38 },
+        { "text": "Shred the chicken with a fork and mix it with the tomatoes, feta and roasted garlic.", "t": 40 },
+        { "text": "Add the cooked pasta and mix everything together.", "t": 43 },
+        { "text": "Top with basil and Parmesan, then return to the oven for another 5 minutes.", "t": 48 }
+      ]
+    }
+  ],
+  "nutrition": {
+    "per": "serving (4 servings)",
+    "basis": "description",
+    "calories": 618,
+    "protein_g": 52,
+    "carbs_g": 44,
+    "fat_g": 26,
+    "note": "Creator-reported figures from the description; not independently calculated. The reviewer uses protein pasta, while the written ingredient list does not specify a pasta type."
+  },
+  "notes": [
+    "Louis Howard rates the recipe 10/10 and credits @thefitnesschef_ in the description. The video alternates the source tutorial with his recreation and commentary.",
+    "The upload title says 'pheasant chicken', but the description and spoken ingredients identify chicken breast and feta. The recipe title follows the written recipe.",
+    "The spoken tutorial adds basil with the pasta; the written method tops with basil and Parmesan. Both place the basil before the final 5-minute bake."
+  ],
+  "gaps": [
+    "No quantities are given for salt, black pepper, smoked paprika or basil leaves."
+  ],
+  "source": {
+    "finding": "axels-vault/research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md#finding-6",
+    "evidence": "axels-vault/research/findings/food-content-culture/evidence/louis-howard-feta-chicken-pasta-bake/",
+    "quantity_basis": "All stated quantities, the 4-serving yield, 200 °C fan setting and nutrition come from the public video description. The caption transcript supplies step timestamps and both bake times. Unspecified seasoning and basil amounts remain null."
+  }
+}
