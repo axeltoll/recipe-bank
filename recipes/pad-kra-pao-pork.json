@@ -1,0 +1,76 @@
+{
+  "id": "pad-kra-pao-pork",
+  "title": "Pad Kra Pao (Thai Basil Pork Stir-Fry)",
+  "status": "analyzed",
+  "video": {
+    "platform": "instagram",
+    "id": "DexeTQVzoT8",
+    "url": "https://www.instagram.com/reel/DexeTQVzoT8/"
+  },
+  "creator": {
+    "name": "Vincent Yeow Lim",
+    "handle": "@dimsimlim",
+    "url": "https://www.instagram.com/dimsimlim/"
+  },
+  "uploaded": "2026-10-21",
+  "analyzed": "2026-10-25",
+  "summary": "Minced pork stir-fried in a charcoal-fired wok with pounded garlic and red chilies, seasoned with dark soy, oyster sauce and fish sauce, then finished with Thai basil and served over rice under a fried egg. He gives no quantities at any point.",
+  "serves": null,
+  "tags": ["pork", "thai", "stir-fry", "quick", "rice bowl"],
+  "components": [
+    {
+      "name": "Chili-garlic pork stir-fry",
+      "ingredients": [
+        { "item": "Garlic cloves", "key": "garlic", "amount": null, "basis": "unstated" },
+        { "item": "Small red chilies", "key": "chilli", "amount": null, "basis": "unstated" },
+        { "item": "Cooking oil, for the wok", "key": "cooking oil", "amount": null, "basis": "unstated" },
+        { "item": "Minced pork", "key": "pork", "amount": null, "basis": "unstated" },
+        { "item": "Dark soy sauce", "key": "dark soy sauce", "amount": null, "basis": "unstated" },
+        { "item": "Oyster sauce", "key": "oyster sauce", "amount": null, "basis": "unstated" },
+        { "item": "Fish sauce", "key": "fish sauce", "amount": null, "basis": "unstated" },
+        { "item": "Sugar", "key": "sugar", "amount": null, "basis": "unstated" },
+        { "item": "Seasoning powder he calls \"yum-yum\"", "key": "seasoning", "amount": null, "basis": "unstated", "note": "Spoken as \"a little bit of yum-yum\" at 0:37 while he holds a small red sachet up to camera; the label is never legible, so whether it is MSG or a branded seasoning is unconfirmed." },
+        { "item": "Thai basil", "key": "basil", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Pound the garlic cloves and red chilies to a rough paste in a granite mortar.", "t": 6 },
+        { "text": "Set the wok over a very hot charcoal fire and add oil.", "t": 12 },
+        { "text": "Fry the pounded chili and garlic in the oil until it smells cooked and fragrant.", "t": 13 },
+        { "text": "Add the minced pork and stir-fry, breaking it up, until it starts to brown.", "t": 18 },
+        { "text": "Season with dark soy sauce, oyster sauce and fish sauce, stirring each one through.", "t": 27 },
+        { "text": "Add sugar and stir it through.", "t": 37 },
+        { "text": "Add a little of the seasoning powder (\"yum-yum\").", "t": 39 },
+        { "text": "Add the Thai basil and toss it through the pork.", "t": 41 },
+        { "text": "Add a bit more oil, give it a final toss and take it off the heat.", "t": 47 }
+      ]
+    },
+    {
+      "name": "To serve",
+      "ingredients": [
+        { "item": "Cooked white rice", "key": "rice", "amount": null, "basis": "unstated" },
+        { "item": "Egg, fried", "key": "egg", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Spoon the pork over cooked white rice.", "t": 53 },
+        { "text": "Top with a fried egg, yolk still runny.", "t": 57 }
+      ]
+    }
+  ],
+  "notes": [
+    "He gives no quantities anywhere in the video and there are no on-screen quantity cards, so every amount is left to taste. A 117-frame OCR sweep at 0.5 s steps found no overlay text at all.",
+    "His caption prefers a mix of Thai basil and holy basil; the video itself says \"add our Thai basil\" at 0:41.",
+    "Cooked outdoors in a well-seasoned wok on a charcoal brazier, with the wok tossed over open flame late in the cook — a domestic hob will need the wok preheated hard instead.",
+    "The caption's opinions (\"should have used Italian basil\", the pork tasting better in Australia) are the creator's own, not something the video demonstrates."
+  ],
+  "gaps": [
+    "No quantities are given for any ingredient — not spoken, on screen, or in the caption.",
+    "The fried egg is only shown already cooked, being placed on the plate at 0:57; how he fries it is not shown.",
+    "The rice appears already cooked on the plate; the video never shows it being cooked.",
+    "The \"yum-yum\" seasoning sachet is never legible, so the product is unidentified."
+  ],
+  "source": {
+    "finding": "Instagram reel dropped in the Recipe Bank topic (Telegram 75757) on 2026-10-25; not yet filed in the vault",
+    "evidence": "Local capture: full reel (720x1280, 58.5 s, sha256 5966b577c8dca4af41a1746e0a322f001ce3bafa9d582a8bb5070b73c68002bb), oEmbed/OG metadata, faster-whisper large-v3 transcript, 117 keyframes with OCR. Vault evidence bundle not yet created.",
+    "quantity_basis": "Nothing quantified: the voiceover names ingredients only, the caption lists none, and OCR over 117 frames found zero on-screen text. Ingredient identities come from the local ASR transcript and the frames; every amount is therefore null with basis \"unstated\"."
+  }
+}
