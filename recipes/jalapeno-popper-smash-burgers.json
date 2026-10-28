@@ -1,0 +1,84 @@
+{
+  "id": "jalapeno-popper-smash-burgers",
+  "title": "Jalapeño-Popper Smash Burgers with Raspberry-Bacon Jam",
+  "status": "partial",
+  "video": {
+    "platform": "youtube",
+    "id": "QkbWl5uw71A",
+    "url": "https://www.youtube.com/shorts/QkbWl5uw71A"
+  },
+  "creator": {
+    "name": "burgerfection — recreating Alf's Kitchen",
+    "handle": "@burgerfection",
+    "url": "https://www.youtube.com/@burgerfection"
+  },
+  "uploaded": "2026-10-27",
+  "analyzed": "2026-10-28",
+  "summary": "Double jalapeño smash burgers with Havarti, whipped cream cheese and a bacon jam made with coffee, apple cider vinegar, brown sugar and fresh raspberries. burgerfection recreates and reviews Alf's Kitchen's recipe; most quantities and the patty cooking times are not supplied.",
+  "serves": null,
+  "tags": ["burger", "beef", "bacon", "jalapeño", "smash burger"],
+  "components": [
+    {
+      "name": "Raspberry-bacon jam",
+      "ingredients": [
+        { "item": "Bacon, diced", "key": "bacon", "amount": null, "basis": "unstated" },
+        { "item": "White onion", "key": "onion", "amount": null, "basis": "unstated" },
+        { "item": "Black coffee", "key": "coffee", "amount": null, "basis": "unstated" },
+        { "item": "Apple cider vinegar", "key": "apple cider vinegar", "amount": null, "basis": "unstated" },
+        { "item": "Brown sugar", "key": "sugar", "amount": null, "basis": "unstated" },
+        { "item": "Fresh raspberries", "key": "raspberry", "amount": null, "basis": "unstated" },
+        { "item": "Salt", "key": "salt", "amount": null, "basis": "unstated" },
+        { "item": "Black pepper", "key": "black pepper", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Cook the diced bacon over medium-high heat. Remove the cooked bacon and let it drain.", "t": 8 },
+        { "text": "Discard the bacon grease from the pan, then add the white onion.", "t": 14 },
+        { "text": "Add the black coffee, apple cider vinegar, brown sugar and fresh raspberries.", "t": 21 },
+        { "text": "Add salt and pepper and return the bacon to the pan.", "t": 33 },
+        { "text": "Reduce the heat to medium-low and simmer for 45–50 minutes, until the mixture becomes bacon jam. The creator shows it ready after about 45 minutes.", "t": 39 }
+      ]
+    },
+    {
+      "name": "Jalapeño smash patties",
+      "ingredients": [
+        { "item": "75/25 ground beef", "key": "minced beef", "amount": "2–3 oz per patty; 2 patties per burger", "basis": "spoken", "note": "The 75/25 blend is specified at 0:47. The reviewer gives the 2–3 oz patty weight at 2:01; the two-patty assembly is stated at 1:18. Total batch size is not stated." },
+        { "item": "Jalapeños, thinly sliced", "key": "chilli", "amount": null, "basis": "unstated" },
+        { "item": "Havarti cheese", "key": "cheese", "amount": null, "basis": "unstated", "note": "Named at 1:04; the automatic captions render it as 'havari'. The creator says he normally uses American cheese but chooses Havarti for this version." }
+      ],
+      "steps": [
+        { "text": "Use 75/25 ground beef for the smash burgers. The reviewer describes the patties as 2–3 oz each later in the video.", "t": 45 },
+        { "text": "Place the thinly sliced jalapeños on top of the patties before smashing them down. Put any fallen jalapeño slices back on top afterward.", "t": 51 },
+        { "text": "Top the patties with Havarti. Once the cheese has melted, take the burgers off the cooking surface. The narration does not specify a flip point or cooking time.", "t": 64 }
+      ]
+    },
+    {
+      "name": "Assembly",
+      "ingredients": [
+        { "item": "Burger bun", "key": "burger bun", "amount": "1 per burger", "basis": "spoken", "note": "Assembly names one bottom bun and one top bun; no total batch yield is given." },
+        { "item": "Whipped cream cheese", "key": "cream cheese", "amount": "a generous amount", "basis": "spoken" }
+      ],
+      "steps": [
+        { "text": "Spread a generous amount of whipped cream cheese on the bottom bun.", "t": 72 },
+        { "text": "Place two jalapeño patties on the cream cheese.", "t": 78 },
+        { "text": "Spread a good amount of the raspberry-bacon jam on the top bun, then close the burger.", "t": 81 }
+      ]
+    }
+  ],
+  "notes": [
+    "This upload is burgerfection's recreation and review of a recipe credited in the video to Alf's Kitchen, not an upload from Alf's Kitchen's own account.",
+    "The jam spread is described as 'a good amount' at 1:23; no measured jam quantity or jam yield is supplied.",
+    "At 2:23 the reviewer suggests dry-toasting the bun. At 2:40 he suggests replacing the coffee with Scotch or bourbon. These are review suggestions, not ingredients or steps in the demonstrated version above.",
+    "Source analysis uses the public English automatic caption track, checked against an OCR sweep of the cooking section. OCR is noisy and is not a complete visual audit; no ingredient quantity has been inferred from a bowl or handful. The YouTube description is empty."
+  ],
+  "gaps": [
+    "No measured quantities are supplied for the jam ingredients, jalapeños or Havarti; the cream cheese amount is qualitative.",
+    "No total burger yield, total beef amount, jam yield or nutrition is stated.",
+    "The narration does not specify how long to cook the onion before adding the liquids.",
+    "The narration does not give the patty cooking-surface temperature, flip point, cooking time or a safe internal-temperature target. This is a partial source extraction, not a complete food-safety guide."
+  ],
+  "source": {
+    "finding": "Recipe Bank source capture: evidence/burgerfection-jalapeno-popper-smash-burgers/source-notes.md; vault finding not yet filed",
+    "evidence": "recipe-bank/evidence/burgerfection-jalapeno-popper-smash-burgers/",
+    "quantity_basis": "Public English auto-captions (83 timed segments): 75/25 beef at 0:47, 2–3 oz patties in the review at 2:01, two patties at 1:18, and a generous amount of whipped cream cheese at 1:12. One bun per assembled burger is implied by the bottom/top-bun assembly. All unmeasured ingredient amounts remain null; no quantities invented."
+  }
+}
