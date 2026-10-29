@@ -1,0 +1,81 @@
+{
+  "id": "no-bake-cookie-dough-bars",
+  "title": "No-Bake Chocolate Chip Cookie Dough Bars",
+  "status": "partial",
+  "video": {
+    "platform": "youtube",
+    "id": "kHQ47lqWZLc",
+    "url": "https://www.youtube.com/shorts/kHQ47lqWZLc"
+  },
+  "creator": {
+    "name": "Louis Howard",
+    "handle": "@LouisHowardpt",
+    "url": "https://www.youtube.com/@LouisHowardpt"
+  },
+  "uploaded": "2026-10-24",
+  "analyzed": "2026-10-29",
+  "summary": "Cottage-cheese cookie dough with peanut butter, maple syrup, almond flour and dark chocolate chips, topped with melted chocolate and sea salt. No baking: freeze the base for 10 minutes, then refrigerate the chocolate-topped slab for 30 minutes. The source conflicts on vanilla quantity and bar yield; both are flagged below.",
+  "serves": "12 bars in the description; 5 bars in the spoken tutorial (unresolved)",
+  "tags": ["dessert", "no-bake", "chocolate", "cookie dough", "cottage cheese", "peanut butter"],
+  "components": [
+    {
+      "name": "Cookie-dough base",
+      "ingredients": [
+        { "item": "Cottage cheese", "key": "cottage cheese", "amount": "½ cup (about 110 g)", "basis": "spoken", "note": "The tutorial gives ½ cup; Louis describes his amount as about 110 g. The description also gives ½ cup." },
+        { "item": "Peanut butter", "key": "peanut butter", "amount": "4 tbsp", "basis": "spoken" },
+        { "item": "Maple syrup", "key": "maple syrup", "amount": "2 tbsp (30 ml)", "basis": "spoken" },
+        { "item": "Vanilla extract — conflicting quantity", "key": "vanilla", "amount": "1 tsp spoken / 1 tbsp in description", "basis": "spoken", "note": "Unresolved source conflict: the automatic caption at 0:18 says '1 tsp of vanilla', while the public written recipe says '1 tbsp vanilla extract'. Neither is silently treated as a correction of the other." },
+        { "item": "Almond flour", "key": "almond flour", "amount": "1½ cups", "basis": "spoken" },
+        { "item": "Dark chocolate chips", "key": "dark chocolate", "amount": "about 50 g", "basis": "description", "note": "The narration only says 'some'; the approximate weight comes from the public description." }
+      ],
+      "steps": [
+        { "text": "Put the cottage cheese, peanut butter, maple syrup and vanilla in a large bowl. Note the unresolved vanilla quantity conflict in the ingredient list.", "t": 7 },
+        { "text": "Blitz the wet ingredients together with an immersion blender.", "t": 21 },
+        { "text": "Add the almond flour and mix it into the blended ingredients.", "t": 32 },
+        { "text": "Add the dark chocolate chips and mix again.", "t": 38 },
+        { "text": "Line a separate glass container with baking parchment. Add the cookie dough and press it down evenly.", "t": 43 },
+        { "text": "Freeze the pressed base for 10 minutes.", "t": 49 }
+      ]
+    },
+    {
+      "name": "Chocolate topping and finish",
+      "ingredients": [
+        { "item": "Whittaker's dark chocolate", "key": "dark chocolate", "amount": "½ block", "basis": "spoken", "note": "The source does not state the block's weight or cocoa percentage." },
+        { "item": "Butter, for melting with the chocolate", "key": "butter", "amount": null, "basis": "unstated", "note": "The description says 'a little butter'; there is no measured quantity." },
+        { "item": "Sea salt, to sprinkle", "key": "salt", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Just before the base is ready, melt half a block of dark chocolate with a little butter, as specified in the written method. No melting temperature or time is supplied.", "t": 58 },
+        { "text": "Pour the melted chocolate over the chilled cookie-dough base.", "t": 61 },
+        { "text": "Refrigerate for 30 minutes. This is the stated method; Louis later admits that he accidentally used the freezer instead.", "t": 63 },
+        { "text": "Cut into bars and sprinkle with sea salt. The description says 12 bars, while the spoken tutorial says 5; the source does not resolve the difference.", "t": 66 }
+      ]
+    }
+  ],
+  "nutrition": {
+    "per": "bar (description's 12-bar yield)",
+    "basis": "description",
+    "calories": 200,
+    "protein_g": 6,
+    "carbs_g": 10,
+    "fat_g": 15,
+    "note": "Approximate creator-reported figures, not independently calculated or verified. The written method cuts 12 bars but the spoken tutorial says 5, so these figures must not be applied to a five-bar batch. Vanilla and chocolate-block size are also unresolved."
+  },
+  "notes": [
+    "Louis Howard's description credits @nora.dora99; the upload alternates tutorial narration with his recreation and commentary. The credited account has not been independently authenticated.",
+    "The first chill is explicitly 10 minutes in the freezer. The second is explicitly 30 minutes in the fridge. At 1:10 Louis says he accidentally used the freezer for the second chill and that the bars would have been easier to cut otherwise; that mistake is not substituted for the intended method.",
+    "The vanilla and yield conflicts are present in the source materials, not conversions or quantities invented for this entry. The recipe is marked partial because they remain unresolved.",
+    "The source does not establish a fat-loss benefit; Louis explicitly says it is not necessarily an answer to fat-loss goals. No such benefit is inferred from the nutrition label."
+  ],
+  "gaps": [
+    "Vanilla quantity conflicts: 1 tsp in the spoken tutorial's automatic captions versus 1 tbsp in the written description.",
+    "Yield conflicts: 5 bars in the spoken tutorial versus 12 bars in the description.",
+    "No block weight or cocoa percentage for the dark chocolate, measured butter or salt quantity, or glass-container dimensions are supplied.",
+    "No storage duration, chilling temperature or melting method/time is specified. Nutrition is approximate and publisher-reported, not tested."
+  ],
+  "source": {
+    "finding": "Recipe Bank source capture: evidence/louis-howard-no-bake-cookie-dough-bars/source-notes.md; no vault finding claimed",
+    "evidence": "recipe-bank/evidence/louis-howard-no-bake-cookie-dough-bars/",
+    "quantity_basis": "Public video description plus 64 English automatic-caption segments. The description supplies the approximate 50 g chocolate chips, butter and nutrition; narration supplies wet ingredients, almond flour, half a block of chocolate and timing. Vanilla (1 tsp vs 1 tbsp) and yield (5 vs 12 bars) conflicts are preserved explicitly. Unmeasured butter and sea salt remain null."
+  }
+}
