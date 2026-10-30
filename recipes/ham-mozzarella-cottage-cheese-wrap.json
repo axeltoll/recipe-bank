@@ -1,0 +1,76 @@
+{
+  "id": "ham-mozzarella-cottage-cheese-wrap",
+  "title": "Ham & Mozzarella Cottage-Cheese Wrap",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "HduyjoWVow8",
+    "url": "https://www.youtube.com/shorts/HduyjoWVow8"
+  },
+  "creator": {
+    "name": "Louis Howard",
+    "handle": "@LouisHowardpt",
+    "url": "https://www.youtube.com/@LouisHowardpt"
+  },
+  "uploaded": "2026-10-29",
+  "analyzed": "2026-10-30",
+  "summary": "A blended cottage-cheese, egg and Parmesan base baked into a thin wrap, then filled with mozzarella, ham, sun-dried tomatoes and rocket. The description supplies the measurements and 180 °C / 20-minute bake; Louis adds unmeasured garlic in his recreation.",
+  "serves": null,
+  "tags": ["wrap", "ham", "mozzarella", "cottage cheese", "lunch", "oven"],
+  "components": [
+    {
+      "name": "Baked cottage-cheese wrap",
+      "ingredients": [
+        { "item": "0% cottage cheese", "key": "cottage cheese", "amount": "250g", "basis": "description" },
+        { "item": "Eggs", "key": "egg", "amount": "2", "basis": "description" },
+        { "item": "Parmesan", "key": "parmesan", "amount": "15g", "basis": "description" },
+        { "item": "Italian seasoning", "key": "seasoning", "amount": null, "basis": "unstated" },
+        { "item": "Garlic — Louis's recreation addition", "key": "garlic", "amount": null, "basis": "unstated", "note": "Louis adds garlic at 0:11 and notes that the tutorial did not say garlic. It is not in the description's ingredient list, and no quantity is supplied. Omit when following the written recipe exactly." }
+      ],
+      "steps": [
+        { "text": "Blend the cottage cheese, eggs, Parmesan and Italian seasoning until smooth. Louis also adds garlic in his recreation; this is an unmeasured addition, not part of the written ingredient list.", "t": 0 },
+        { "text": "Line a baking tray with baking paper. Pour on the mixture and spread it into a thin rectangle; the tray dimensions are not stated.", "t": 18 },
+        { "text": "Bake at 180 °C for 20 minutes, until set. Temperature and time come from the description; the source does not specify fan versus conventional oven.", "t": 23 }
+      ]
+    },
+    {
+      "name": "Filling and assembly",
+      "ingredients": [
+        { "item": "Mozzarella", "key": "mozzarella", "amount": "65g", "basis": "description" },
+        { "item": "Ham", "key": "ham", "amount": "100g", "basis": "description" },
+        { "item": "Sun-dried tomatoes", "key": "sun-dried tomato", "amount": "40g", "basis": "description" },
+        { "item": "Rocket", "key": "rocket", "amount": "A handful", "basis": "description" }
+      ],
+      "steps": [
+        { "text": "Add the mozzarella, sun-dried tomatoes, ham and rocket to the baked base. The video adds them in that order; the written method lists mozzarella, ham, sun-dried tomatoes and rocket.", "t": 40 },
+        { "text": "Roll it up and slice in half, as directed in the description. Louis uses the baking paper to help roll and hold it together.", "t": 51 }
+      ]
+    }
+  ],
+  "nutrition": {
+    "per": "serving (serving count and portion size not specified)",
+    "basis": "description",
+    "calories": 340,
+    "protein_g": 37,
+    "carbs_g": 8,
+    "fat_g": 16,
+    "note": "Creator-reported, not independently calculated or verified. The narration calls this 'one of these wraps', while the description says 'per serving' and directs slicing in half without stating the batch yield. Do not treat these as whole-batch totals or assume each half is a serving. The tutorial separately claims 22g protein for the unfilled wrap."
+  },
+  "notes": [
+    "Louis Howard's public description credits @AdamHoadCoaching. The Short alternates tutorial footage with Louis's recreation and reaction; the credited original account was not independently audited.",
+    "The method is publicly available in the description, so this is marked analyzed. Unknown amounts, oven mode and serving definition remain explicit gaps rather than invented instructions.",
+    "The written recipe has eight ingredients. Garlic is a ninth, separately labelled recreation addition; it is not silently inserted into the original recipe.",
+    "The source also promotes Louis's app and a Halloween offer. No app access, sign-up, purchase or independent nutritional/health verification was performed."
+  ],
+  "gaps": [
+    "No Italian-seasoning or garlic quantity is stated; garlic is absent from the written recipe and appears only in Louis's recreation.",
+    "No explicit serving count or portion size is stated. Slicing in half does not establish the nutrition denominator.",
+    "The source does not specify fan versus conventional oven, baking-tray dimensions or an explicit cooling interval before filling.",
+    "The description does not specify whether the sun-dried tomatoes are drained or packed in oil. Nutrition is creator-reported and unverified."
+  ],
+  "source": {
+    "finding": "axels-vault/research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md#finding-7",
+    "evidence": "axels-vault/research/findings/food-content-culture/evidence/louis-howard-ham-mozzarella-cottage-cheese-wrap/",
+    "quantity_basis": "Public description supplies eight ingredients, six measured quantities, a handful of rocket and the 180 °C / 20-minute bake. Italian seasoning and Louis's extra garlic remain null/unstated. Steps are checked against 67 English automatic-caption segments and representative video frames; timestamps point to demonstrated beats, while description-only timing and amounts are labelled."
+  }
+}
