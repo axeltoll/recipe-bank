@@ -1,0 +1,144 @@
+{
+  "id": "steak-au-poivre-vegetable-sides",
+  "title": "Steak au Poivre with Crispy Potatoes & Vegetable Sides",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "vLAIDuGnUHA",
+    "url": "https://www.youtube.com/shorts/vLAIDuGnUHA"
+  },
+  "creator": {
+    "name": "Brian Min",
+    "handle": "@Justahumblecook",
+    "url": "https://www.youtube.com/@Justahumblecook"
+  },
+  "uploaded": "2026-10-27",
+  "analyzed": "2026-10-31",
+  "summary": "Grilled filet mignon with a brandy, cream and green-peppercorn sauce, crispy roasted potatoes, honey-thyme carrots, Parmesan cauliflower and steam-charred green beans. Brian demonstrates the full meal workflow, but supplies no serving count or measured ingredient quantities.",
+  "serves": null,
+  "tags": ["steak", "beef", "peppercorn sauce", "potato", "carrot", "cauliflower", "green bean", "grill", "oven", "dinner"],
+  "components": [
+    {
+      "name": "Crispy roasted potatoes — start first",
+      "ingredients": [
+        { "item": "Potatoes", "key": "potato", "amount": null, "basis": "unstated" },
+        { "item": "Salt", "key": "salt", "amount": "a healthy amount", "basis": "spoken", "note": "For boiling the potatoes; not a measured quantity." },
+        { "item": "Fresh thyme", "key": "thyme", "amount": null, "basis": "unstated" },
+        { "item": "Olive oil", "key": "olive oil", "amount": "a bit", "basis": "spoken", "note": "Added after draining and drizzled over the tray. No measured amount is supplied." }
+      ],
+      "steps": [
+        { "text": "Peel, cube and rinse the potatoes. Add a healthy amount of salt and fresh thyme, then bring to a boil. Brian starts these first because they take the longest.", "t": 6 },
+        { "text": "Once fully cooked, drain, add a bit of olive oil and toss so a rough mashed-potato crust forms on the pieces.", "t": 50 },
+        { "text": "Gently transfer to a sheet pan, drizzle with olive oil and put in the oven at 400 °F. This is the method actually used; Brian says he normally uses a preheated pan with more oil but did not have enough olive oil for that version.", "t": 57 },
+        { "text": "When a crispy crust has developed, turn the potatoes individually so the other sides crisp as well. No total roasting time is supplied.", "t": 134 }
+      ]
+    },
+    {
+      "name": "Honey-thyme carrots",
+      "ingredients": [
+        { "item": "Carrots", "key": "carrot", "amount": null, "basis": "unstated" },
+        { "item": "Olive oil", "key": "olive oil", "amount": null, "basis": "unstated" },
+        { "item": "Salt", "key": "salt", "amount": null, "basis": "unstated" },
+        { "item": "Honey", "key": "honey", "amount": null, "basis": "unstated" },
+        { "item": "Fresh thyme", "key": "thyme", "amount": "a few sprigs", "basis": "spoken" }
+      ],
+      "steps": [
+        { "text": "Peel the carrots, or scrub them clean as Brian's stated alternative. Drizzle with olive oil, add salt and honey, rub all over, and add a few sprigs of thyme.", "t": 14 },
+        { "text": "Wrap tightly in foil and put in the oven to steam in their own juices. A carrot-specific temperature and cooking time are not stated.", "t": 25 },
+        { "text": "Once sweet and tender, open the foil and return the carrots to the oven uncovered to roast and caramelize.", "t": 85 }
+      ]
+    },
+    {
+      "name": "Crispy Parmesan roasted cauliflower",
+      "ingredients": [
+        { "item": "Multi-coloured cauliflower", "key": "cauliflower", "amount": null, "basis": "unstated" },
+        { "item": "Olive oil", "key": "olive oil", "amount": null, "basis": "unstated" },
+        { "item": "Smoked paprika", "key": "smoked paprika", "amount": null, "basis": "unstated" },
+        { "item": "Salt", "key": "salt", "amount": null, "basis": "unstated" },
+        { "item": "Garlic powder", "key": "garlic powder", "amount": null, "basis": "unstated" },
+        { "item": "Onion powder", "key": "onion powder", "amount": null, "basis": "unstated" },
+        { "item": "Brown sugar", "key": "sugar", "amount": "a little", "basis": "spoken", "note": "Brown sugar specifically; the existing sugar filter key is reused." },
+        { "item": "Parmesan", "key": "parmesan", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Trim into roughly equal-sized florets, rinse and drain. Coat in olive oil and season with smoked paprika, salt, garlic powder, onion powder and a little brown sugar.", "t": 34 },
+        { "text": "Put in the oven to char. Give the cauliflower a mix during roasting so it cooks evenly, then return it to the oven. A cauliflower-specific temperature and roasting time are not stated.", "t": 48 },
+        { "text": "When nearly done, grate fresh Parmesan over the cauliflower and return to the oven until the cheese crisps onto it.", "t": 113 }
+      ]
+    },
+    {
+      "name": "Green-peppercorn au poivre sauce",
+      "ingredients": [
+        { "item": "Shallots", "key": "shallot", "amount": null, "basis": "unstated" },
+        { "item": "Butter", "key": "butter", "amount": null, "basis": "unstated" },
+        { "item": "Garlic", "key": "garlic", "amount": null, "basis": "unstated" },
+        { "item": "Green peppercorns in brine", "key": "green peppercorn", "amount": null, "basis": "unstated", "note": "Brian explicitly chooses green peppercorns rather than black pepper. No separate addition of the brine is specified." },
+        { "item": "Brandy", "key": "brandy", "amount": null, "basis": "unstated" },
+        { "item": "Heavy cream", "key": "heavy cream", "amount": null, "basis": "unstated" },
+        { "item": "Reduced veal stock", "key": "veal stock", "amount": null, "basis": "unstated", "note": "Already reduced when added. No stock recipe or reduction ratio is supplied; beef stock is not silently substituted." },
+        { "item": "Chives", "key": "chives", "amount": null, "basis": "unstated", "note": "Intended for finishing the sauce; Brian forgets and uses them on top of the plated steaks instead." }
+      ],
+      "steps": [
+        { "text": "Finely mince the shallots and sweat them in melted butter with minced garlic.", "t": 96 },
+        { "text": "Chop the green peppercorns in brine and add to the pot. Mix, deglaze with brandy and let it reduce.", "t": 100 },
+        { "text": "Once the harsh alcohol smell of the brandy is gone, add heavy cream and reduced veal stock, then reduce further. Brian gives no quantities, reduction ratio or duration.", "t": 118 },
+        { "text": "Finely slice the chives without bruising them. Brian intends to finish the sauce with them but actually adds them on top of the plated steaks.", "t": 141 }
+      ]
+    },
+    {
+      "name": "Steam-charred green beans",
+      "ingredients": [
+        { "item": "Green beans", "key": "green bean", "amount": null, "basis": "unstated" },
+        { "item": "Cooking oil", "key": "cooking oil", "amount": "a little", "basis": "spoken", "note": "Oil type is not identified in the narration." },
+        { "item": "Water", "key": "water", "amount": null, "basis": "unstated" },
+        { "item": "Salt", "key": "salt", "amount": null, "basis": "unstated" }
+      ],
+      "steps": [
+        { "text": "Line up and trim off the tough stem ends. Cut the beans in half for easier eating, rinse and let them dry for a bit.", "t": 72 },
+        { "text": "Put the beans into a saucier with a little oil, water and salt. Cover over high heat and steam.", "t": 124 },
+        { "text": "After a few minutes, remove the lid. As the water evaporates, let the green beans pick up a little char in the oil.", "t": 130 }
+      ]
+    },
+    {
+      "name": "Grilled filet mignon",
+      "ingredients": [
+        { "item": "Filet mignon steaks", "key": "beef", "amount": null, "basis": "unstated" },
+        { "item": "Steak seasoning — composition not stated", "key": "seasoning", "amount": null, "basis": "unstated", "note": "Brian says he seasoned heavily the night before, without identifying the seasoning. Salt and black pepper are not inferred." },
+        { "item": "Cooking oil", "key": "cooking oil", "amount": "a little", "basis": "spoken", "note": "Oil type is not identified in the narration." }
+      ],
+      "steps": [
+        { "text": "Season the steaks heavily the night before, as Brian says he did. The seasoning ingredients, steak count, weight and thickness are not supplied.", "t": 152 },
+        { "text": "Coat the steaks in a little oil and grill. The video does not state grill temperature, time per side or a target internal temperature; the guests arriving in ten minutes is not a cooking-time instruction.", "t": 150 },
+        { "text": "Let the steaks rest for a few minutes before plating.", "t": 156 }
+      ]
+    },
+    {
+      "name": "Plate the meal",
+      "ingredients": [],
+      "steps": [
+        { "text": "Serve the sauce on the side, as for Brian's clients, or spoon it underneath the steak, as for the guests. Add the cauliflower, carrots, potatoes, green beans and steak; scatter the sliced chives over the steak as shown.", "t": 159 }
+      ]
+    }
+  ],
+  "nutrition": null,
+  "notes": [
+    "The complete publicly narrated workflow is captured, so this is marked analyzed; it is not a fully measured recipe. No ingredient weights, exact serving count or nutrition are supplied.",
+    "Start the potatoes and other sides before grilling the steaks. Components are grouped for reading, not a claim that each component must be completed before starting the next.",
+    "400 °F is explicitly spoken during the potato-roasting step. The source does not separately specify temperatures for the carrot or cauliflower stages, or fan versus conventional oven.",
+    "Only the creator's own rough amount phrases are preserved. Visible vegetables, steaks or shallot pieces in selected frames are not used to infer batch quantities.",
+    "The source describes a private-chef lunch in Beverly Hills and makes vegetable/pesticide and nutrition-related comments. Those claims are not independently verified or needed for the cooking instructions.",
+    "Steps and timestamps are based on 112 English automatic-caption segments, checked against seven source frames. Automatic captions are not a proofread recipe; no generic cooking method has been inserted to fill missing specifications."
+  ],
+  "gaps": [
+    "No serving count, ingredient weights or measured quantities are provided. The rough phrases are not precise measurements.",
+    "The steak seasoning composition, number/weight/thickness of steaks, grill heat, time per side and target internal temperature are unstated.",
+    "Potato-boiling time, total roasting times, carrot/cauliflower-specific oven settings and fan versus conventional mode are unstated.",
+    "Sauce proportions, butter/cream/stock amounts, stock-reduction ratio and sauce-reduction duration are unstated.",
+    "The oil type for the green beans and steaks is not identified in the narration; no exact resting interval or nutritional values are supplied."
+  ],
+  "source": {
+    "finding": "axels-vault/research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md#finding-9",
+    "evidence": "axels-vault/research/findings/food-content-culture/evidence/brian-min-steak-au-poivre-vegetable-sides/",
+    "quantity_basis": "Public spoken method and English automatic captions; the description names the dishes but gives no measurements. A healthy amount of potato salt, a bit of potato oil, a few sprigs of carrot thyme, a little brown sugar and a little oil for beans/steaks are retained as rough source phrases. All other amounts are null/unstated. No frame-counted portions or inferred ingredient substitutions."
+  }
+}
