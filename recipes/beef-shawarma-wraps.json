@@ -1,0 +1,94 @@
+{
+  "id": "beef-shawarma-wraps",
+  "title": "Beef Shawarma Wraps with Roasted-Garlic Tzatziki",
+  "status": "analyzed",
+  "video": { "platform": "youtube", "id": "-NROxUJXlV4", "url": "https://www.youtube.com/shorts/-NROxUJXlV4" },
+  "creator": { "name": "Louis Howard", "handle": "@LouisHowardpt", "url": "https://www.youtube.com/@LouisHowardpt" },
+  "uploaded": "2026-03-24",
+  "analyzed": "2026-10-31",
+  "summary": "Spiced lean beef flattened and rolled in baking paper, roasted with tomatoes and garlic, then wrapped in flatbread with roasted-garlic tzatziki and red onion. The public description supplies measurements; Louis adds sweet-chilli sauce after tasting his recreation.",
+  "serves": "2 wraps (the description lists 2 flatbreads)",
+  "tags": ["beef", "shawarma", "wrap", "flatbread", "tzatziki", "garlic", "oven", "fakeaway"],
+  "components": [
+    {
+      "name": "Beef and tray roast",
+      "ingredients": [
+        { "item": "Lean beef mince (5% fat)", "key": "minced beef", "amount": "400g", "basis": "description", "note": "The written list says lean beef (5%); the video shows mince spread into a sheet." },
+        { "item": "Paprika", "key": "paprika", "amount": "1 tsp", "basis": "description" },
+        { "item": "Chilli powder", "key": "chilli", "amount": "1 tsp", "basis": "description", "note": "Chilli powder specifically; existing chilli filter key reused." },
+        { "item": "Black pepper", "key": "black pepper", "amount": "1 tsp", "basis": "description" },
+        { "item": "Dried garlic", "key": "garlic powder", "amount": "1 tsp", "basis": "description", "note": "Source calls this dried garlic, not a specified granule size." },
+        { "item": "Salt", "key": "salt", "amount": null, "basis": "unstated" },
+        { "item": "Tomatoes, diced", "key": "tomato", "amount": "250g", "basis": "description", "note": "The written ingredient list says diced. Tomatoes roast alongside the beef and are added when assembling; no separate raw/roasted allocation is given." },
+        { "item": "Cooking oil for the roasting tray", "key": "cooking oil", "amount": null, "basis": "unstated", "note": "Louis adds oil to the tray in the video. Its type and quantity are not specified; do not automatically take this from the measured tzatziki oil." }
+      ],
+      "steps": [
+        { "text": "Spread the beef mince into a thin sheet using baking paper, following the demonstrated paper-and-mince preparation. No sheet dimensions or thickness are specified.", "t": 7 },
+        { "text": "Season with the paprika, chilli powder, dried garlic, black pepper and salt, then roll the meat sheet up using the baking paper as shown.", "t": 19 },
+        { "text": "Place the rolls on a baking tray with the tomatoes and the garlic intended for the tzatziki, and add oil to the tray. The description lists two whole garlic bulbs but calls them garlic cloves in this method sentence; preparation details are not specified consistently.", "t": 30 },
+        { "text": "Bake for about 40 minutes at 200 degrees, as stated in both narration and description. Neither inspected surface specifies Celsius versus Fahrenheit or fan versus conventional mode; the temperature unit remains a source gap rather than a confirmed setting.", "t": 34 }
+      ]
+    },
+    {
+      "name": "Roasted-garlic tzatziki",
+      "ingredients": [
+        { "item": "Greek yogurt", "key": "greek yoghurt", "amount": "200g", "basis": "description", "note": "Fat percentage is not specified; 0% yogurt is offered separately as a lower-calorie swap." },
+        { "item": "Grated cucumber", "key": "cucumber", "amount": "3 tbsp", "basis": "description" },
+        { "item": "Whole garlic bulbs, roasted", "key": "garlic", "amount": "2 whole garlic bulbs", "basis": "description", "note": "Preserved exactly from the ingredient list. The method later calls these garlic cloves; do not silently change two bulbs into two cloves." },
+        { "item": "Mint", "key": "mint", "amount": "1 tsp", "basis": "description", "note": "Narration specifies fresh mint; description does not specify fresh versus dried." },
+        { "item": "Dill", "key": "dill", "amount": "1 tbsp", "basis": "description", "note": "Narration specifies fresh dill." },
+        { "item": "Olive oil", "key": "olive oil", "amount": "2 tbsp", "basis": "description", "note": "This is the tzatziki amount, not a separately measured roasting-tray allowance." },
+        { "item": "Lemon juice", "key": "lemon", "amount": "1 tbsp", "basis": "description" },
+        { "item": "Salt", "key": "salt", "amount": null, "basis": "unstated" },
+        { "item": "Black pepper", "key": "black pepper", "amount": null, "basis": "unstated", "note": "Additional pepper for the tzatziki; no quantity supplied." }
+      ],
+      "steps": [
+        { "text": "Mix the Greek yogurt, grated cucumber, roasted garlic, mint, dill, lemon juice and olive oil; include the salt and pepper listed for the tzatziki. The written method mixes cucumber into the sauce, while Louis's recreation also refers to cucumber during assembly.", "t": 40 }
+      ]
+    },
+    {
+      "name": "Wraps and assembly",
+      "ingredients": [
+        { "item": "Flatbreads", "key": "flatbread", "amount": "2", "basis": "description" },
+        { "item": "Red onion, sliced", "key": "red onion", "amount": "1/2–1", "basis": "description" },
+        { "item": "Sweet-chilli sauce — optional recreation addition", "key": "sweet chilli sauce", "amount": null, "basis": "unstated", "note": "Louis adds this after tasting at about 1:37. It is absent from the written recipe; its effect on the reported macros is not supplied." }
+      ],
+      "steps": [
+        { "text": "Warm the flatbreads for a couple of minutes, as directed in the description. It does not specify the warming method or temperature; this step is not separately timestamped in the video." },
+        { "text": "Open the cooked beef rolls and load the flatbreads with tzatziki, beef, red onion and tomatoes. The description lists tzatziki, beef and vegetables and says the order is flexible. The tomato quantity is the single 250g amount already listed, not an additional batch.", "t": 70 },
+        { "text": "Fold and wrap so the filling stays inside. Louis says the original creator toasted his wrap, but he skips that step; no toasting specification is supplied.", "t": 79 },
+        { "text": "Optional recreation variation: add sweet-chilli sauce, as Louis does after tasting. No quantity is given; omit it to follow the written ingredient list exactly.", "t": 97 }
+      ]
+    }
+  ],
+  "nutrition": {
+    "per": "wrap",
+    "basis": "description",
+    "calories": 650,
+    "protein_g": 48,
+    "carbs_g": 45,
+    "fat_g": 27,
+    "note": "Approximate creator-reported figures: the description prefixes each with ~. Not independently calculated or verified. No brands or flatbread size are specified, and extra tray oil and optional sweet-chilli sauce are not quantified. Do not treat these as verified values or extend them to the suggested ingredient swaps."
+  },
+  "notes": [
+    "Louis Howard's description credits @derevensky.food. This capture documents Louis's public review/recreation; the credited original was not independently audited.",
+    "The method is public and the description supplies measurements, so the recipe is analyzed. Source inconsistencies and missing specifications remain explicit rather than being repaired from generic cooking knowledge.",
+    "The source says 200 degrees without a temperature unit. A UK creator context is not treated as an explicit Celsius statement.",
+    "The written recipe calls for two whole roasted garlic bulbs; its method uses the word cloves. Louis jokes about the amount of garlic, but does not provide a corrected written quantity.",
+    "The description suggests a low-calorie wrap, 0% Greek yogurt, less or no oil, or chicken instead of beef. These are suggestions only; no replacement quantities, cooking specification or recalculated macros are supplied.",
+    "Sweet-chilli sauce is a separately labelled optional recreation addition, not a silent alteration of the credited written recipe."
+  ],
+  "gaps": [
+    "Neither the description nor the reviewed temperature segment explicitly labels 200 degrees as Celsius or Fahrenheit; oven mode is unstated.",
+    "Garlic is listed as two whole bulbs but called cloves in the method; trimming, peeling and bulb/clove preparation are not consistently specified.",
+    "Salt amounts, tzatziki pepper amount, tray-oil type/amount and optional sweet-chilli quantity are unstated.",
+    "Beef-sheet thickness and dimensions, flatbread size, garlic-roasting preparation, bread-warming method and optional wrap-toasting details are unstated.",
+    "The source does not state how much tomato is reserved raw versus roasted, if any. The written list says diced, and the method roasts tomatoes alongside the beef.",
+    "Nutrition is approximate and creator-reported; it is not independently verified and should not be applied unchanged to substitutions or added sauce."
+  ],
+  "source": {
+    "finding": "axels-vault/research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md#finding-10",
+    "evidence": "axels-vault/research/findings/food-content-culture/evidence/louis-howard-beef-shawarma-wraps/",
+    "quantity_basis": "Measurements and approximate per-wrap macros from the public description. Demonstrated steps checked against 60 English automatic-caption segments and seven sampled source frames. Paper-rolling technique and Louis's optional sweet-chilli addition are distinguished from the written method. No inferred Celsius unit, bulb-to-clove correction, extra tomato quantity or macro recalculation."
+  }
+}
