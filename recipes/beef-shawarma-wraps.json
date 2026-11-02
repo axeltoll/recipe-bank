@@ -87,8 +87,6 @@
     "Nutrition is approximate and creator-reported; it is not independently verified and should not be applied unchanged to substitutions or added sauce."
   ],
   "source": {
-    "finding": "axels-vault/research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md#finding-10",
-    "evidence": "axels-vault/research/findings/food-content-culture/evidence/louis-howard-beef-shawarma-wraps/",
     "quantity_basis": "Measurements and approximate per-wrap macros from the public description. Demonstrated steps checked against 60 English automatic-caption segments and seven sampled source frames. Paper-rolling technique and Louis's optional sweet-chilli addition are distinguished from the written method. No inferred Celsius unit, bulb-to-clove correction, extra tomato quantity or macro recalculation."
   }
 }

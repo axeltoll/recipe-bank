@@ -1,8 +1,6 @@
 # Recipe Bank
 
-Axel's personal recipe bank. Recipe videos from social media (YouTube Shorts, TikTok, Instagram Reels) get analyzed into exact ingredients and step-by-step guides, then shown on a local dashboard. The dashboard embeds each video, filters recipes by ingredient, and queues new videos for analysis.
-
-The operator rules in `~/.claude/CLAUDE.md` / `~/dev/CLAUDE.md` apply: one folder per project, variants are branches, and worktrees go under `~/dev/worktrees/recipe-bank-<branch>`.
+A personal recipe bank. Recipe videos from social media (YouTube Shorts, TikTok, Instagram Reels) get analyzed into exact ingredients and step-by-step guides, then shown on a local dashboard. The dashboard embeds each video, filters recipes by ingredient, and queues new videos for analysis.
 
 ## Run
 
@@ -50,7 +48,7 @@ API: `GET /api/recipes` → `{recipes, invalid}` · `GET /api/queue` · `POST /a
   ],
   "nutrition": { "per": "sub", "basis": "description", "calories": 517, "protein_g": 43, "carbs_g": 39, "fat_g": 21, "note": "…" },
   "notes": ["…"], "gaps": ["what the video does not say"],
-  "source": { "finding": "axels-vault/…#finding-N", "evidence": "axels-vault/…/evidence/<slug>/", "quantity_basis": "…" }
+  "source": { "evidence": "what was checked, e.g. YouTube captions + video description (optional)", "quantity_basis": "…" }
 }
 ```
 
@@ -64,21 +62,12 @@ Rules that matter more than the format:
 
 ## Analysis pipeline
 
-1. A video comes in through the dashboard's **Add video** (`data/queue.json`, `status: queued`) or through the **Recipe Bank** Telegram topic.
-2. The Hermes research agent captures it (transcript, keyframes, OCR, oEmbed) with the `vault-research-capture` skill. The evidence goes to `axels-vault/research/findings/food-content-culture/evidence/<slug>/`, and the format/funnel finding is appended to the food-content-culture findings file.
-3. The same agent writes `recipes/<id>.json` here from the transcript (rules above), runs `npm run validate`, clears the queue entry, and commits.
-4. The finding is format intelligence, kept in the vault; the recipe file is the cookable output, kept here. They link to each other through `source.finding`.
-
-## Vault and routing
-
-- Project card: `~/dev/axels-vault/Projects/Recipe-Bank/README.md`
-- Lane note: `~/dev/axels-vault/ops/lanes/recipe-bank.md`
-- Topic Creator handoff: `~/dev/axels-vault/handoffs/2026-10-12-recipe-bank-topic-creator-handoff.md`
-- Delivery category `recipe_bank`; notify prefix `recipebank-`. The Telegram thread is `180986` (Recipe Bank); Topic Creator recorded it in `_system/config/telegram-topic-map.yaml` and `ops/topics.md` on 2026-10-12.
-- The first four recipes were analyzed from the Personal topic (75757). The research findings are F1–F4 in `research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md`.
+1. A video comes in through the dashboard's **Add video** (`data/queue.json`, `status: queued`). The static site can't queue, so it copies a request message instead.
+2. An analysis agent captures the video's transcript, captions, description and keyframes into a private research store **outside this repository**. Transcripts, captions and frames are the creators' own content: never commit them here (`evidence/` is git-ignored for that reason).
+3. The agent writes `recipes/<id>.json` from that material (rules above), in its own words with the creator credited, runs `npm run validate`, clears the queue entry, and commits.
 
 ## Conventions
 
-- Keep it dependency-free unless there's a real need; adding a build step is a decision to raise with Axel first.
+- Keep it dependency-free unless there's a real need; adding a build step is a decision to raise with the owner first.
 - The UI escapes every string from data files and oEmbed (`esc()` in `public/app.js`), because queue titles come from third parties.
 - Browser storage only holds conveniences (filters, ingredient checkboxes), each read and write wrapped in try/catch.

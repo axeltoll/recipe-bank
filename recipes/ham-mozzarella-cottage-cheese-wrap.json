@@ -69,8 +69,6 @@
     "The description does not specify whether the sun-dried tomatoes are drained or packed in oil. Nutrition is creator-reported and unverified."
   ],
   "source": {
-    "finding": "axels-vault/research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md#finding-7",
-    "evidence": "axels-vault/research/findings/food-content-culture/evidence/louis-howard-ham-mozzarella-cottage-cheese-wrap/",
     "quantity_basis": "Public description supplies eight ingredients, six measured quantities, a handful of rocket and the 180 °C / 20-minute bake. Italian seasoning and Louis's extra garlic remain null/unstated. Steps are checked against 67 English automatic-caption segments and representative video frames; timestamps point to demonstrated beats, while description-only timing and amounts are labelled."
   }
 }

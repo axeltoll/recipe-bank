@@ -77,8 +77,6 @@
     "No source-backed step timestamps, measured nutrition or total preparation time were available."
   ],
   "source": {
-    "finding": "axels-vault/research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md#finding-11",
-    "evidence": "axels-vault/research/findings/food-content-culture/evidence/simon-kafi-thai-chicken-satay-sandwich/",
     "quantity_basis": "English translation of the original Swedish public YouTube description requested with hl=sv. Public oEmbed confirms video identity and creator. Playback and transcript API blocked; no narration, frames, cooking sequence or timestamps claimed. Only the description's optional chilli deseeding and toasted-bread directions are retained as steps."
   }
 }

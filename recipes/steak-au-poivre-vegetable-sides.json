@@ -137,8 +137,6 @@
     "The oil type for the green beans and steaks is not identified in the narration; no exact resting interval or nutritional values are supplied."
   ],
   "source": {
-    "finding": "axels-vault/research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md#finding-9",
-    "evidence": "axels-vault/research/findings/food-content-culture/evidence/brian-min-steak-au-poivre-vegetable-sides/",
     "quantity_basis": "Public spoken method and English automatic captions; the description names the dishes but gives no measurements. A healthy amount of potato salt, a bit of potato oil, a few sprigs of carrot thyme, a little brown sugar and a little oil for beans/steaks are retained as rough source phrases. All other amounts are null/unstated. No frame-counted portions or inferred ingredient substitutions."
   }
 }

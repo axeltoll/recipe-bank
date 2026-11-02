@@ -74,8 +74,6 @@
     "No storage duration, chilling temperature or melting method/time is specified. Nutrition is approximate and publisher-reported, not tested."
   ],
   "source": {
-    "finding": "Recipe Bank source capture: evidence/louis-howard-no-bake-cookie-dough-bars/source-notes.md; no vault finding claimed",
-    "evidence": "recipe-bank/evidence/louis-howard-no-bake-cookie-dough-bars/",
     "quantity_basis": "Public video description plus 64 English automatic-caption segments. The description supplies the approximate 50 g chocolate chips, butter and nutrition; narration supplies wet ingredients, almond flour, half a block of chocolate and timing. Vanilla (1 tsp vs 1 tbsp) and yield (5 vs 12 bars) conflicts are preserved explicitly. Unmeasured butter and sea salt remain null."
   }
 }

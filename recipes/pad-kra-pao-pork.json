@@ -69,8 +69,6 @@
     "The \"yum-yum\" seasoning sachet is never legible, so the product is unidentified."
   ],
   "source": {
-    "finding": "Instagram reel dropped in the Recipe Bank topic (Telegram 75757) on 2026-10-25; not yet filed in the vault",
-    "evidence": "Local capture: full reel (720x1280, 58.5 s, sha256 5966b577c8dca4af41a1746e0a322f001ce3bafa9d582a8bb5070b73c68002bb), oEmbed/OG metadata, faster-whisper large-v3 transcript, 117 keyframes with OCR. Vault evidence bundle not yet created.",
     "quantity_basis": "Nothing quantified: the voiceover names ingredients only, the caption lists none, and OCR over 117 frames found zero on-screen text. Ingredient identities come from the local ASR transcript and the frames; every amount is therefore null with basis \"unstated\"."
   }
 }

@@ -77,8 +77,6 @@
     "The narration does not give the patty cooking-surface temperature, flip point, cooking time or a safe internal-temperature target. This is a partial source extraction, not a complete food-safety guide."
   ],
   "source": {
-    "finding": "Recipe Bank source capture: evidence/burgerfection-jalapeno-popper-smash-burgers/source-notes.md; vault finding not yet filed",
-    "evidence": "recipe-bank/evidence/burgerfection-jalapeno-popper-smash-burgers/",
     "quantity_basis": "Public English auto-captions (83 timed segments): 75/25 beef at 0:47, 2–3 oz patties in the review at 2:01, two patties at 1:18, and a generous amount of whipped cream cheese at 1:12. One bun per assembled burger is implied by the bottom/top-bun assembly. All unmeasured ingredient amounts remain null; no quantities invented."
   }
 }
