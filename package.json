@@ -2,6 +2,7 @@
   "name": "recipe-bank",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "description": "Personal recipe bank: social-media recipe videos analyzed into ingredients and step-by-step guides, with an ingredient-filter dashboard.",
   "type": "module",
   "engines": {
