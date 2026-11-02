@@ -266,7 +266,7 @@ function analysisRequest(x) {
   return [
     `Recipe Bank: analyze this video → ${x.video.url}`,
     x.note ? `Note: ${x.note}` : null,
-    `Write recipes/<slug>.json in ~/dev/recipe-bank (contract: CLAUDE.md), run npm run validate, and file the format finding in research/findings/food-content-culture.`,
+    `Write recipes/<slug>.json (contract: CLAUDE.md) and run npm run validate.`,
   ].filter(Boolean).join('\n');
 }
 
@@ -344,7 +344,7 @@ function renderRecipe(id) {
         <section class="panel">
           ${r.gaps?.length ? `<div class="callout gaps"><h3>What the video doesn't say</h3><ul>${r.gaps.map((g) => `<li>${esc(g)}</li>`).join('')}</ul></div>` : ''}
           ${r.notes?.length ? `<div class="callout notes"><h3>Notes</h3><ul>${r.notes.map((g) => `<li>${esc(g)}</li>`).join('')}</ul></div>` : ''}
-          ${r.source ? `<p class="source">${esc(r.source.quantity_basis ?? '')}<br>Research: <code>${esc(r.source.finding ?? '')}</code></p>` : ''}
+          ${r.source ? `<p class="source">${esc(r.source.quantity_basis ?? '')}${r.source.evidence ? `<br>Checked against: ${esc(r.source.evidence)}` : ''}</p>` : ''}
         </section>` : ''}
       </div>
     </article>`;
