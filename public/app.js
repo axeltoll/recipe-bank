@@ -289,7 +289,7 @@ function renderRecipe(id) {
         </div>
       </div>
       <div>
-        <span class="badge ${esc(r.status)}">${r.status === 'partial' ? 'Partial recipe: the creator held details back' : 'Full recipe from the video'}</span>
+        <span class="badge ${esc(r.status)}">${r.status === 'partial' ? 'Partial recipe: some details are missing' : 'Full recipe from the video'}</span>
         <h1>${esc(r.title)}</h1>
         <p class="by">by ${esc(r.creator.name)}${r.uploaded ? ` · posted ${esc(r.uploaded)}` : ''}</p>
         <p class="summary">${esc(r.summary)}</p>
