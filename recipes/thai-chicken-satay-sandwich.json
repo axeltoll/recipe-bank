@@ -1,0 +1,84 @@
+{
+  "id": "thai-chicken-satay-sandwich",
+  "title": "Thai Chicken Satay Sandwich with Peanut Sauce",
+  "status": "partial",
+  "video": { "platform": "youtube", "id": "3dQgtzo4HfQ", "url": "https://www.youtube.com/shorts/3dQgtzo4HfQ" },
+  "creator": { "name": "Simon Kafi", "handle": "@SimonKafi", "url": "https://www.youtube.com/@SimonKafi" },
+  "uploaded": "2026-11-01",
+  "analyzed": "2026-11-02",
+  "summary": "Chicken satay, peanut sauce and a red-cabbage, cucumber and coriander salad on toasted sourdough. The Swedish description supplies the ingredient quantities; video playback and transcript retrieval were blocked, so the cooking method is not yet captured.",
+  "serves": "Approximately 2 large sandwiches or 4 smaller sandwiches",
+  "tags": ["chicken", "sandwich", "satay", "peanut", "coconut milk", "red cabbage", "sourdough", "swedish source"],
+  "components": [
+    {
+      "name": "Chicken satay — method not yet captured",
+      "ingredients": [
+        { "item": "Boneless chicken thigh fillets", "key": "chicken", "amount": "800g", "basis": "description", "note": "Translated from Swedish kycklinglårfilé; not chicken breast." },
+        { "item": "Coconut milk", "key": "coconut milk", "amount": "1.5dl", "basis": "description" },
+        { "item": "Red curry paste", "key": "red curry paste", "amount": "2 tbsp", "basis": "description", "note": "Swedish msk translated as tablespoon." },
+        { "item": "Garlic cloves", "key": "garlic", "amount": "3", "basis": "description" },
+        { "item": "Brown sugar / farin sugar", "key": "brown sugar", "amount": "1 tbsp", "basis": "description", "note": "The source offers brunt/farin socker as alternatives, not two separate additions." },
+        { "item": "Soy sauce", "key": "soy sauce", "amount": "2 tbsp", "basis": "description" },
+        { "item": "Salt", "key": "salt", "amount": null, "basis": "unstated" },
+        { "item": "Pepper", "key": "black pepper", "amount": null, "basis": "unstated", "note": "The source says pepper without specifying a variety; existing pepper filter key reused." }
+      ],
+      "steps": []
+    },
+    {
+      "name": "Peanut sauce — method not yet captured",
+      "ingredients": [
+        { "item": "Peanut butter", "key": "peanut butter", "amount": "200g / 2dl", "basis": "description", "note": "Both alternatives are printed by the creator; this is not an independently verified mass-to-volume conversion." },
+        { "item": "Honey", "key": "honey", "amount": "2 tbsp", "basis": "description" },
+        { "item": "Soy sauce", "key": "soy sauce", "amount": "2 tbsp", "basis": "description" },
+        { "item": "Sesame oil", "key": "sesame oil", "amount": "1 tsp", "basis": "description", "note": "Swedish tsk translated as teaspoon; toasted versus untoasted is not specified." },
+        { "item": "Lime juice", "key": "lime", "amount": "Juice of 1/2 lime", "basis": "description", "note": "Source wording is 1/2st Limejuice: a half-item lime-juice amount, not half a teaspoon or decilitre." },
+        { "item": "Coconut milk", "key": "coconut milk", "amount": "2dl", "basis": "description" },
+        { "item": "Pepper", "key": "black pepper", "amount": null, "basis": "unstated", "note": "Pepper variety not specified." }
+      ],
+      "steps": []
+    },
+    {
+      "name": "Salad — full method not yet captured",
+      "ingredients": [
+        { "item": "Red cabbage", "key": "red cabbage", "amount": "400g", "basis": "description" },
+        { "item": "Red onion", "key": "red onion", "amount": "1", "basis": "description" },
+        { "item": "Cucumber", "key": "cucumber", "amount": "1", "basis": "description" },
+        { "item": "Red chillies", "key": "chilli", "amount": "2", "basis": "description", "note": "The description explicitly allows removing the seeds for less heat." },
+        { "item": "Fresh coriander", "key": "coriander", "amount": "1 pot", "basis": "description", "note": "The Swedish source says 1st Kruka: one pot of the herb, not one teaspoon or a measured bunch." },
+        { "item": "Lime juice", "key": "lime", "amount": "Juice of 1/2 lime", "basis": "description" },
+        { "item": "Salt", "key": "salt", "amount": null, "basis": "unstated" },
+        { "item": "Pepper", "key": "black pepper", "amount": null, "basis": "unstated", "note": "Pepper variety not specified." }
+      ],
+      "steps": [
+        { "text": "Remove the seeds from the red chillies if you want less heat. This is the preparation instruction explicitly supplied in the description; the rest of the salad method has not been recovered." }
+      ]
+    },
+    {
+      "name": "Bread — final assembly not yet captured",
+      "ingredients": [
+        { "item": "Bread, sourdough used by the creator", "key": "bread", "amount": null, "basis": "unstated", "note": "The description specifies toasted bread and says the creator used sourdough; no slice count or loaf size is stated." }
+      ],
+      "steps": [
+        { "text": "Use toasted bread; Simon says he used sourdough. No toasting technique, timing or final sandwich assembly order was recovered." }
+      ]
+    }
+  ],
+  "notes": [
+    "First Swedish-language source added under Axel's 2026-11-02 request. The Recipe Bank entry is in English; the original Swedish ingredient list is preserved separately in vault evidence.",
+    "The public description provides measurements and the batch yield but does not give a complete cooking method. Partial status reflects capture access limits, not a claim that the creator withheld the method or put it behind a paywall.",
+    "Swedish msk and tsk are translated as tbsp and tsp; decimal comma 1,5 becomes 1.5, while decilitres remain decilitres. No unprovided quantities or nutrition values are calculated.",
+    "The chicken and sauce have separate coconut-milk and soy-sauce amounts; the salad and sauce each have their own half-lime allocation. Do not duplicate or merge these allocations silently."
+  ],
+  "gaps": [
+    "Chicken cutting/preparation, marinade procedure and resting time, cooking equipment, heat, duration and doneness instructions could not be recovered because YouTube blocked anonymous playback and transcript retrieval. Do not treat the ingredient list as a complete safe cooking method.",
+    "Peanut-sauce mixing order, heating method and timing were not recovered.",
+    "Salad cutting, dressing and mixing method and final sandwich assembly order were not recovered.",
+    "Salt, pepper and bread quantities, bread slice size/count, peanut-butter type and coconut-milk specification are unstated.",
+    "No source-backed step timestamps, measured nutrition or total preparation time were available."
+  ],
+  "source": {
+    "finding": "axels-vault/research/findings/food-content-culture/research-findings-food-content-culture-2026-09-27.md#finding-11",
+    "evidence": "axels-vault/research/findings/food-content-culture/evidence/simon-kafi-thai-chicken-satay-sandwich/",
+    "quantity_basis": "English translation of the original Swedish public YouTube description requested with hl=sv. Public oEmbed confirms video identity and creator. Playback and transcript API blocked; no narration, frames, cooking sequence or timestamps claimed. Only the description's optional chilli deseeding and toasted-bread directions are retained as steps."
+  }
+}
