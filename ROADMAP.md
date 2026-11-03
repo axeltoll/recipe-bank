@@ -25,4 +25,19 @@ Work I plan to do on Recipe Bank, roughly in order. Estimates are my own and inc
 - [ ] **Food budget** (~6 h). Set a weekly or monthly food budget, record what each shop actually cost, and see spend per meal and per person over time, so purchase amounts and plans get more accurate.
 - [ ] **Local prices and deals** (~12 h). Link each shopping-list ingredient to current prices and offers at nearby supermarkets, and suggest where the week's list is cheapest. Uses official store APIs or published offer feeds only (no scraping), cached locally, with a clear "last updated" time.
 
-About 74 hours in total.
+## Recipe Agent and self-hosting
+
+Today an AI agent turns a video into a recipe file, but its instructions live outside this repository. The goal is a self-hosted Recipe Agent that anyone can run with the coding agent they already use.
+
+- [ ] **Recipe Agent definition** (~6 h). An `agent/` folder that describes the agent's job (capture a video, write `recipes/<id>.json` by the contract, validate, credit the creator) once, with thin entry files per harness: `CLAUDE.md` for Claude Code, `AGENTS.md` for Codex and other AGENTS.md-aware tools, and `SOUL.md` for agents that use a persona file.
+- [ ] **Analysis skill** (~8 h). Package the video-analysis workflow as a reusable skill: read the platform's captions and description first, fall back to local speech-to-text on the audio, sample keyframes for on-screen text, then write the recipe in its own words with amounts only as the creator gave them.
+- [ ] **Local dependencies and setup** (~4 h). A `SELF-HOSTING.md` and a `npm run doctor` check for the optional tools the agent needs: `ffmpeg`, `yt-dlp`, a local speech-to-text engine (for example faster-whisper) and `tesseract` for on-screen text. The dashboard keeps working without any of them.
+- [ ] **Keep captures private** (~2 h). The agent writes transcripts, captions and frames to a configurable folder outside the repository and never commits them; only the finished recipe goes in `recipes/`. Users are responsible for following each platform's terms.
+- [ ] **More platforms** (~6 h). Today: YouTube (including Shorts), TikTok and Instagram Reels. Next: Facebook and Pinterest videos, X, and plain web pages with a video, with embeds where the platform offers them and a link otherwise.
+
+## Sharing
+
+- [ ] **Recipe packs** (~5 h). Export favourite recipes as a single file or link and import someone else's pack, with duplicates detected by video. No accounts and no server needed.
+- [ ] **Community list for self-hosters** (~6 h). An optional, read-only "top recipes" page for a self-hosted copy, built from the packs its owner chooses to include. Ratings stay local.
+
+About 111 hours in total.

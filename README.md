@@ -2,7 +2,7 @@
 
 Turn the cooking videos you save into recipes you can actually cook from.
 
-Recipe Bank keeps short recipe videos (YouTube Shorts, TikTok, Instagram Reels) as structured recipes: the ingredients in the creator's own amounts, and step-by-step instructions whose timestamps jump straight to that moment in the embedded video. A small dashboard filters the collection by what you have in the fridge and builds a shopping list.
+Recipe Bank keeps short recipe videos (today YouTube, including Shorts, TikTok and Instagram Reels; more platforms are planned) as structured recipes: the ingredients in the creator's own amounts, and step-by-step instructions whose timestamps jump straight to that moment in the embedded video. A small dashboard filters the collection by what you have in the fridge and builds a shopping list.
 
 ## Who it's for
 
@@ -58,7 +58,7 @@ npm run build      # static copy in dist/ (read-only: "Add video" copies a reque
 
 ## Plans
 
-See [ROADMAP.md](ROADMAP.md).
+See [ROADMAP.md](ROADMAP.md). Next up: a week plan with a combined shopping list, household planning with a food budget, and a self-hosted Recipe Agent that turns a video link into a recipe with the coding agent you already use.
 
 ## License
 
