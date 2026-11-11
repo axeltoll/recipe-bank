@@ -215,6 +215,23 @@ test('handleFromUrl reads @handles from creator URLs', () => {
   assert.equal(handleFromUrl(null), '');
 });
 
+test('a "__proto__" field in a recipe file never reaches a prototype', () => {
+  const r = JSON.parse(JSON.stringify(recipeFromDraft(emptyDraft('https://youtu.be/TestVideo01'))));
+  const evil = '{"__proto__": {"polluted": true}}';
+  const file = JSON.parse(JSON.stringify(r).replace(/^\{/, evil.slice(0, -1) + ',')
+    .replace('"video":{', '"video":{"__proto__":{"polluted":true},'));
+  assert.ok(Object.hasOwn(file, '__proto__') && Object.hasOwn(file.video, '__proto__'), 'fixture carries own __proto__ fields');
+  const d = draftFromRecipe(file);
+  assert.equal(Object.getPrototypeOf(d.extra), Object.prototype);
+  assert.equal(Object.getPrototypeOf(d.video.extra), Object.prototype);
+  const out = recipeFromDraft(d);
+  assert.equal(Object.getPrototypeOf(out), Object.prototype);
+  assert.equal(Object.getPrototypeOf(out.video), Object.prototype);
+  assert.equal(out.polluted, undefined);
+  assert.equal(out.video.polluted, undefined);
+  assert.equal({}.polluted, undefined);
+});
+
 // ---------- slugify ----------
 
 test('slugify makes kebab-case ASCII ids', () => {
