@@ -12,7 +12,7 @@ npm start
 
 Open `http://127.0.0.1:4780`. The dashboard and recipe validator work with Node alone. `npm run dev` restarts the server when its code changes. Use `npm test` and `npm run validate` to check local changes; Git is needed for the tracked-capture privacy test, which is skipped in a copy without `.git` (a source archive).
 
-The server listens on `127.0.0.1` only (set `HOST` to change that). It refuses changes (adding to the queue, saving recipes, importing packs) that are not sent as `application/json` or that come from another website (`Origin`, `Sec-Fetch-Site`), and changes addressed to a host name that is not this machine's loopback name. To use the dashboard under another name, such as `kitchen.lan`, list it in `RECIPE_BANK_HOSTS` (comma-separated). `RECIPE_BANK_DIR` points the server and scripts at another folder holding `recipes/` and `data/`; keep it a folder only you use.
+The server listens on `127.0.0.1` only (set `HOST` to change that). It refuses changes (adding to the queue, saving recipes, importing packs) that are not sent as `application/json` or that come from another website (`Origin`, `Sec-Fetch-Site`), and changes addressed to a host name that is not this machine's loopback name. To use the dashboard under another name, such as `kitchen.lan`, list it in `RECIPE_BANK_HOSTS` (comma-separated). `RECIPE_BANK_DIR` points the server and scripts at another folder holding `recipes/` and `data/`; keep it a folder only you use. The static build (`npm run build`, `npm run deploy`) ignores it and always publishes this repository's recipes and queue.
 
 ## Optional capture tools
 
