@@ -133,3 +133,8 @@ test('add: a 409 for a recipe this page has not loaded yet reloads before openin
     'reload() runs before the hash changes');
   assert.match(app, /setupAdd\(\{ rerender: [^}]*\}?, reload \}\)/, 'the dashboard hands reload to the dialog');
 });
+
+test('home: turning a chip off redraws the chips, so a chip past the limit shown only while on goes away', () => {
+  const click = home.slice(home.indexOf("$('#chips').addEventListener('click'"), home.indexOf("if (e.target.closest('#more'))"));
+  assert.match(click, /if \(!state\.keys\.has\(k\)\) \{[\s\S]*?renderChips\(\);/);
+});
