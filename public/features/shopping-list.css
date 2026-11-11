@@ -1,0 +1,54 @@
+/* Shopping list (public/features/shopping-list.mjs). Theme it with the --rbf-* properties. */
+.rbf-shop {
+  --_fg: var(--rbf-fg, var(--ink, #1f1a16));
+  --_muted: var(--rbf-muted, var(--muted, #7a6f66));
+  --_line: var(--rbf-line, var(--line, #e6ddd1));
+  --_surface: var(--rbf-surface, var(--surface, #fff));
+  --_accent: var(--rbf-accent, var(--accent, #c2410c));
+  --_warn: var(--rbf-warn, var(--warn, #9a6400));
+  --_radius: var(--rbf-radius, var(--radius, 14px));
+  --_gap: var(--rbf-gap, 12px);
+  --_font: var(--rbf-font, inherit);
+  color: var(--_fg);
+  font: var(--_font);
+  display: grid;
+  gap: var(--_gap);
+}
+.rbf-shop .rbf-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: calc(var(--_gap) / 2) var(--_gap); }
+.rbf-shop .rbf-head h2 { margin: 0; font-size: 1.25em; }
+.rbf-shop .rbf-actions { margin-left: auto; display: flex; gap: 8px; }
+.rbf-shop .rbf-muted, .rbf-shop .rbf-empty, .rbf-shop .rbf-note, .rbf-shop .rbf-for { color: var(--_muted); margin: 0; }
+.rbf-shop .rbf-for a { color: var(--_fg); }
+.rbf-shop .rbf-times { font-weight: 600; color: var(--_accent); }
+
+.rbf-shop .rbf-btn {
+  font: inherit; cursor: pointer; min-height: 44px; padding: 8px 14px;
+  border-radius: calc(var(--_radius) / 2); border: 1px solid var(--_line);
+  background: var(--_surface); color: var(--_fg);
+}
+.rbf-shop .rbf-btn-quiet { background: transparent; }
+.rbf-shop :focus-visible { outline: 2px solid var(--_accent); outline-offset: 2px; }
+
+.rbf-shop .rbf-aisle {
+  background: var(--_surface); border: 1px solid var(--_line); border-radius: var(--_radius); padding: var(--_gap);
+}
+.rbf-shop .rbf-aisle h3 { margin: 0 0 calc(var(--_gap) / 2); font-size: 1em; }
+.rbf-shop .rbf-items, .rbf-shop .rbf-lines { list-style: none; margin: 0; padding: 0; }
+.rbf-shop .rbf-item { padding: 8px 0; border-top: 1px solid var(--_line); }
+.rbf-shop .rbf-item:first-child { border-top: 0; }
+.rbf-shop .rbf-item label { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
+.rbf-shop .rbf-item input { width: 20px; height: 20px; accent-color: var(--_accent); flex: none; }
+.rbf-shop .rbf-key { font-weight: 600; }
+.rbf-shop .rbf-count { color: var(--_muted); font-size: 0.875em; }
+.rbf-shop .rbf-lines { padding-left: 30px; display: grid; gap: 2px; font-size: 0.9375em; }
+.rbf-shop .rbf-lines li { display: flex; flex-wrap: wrap; gap: 4px 10px; }
+.rbf-shop .rbf-amt { font-variant-numeric: tabular-nums; }
+.rbf-shop .rbf-unstated { color: var(--_warn); font-style: italic; }
+.rbf-shop .rbf-from { color: var(--_muted); }
+.rbf-shop .rbf-done .rbf-key, .rbf-shop .rbf-done .rbf-lines { text-decoration: line-through; opacity: 0.6; }
+
+.rbf-shop .rbf-copy-fallback label { display: grid; gap: 6px; color: var(--_muted); }
+.rbf-shop .rbf-copy-fallback textarea {
+  font: inherit; color: var(--_fg); background: var(--_surface);
+  border: 1px solid var(--_line); border-radius: calc(var(--_radius) / 2); padding: 8px;
+}

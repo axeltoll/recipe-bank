@@ -1,10 +1,13 @@
 // Validates every recipes/*.json against the contract in lib/recipe.mjs and
 // checks data/queue.json entries. Exit code 1 on any problem.
+// Also warns (without failing) about ingredient keys the shopping list can't place
+// in an aisle (lib/plan.mjs AISLE_KEYS), so new keys get added there.
 
 import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { validateRecipe } from '../lib/recipe.mjs';
+import { validateRecipe, ingredientKeys } from '../lib/recipe.mjs';
 import { parseVideoUrl, videoKey } from '../lib/video.mjs';
+import { aisleOf } from '../lib/plan.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 let problems = 0;
@@ -24,6 +27,13 @@ for (const f of files) {
   const key = videoKey(r.video);
   if (seen.has(key)) fail(f, `same video as ${seen.get(key)}`);
   seen.set(key, f);
+  let keys = [];
+  try { keys = ingredientKeys(r); } catch { /* malformed components are reported above */ }
+  for (const k of keys) {
+    if (typeof k === 'string' && aisleOf(k) === 'other') {
+      console.warn(`! ${f}: ingredient key "${k}" has no shopping-list aisle; add it to AISLE_KEYS in lib/plan.mjs`);
+    }
+  }
 }
 
 let queue = [];

@@ -14,6 +14,9 @@
     "validate": "node scripts/validate.mjs",
     "test": "node --test \"test/*.test.mjs\"",
     "build": "node scripts/build-static.mjs",
+    "schema": "node scripts/export-schema.mjs",
+    "migrate": "node scripts/migrate.mjs",
+    "packs": "node scripts/pack.mjs",
     "deploy": "node scripts/build-static.mjs && npx wrangler pages deploy dist --project-name=recipe-bank --branch=main --commit-dirty=true"
   }
 }
