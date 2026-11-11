@@ -9,17 +9,20 @@ const pairs = [
   ['https://pin.it/AbC123', 'https://www.pinterest.co.uk/pin/12345/'],
   ['https://vm.tiktok.com/AbC123/', 'https://www.tiktok.com/@kitchen/video/12345?si=abc'],
   ['https://vt.tiktok.com/AbC123/', 'https://m.tiktok.com/@kitchen/video/12345'],
+  ['https://www.tiktok.com/t/ZTAbC123/', 'https://www.tiktok.com/@kitchen/video/12345'],
+  ['https://www.facebook.com/share/r/1AbC23/', 'https://www.facebook.com/reel/12345/?mibextid=x'],
+  ['https://www.facebook.com/share/v/1AbC23/', 'https://www.facebook.com/kitchen/videos/12345/'],
 ];
 
 for (const [source, target] of pairs) {
-  test(`resolves ${new URL(source).hostname} to a canonical video`, async (t) => {
+  test(`resolves ${source.slice('https://'.length)} to a canonical video`, async (t) => {
     const video = parseVideoUrl(source);
     const fetch = t.mock.method(globalThis, 'fetch', async (url, options) => {
       assert.equal(options.method, 'HEAD');
       assert.equal(options.redirect, 'manual');
       assert.ok(options.signal instanceof AbortSignal);
-      assert.ok([source, target].includes(url));
-      return url === source ? redirect(target) : new Response(null);
+      assert.ok([video.url, target].includes(url));
+      return url === video.url ? redirect(target) : new Response(null);
     });
     const resolved = await resolveShortVideo(video);
     assert.deepEqual(resolved, parseVideoUrl(target));
@@ -44,6 +47,18 @@ test('allows three same-platform redirects including relative locations', async 
   });
   assert.deepEqual(await resolveShortVideo(video), parseVideoUrl(urls[3]));
   assert.equal(fetch.mock.callCount(), 4);
+});
+
+test('a vm.tiktok.com link may pass through a tiktok.com/t/ hop', async (t) => {
+  const video = parseVideoUrl('https://vm.tiktok.com/ZMAbC123/');
+  const urls = [video.url, 'https://www.tiktok.com/t/ZTAbC123/', 'https://www.tiktok.com/@kitchen/video/12345'];
+  let calls = 0;
+  const fetch = t.mock.method(globalThis, 'fetch', async (url) => {
+    assert.equal(url, urls[calls++]);
+    return url === urls[2] ? new Response(null) : redirect(urls[calls]);
+  });
+  assert.deepEqual(await resolveShortVideo(video), parseVideoUrl(urls[2]));
+  assert.equal(fetch.mock.callCount(), 3);
 });
 
 test('a fourth redirect is not followed and keeps the short link', async (t) => {
@@ -124,7 +139,8 @@ test('does not request full URLs, arbitrary pages, HTTP links or untrusted short
   // reaches the resolver some other way is still never requested.
   for (const [platform, url] of [['facebook', 'https://fb.watch.evil.example/AbC123'], ['facebook', 'https://fb.watch@evil.example/AbC123'],
     ['facebook', 'https://user:password@fb.watch/AbC123'], ['facebook', 'https://fb.watch:444/AbC123'],
-    ['facebook', 'http://fb.watch/AbC123/'], ['tiktok', 'http://vm.tiktok.com/AbC123/']]) {
+    ['facebook', 'http://fb.watch/AbC123/'], ['tiktok', 'http://vm.tiktok.com/AbC123/'],
+    ['tiktok', 'https://untrusted.tiktok.com/t/AbC123/'], ['facebook', 'https://l.facebook.com/share/r/AbC123/']]) {
     const video = { platform, id: null, url };
     assert.equal(await resolveShortVideo(video), video);
   }

@@ -64,31 +64,59 @@ test('large numeric platform IDs retain every digit', () => {
   }
 });
 
-// Short links are kept as https://<host><path>: an http: link could never be resolved (the resolver
-// only fetches HTTPS) and a share query must not make the same link a second queue entry.
-test('short links keep their https host and path and use them as their unresolved key', () => {
+// Short links are kept as https://<host>/<code>: an http: link could never be resolved (the resolver
+// only fetches HTTPS), and neither a share query nor a trailing slash may make the same link a second entry.
+test('short links keep their https host and code and use them as their unresolved key', () => {
   for (const [platform, input, url] of [
-    ['facebook', 'https://fb.watch/AbC_123-/', 'https://fb.watch/AbC_123-/'],
+    ['facebook', 'https://fb.watch/AbC_123-/', 'https://fb.watch/AbC_123-'],
     ['facebook', 'https://fb.watch/AbC123?si=abc', 'https://fb.watch/AbC123'],
     ['facebook', 'http://fb.watch/AbC123#x', 'https://fb.watch/AbC123'],
+    ['facebook', 'https://www.facebook.com/share/r/1AbC23/', 'https://www.facebook.com/share/r/1AbC23'],
     ['pinterest', 'https://pin.it/AbC123', 'https://pin.it/AbC123'],
-    ['pinterest', 'https://pin.it/AbC123/?si=abc', 'https://pin.it/AbC123/'],
+    ['pinterest', 'https://pin.it/AbC123/?si=abc', 'https://pin.it/AbC123'],
     ['pinterest', 'HTTPS://PIN.IT/AbC123?si=1', 'https://pin.it/AbC123'],
-    ['tiktok', 'https://vm.tiktok.com/AbC123/', 'https://vm.tiktok.com/AbC123/'],
-    ['tiktok', 'http://vm.tiktok.com/AbC123/', 'https://vm.tiktok.com/AbC123/'],
-    ['tiktok', 'https://vt.tiktok.com/AbC123/?si=abc', 'https://vt.tiktok.com/AbC123/'],
-    ['tiktok', 'https://vt.tiktok.com./AbC123/', 'https://vt.tiktok.com/AbC123/'],
+    ['tiktok', 'https://vm.tiktok.com/AbC123/', 'https://vm.tiktok.com/AbC123'],
+    ['tiktok', 'http://vm.tiktok.com/AbC123/', 'https://vm.tiktok.com/AbC123'],
+    ['tiktok', 'https://vt.tiktok.com/AbC123/?si=abc', 'https://vt.tiktok.com/AbC123'],
+    ['tiktok', 'https://vt.tiktok.com./AbC123/', 'https://vt.tiktok.com/AbC123'],
+    ['tiktok', 'https://www.tiktok.com/t/ZTAbC123/', 'https://www.tiktok.com/t/ZTAbC123'],
   ]) {
     const parsed = parseVideoUrl(input);
     assert.deepEqual(parsed, { platform, id: null, url }, input);
     assert.equal(videoKey(parsed), url, input);
   }
-  // The same link with and without a share query is one video, also when the stored form is the old one.
+  // The same link with and without a share query or a trailing slash is one video, also when the stored
+  // form is an older one.
   assert.equal(videoKey(parseVideoUrl('https://pin.it/AbC123?si=1')), videoKey(parseVideoUrl('https://pin.it/AbC123')));
+  for (const [a, b] of [['https://pin.it/AbC', 'https://pin.it/AbC/'], ['https://fb.watch/AbC', 'https://fb.watch/AbC/'],
+    ['https://vm.tiktok.com/AbC', 'https://vm.tiktok.com/AbC/'], ['https://vt.tiktok.com/AbC', 'https://vt.tiktok.com/AbC/']]) {
+    assert.equal(videoKey(parseVideoUrl(a)), videoKey(parseVideoUrl(b)), b);
+    assert.equal(videoKey({ platform: parseVideoUrl(a).platform, id: null, url: b }), a, `stored ${b}`);
+  }
   assert.equal(videoKey({ platform: 'pinterest', id: null, url: 'http://pin.it/AbC123?si=1' }), 'https://pin.it/AbC123');
   assert.equal(videoKey({ platform: 'web', id: null, url: 'https://example.com/r?v=2' }), 'https://example.com/r?v=2');
   assert.equal(videoKey({ platform: 'web', url: 'not a url' }), 'not a url', 'unparseable stored URLs stay as they are');
   assert.equal(videoKey(null), '');
+});
+
+test('share links people paste: X /i/web/status, TikTok /t/ and Facebook /share/r|v/', () => {
+  for (const input of ['https://x.com/i/web/status/12345', 'https://twitter.com/i/web/status/12345?s=20',
+    'https://mobile.x.com/i/web/status/12345/', 'https://x.com/i/web/status/12345/video/1']) {
+    assert.deepEqual(parseVideoUrl(input), { platform: 'x', id: '12345', url: 'https://x.com/i/web/status/12345' }, input);
+    assert.equal(videoKey(parseVideoUrl(input)), videoKey(parseVideoUrl('https://x.com/kitchen/status/12345')), input);
+  }
+  // A short link has no id yet: lib/video-resolver.mjs follows it.
+  for (const [input, platform, url] of [
+    ['https://www.tiktok.com/t/ZTAbC123/', 'tiktok', 'https://www.tiktok.com/t/ZTAbC123'],
+    ['https://tiktok.com/t/ZTAbC123?_r=1', 'tiktok', 'https://www.tiktok.com/t/ZTAbC123'],
+    ['https://www.facebook.com/share/r/1AbC23/', 'facebook', 'https://www.facebook.com/share/r/1AbC23'],
+    ['https://m.facebook.com/share/v/1AbC23?mibextid=x', 'facebook', 'https://www.facebook.com/share/v/1AbC23'],
+  ]) assert.deepEqual(parseVideoUrl(input), { platform, id: null, url }, input);
+  for (const input of ['https://x.com/i/web/status/abc', 'https://x.com/i/web/12345', 'https://www.tiktok.com/t/',
+    'https://www.tiktok.com/t/AbC/other', 'https://www.facebook.com/share/r/', 'https://www.facebook.com/share/x/AbC/',
+    'https://www.facebook.com/share/r/AbC/other', 'https://l.facebook.com/share/r/AbC/']) {
+    assert.equal(parseVideoUrl(input), null, input);
+  }
 });
 
 test('rejects dangerous schemes, userinfo, look-alikes and unsupported hosts', () => {
