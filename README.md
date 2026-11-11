@@ -29,6 +29,7 @@ Built and tested, waiting to be placed in the dashboard's new design (see [`publ
 - **Week plan and combined shopping list.** Pick recipes for the days of the week and get one list, merged by ingredient and grouped by aisle. Each recipe's amount stays in the creator's words; nothing is added up or guessed.
 - **More filters.** *Without* (hide recipes with pork, nuts, or whatever you're out of), tags, a minimum protein and a maximum calories for recipes that state their macros.
 - **Serving scaling.** Scale plain numbers and units (fractions, ranges, decimals); amounts given in words stay as they are, and every scaled amount shows the creator's original.
+- **Amounts for your household.** The shopping list can show how much to buy for the household profile ("for 2 adults, 1 child aged 6-10"). Amounts in the same unit are added up across the week, grams and cups are never converted into each other, and amounts in words or from recipes without stated servings are shown as written and flagged. A pantry (salt, pepper, oil by default) is left out. See [`public/features/PURCHASE.md`](public/features/PURCHASE.md); the groundwork for local prices is in [`docs/PRICES.md`](docs/PRICES.md).
 - **Recipe packs.** Export recipes as one file or link and import someone else's; recipes for a video you already have are skipped (`npm run packs`).
 
 ## Built with

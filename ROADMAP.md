@@ -21,9 +21,9 @@ Work I plan to do on Recipe Bank, roughly in order. Estimates are my own and inc
 ## Household planning and budget
 
 - [x] **Household profile** (~6 h). Set up the household once: how many people, age groups (for example "2 adults, 1 child aged 6–10") and general eating habits (portion size, vegetarian days, how often you cook). It is anonymous and stays on the device: no names, no accounts, nothing sent to a server.
-- [ ] **Amounts for your household** (~8 h). Use the profile to turn a week plan into purchase amounts: how much chicken, rice or cheese to buy for everyone, built on serving scaling and the combined shopping list. Amounts that the creator only gave in words stay as words and are flagged.
+- [ ] **Amounts for your household** (~8 h). Use the profile to turn a week plan into purchase amounts: how much chicken, rice or cheese to buy for everyone, built on serving scaling and the combined shopping list. Amounts that the creator only gave in words stay as words and are flagged. *Logic (`lib/purchase.mjs`), tests, a pantry that is left out, and the purchase option of `public/features/shopping-list.mjs` are built ([PURCHASE.md](public/features/PURCHASE.md)); left: placing it in the dashboard, and a way to say how many servings a recipe that counts items ("12 nuggets") makes.*
 - [x] **Food budget** (~6 h). Set a weekly or monthly food budget, record what each shop actually cost, and see spend per meal and per person over time, so purchase amounts and plans get more accurate.
-- [ ] **Local prices and deals** (~12 h). Link each shopping-list ingredient to current prices and offers at nearby supermarkets, and suggest where the week's list is cheapest. Uses official store APIs or published offer feeds only (no scraping), cached locally, with a clear "last updated" time.
+- [ ] **Local prices and deals** (~12 h). Link each shopping-list ingredient to current prices and offers at nearby supermarkets, and suggest where the week's list is cheapest. Uses official store APIs or published offer feeds only (no scraping), cached locally, with a clear "last updated" time. *Groundwork built, no real source yet: provider interface, cache with expiry, cheapest-shop comparison and a fake provider (`lib/prices.mjs`); what a source must give us is in [docs/PRICES.md](docs/PRICES.md).*
 
 ## Recipe Agent and self-hosting
 
