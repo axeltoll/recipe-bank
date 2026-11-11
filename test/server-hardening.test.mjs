@@ -118,3 +118,22 @@ test('reads are refused for an unknown Host (DNS rebinding), allowed for loopbac
   // The dashboard page is served as before.
   assert.equal(await get('/', { host: `127.0.0.1:${port}` }), 200);
 });
+
+test('a null component, ingredient or step is a 400 with problems, not a server error', async () => {
+  const shapes = [
+    (r) => { r.components = [null]; },
+    (r) => { r.components[0].ingredients = [null]; },
+    (r) => { r.components[0].steps = [null]; },
+  ];
+  for (const [n, shape] of shapes.entries()) {
+    const recipe = makeRecipe(`broken-${n}`, 10 + n);
+    shape(recipe);
+    const body = Buffer.from(JSON.stringify(recipe));
+    const created = await call({ url: '/api/recipes', headers: JSON_TYPE, chunks: [body] });
+    assert.equal(created.status, 400, `POST, shape ${n}`);
+    assert.match(created.json.problems.join('\n'), /not an object/);
+    const replaced = await call({ method: 'PUT', url: '/api/recipes/alpha', headers: JSON_TYPE, chunks: [Buffer.from(JSON.stringify({ ...recipe, id: 'alpha' }))] });
+    assert.equal(replaced.status, 400, `PUT, shape ${n}`);
+  }
+  assert.equal(JSON.parse(await readFile(join(dir, 'recipes', 'alpha.json'), 'utf8')).title, 'Recipe alpha', 'unchanged');
+});

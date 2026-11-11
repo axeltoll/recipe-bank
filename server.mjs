@@ -289,7 +289,13 @@ export function createHandler({
 
   // Creates (id = null) or replaces (id = the file to replace) a recipe file. Shared by POST and PUT.
   async function saveRecipe(res, body, id) {
-    const problems = validateRecipe(body, id ?? undefined);
+    let problems;
+    try {
+      problems = validateRecipe(body, id ?? undefined);
+    } catch {
+      // validateRecipe reads c.name, ing.item and s.text, so a null in one of those lists throws.
+      problems = ['malformed recipe (a component, ingredient or step is not an object)'];
+    }
     return withLock(async () => {
       const files = new Set((await readdir(dirs.recipesDir)).filter((f) => f.endsWith('.json')));
       if (id && !files.has(`${id}.json`)) return json(res, 404, { error: 'No recipe with that id.' });
