@@ -4,7 +4,7 @@ Turn the cooking videos you save into recipes you can actually cook from.
 
 ![A Recipe Bank recipe page: ingredient checklist, steps with play-from-here timestamps, and nutrition per serving. The embedded video is blurred in this screenshot.](docs/screenshot.png)
 
-Recipe Bank keeps short recipe videos (today YouTube, including Shorts, TikTok and Instagram Reels; more platforms are planned) as structured recipes: the ingredients in the creator's own amounts, and step-by-step instructions whose timestamps jump straight to that moment in the embedded video. A small dashboard filters the collection by what you have in the fridge and builds a shopping list.
+Recipe Bank keeps recipe videos from YouTube (including Shorts), TikTok, Instagram Reels, Facebook, Pinterest and X, plus explicitly opted-in HTTPS web pages, as structured recipes: the ingredients in the creator's own amounts, and step-by-step instructions with video timestamps. Public embeds are used where supported, with a link otherwise; timestamp seeking is supported on YouTube. A small dashboard filters the collection by what you have in the fridge and builds a shopping list. See [platform support and pending dashboard wiring](docs/PLATFORMS.md).
 
 ## Who it's for
 

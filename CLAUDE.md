@@ -1,6 +1,6 @@
 # Recipe Bank
 
-A personal recipe bank. Recipe videos from social media (YouTube Shorts, TikTok, Instagram Reels) get analyzed into exact ingredients and step-by-step guides, then shown on a local dashboard. The dashboard embeds each video, filters recipes by ingredient, and queues new videos for analysis.
+A personal recipe bank. Recipe videos from YouTube (including Shorts), TikTok, Instagram Reels, Facebook, Pinterest, X and explicitly opted-in HTTPS web pages get analyzed into exact ingredients and step-by-step guides, then shown on a local dashboard. The dashboard uses public embeds where supported and original links otherwise, filters recipes by ingredient, and queues new videos for analysis. See docs/PLATFORMS.md for the contract and pending dashboard wiring.
 
 ## Run
 
@@ -46,7 +46,7 @@ Recipe writes (local server only; the static build stays read-only): `POST /api/
   "id": "gochujang-chicken-thighs",          // kebab-case, == filename
   "title": "…",
   "status": "analyzed" | "partial",           // partial = creator withheld the method; gaps[] required
-  "video": { "platform": "youtube|tiktok|instagram", "id": "…", "url": "…" },
+  "video": { "platform": "youtube|tiktok|instagram|facebook|pinterest|x|web", "id": "…", "url": "…" },
   "creator": { "name": "…", "handle": "@…", "url": "…" },
   "uploaded": "YYYY-MM-DD", "analyzed": "YYYY-MM-DD",
   "summary": "1–2 plain sentences",
@@ -63,6 +63,10 @@ Recipe writes (local server only; the static build stays read-only): `POST /api/
   "source": { "evidence": "what was checked, e.g. YouTube captions + video description (optional)", "quantity_basis": "…" }
 }
 ```
+
+`video.id` is null or omitted for explicitly declared HTTPS `web` pages and
+unresolved short links. Their full URL is the deduplication key; other sources
+use the parsed platform and string ID. See [PLATFORMS.md](docs/PLATFORMS.md).
 
 Rules that matter more than the format:
 

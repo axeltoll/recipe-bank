@@ -76,6 +76,8 @@ export async function oembed(video) {
   const endpoint = {
     youtube: 'https://www.youtube.com/oembed?format=json&url=',
     tiktok: 'https://www.tiktok.com/oembed?url=',
+    pinterest: 'https://www.pinterest.com/oembed.json?url=',
+    x: 'https://publish.x.com/oembed?url=',
   }[video.platform];
   if (!endpoint) return {};
   try {
