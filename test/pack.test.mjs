@@ -222,6 +222,24 @@ test('HTML and control characters in titles stay plain text, bounded', () => {
   assert.equal(readPack(wrap([makeRecipe('alpha', 1)], { exported: 'not a date' })).exported, null);
 });
 
+test('the imported file keeps the title and creator name the preview shows', () => {
+  const rlo = String.fromCodePoint(0x202e);
+  const raw = makeRecipe('alpha', 1, { title: `Safe${rlo} title\n\nline two ${'é'.repeat(200)}` });
+  raw.creator.name = `A${rlo}\tcreator`;
+  const plan = planImport(wrap([raw]));
+  const [item] = plan.items;
+  assert.equal(item.status, 'new');
+  assert.equal(item.recipe.title, item.title, 'file title is the previewed title');
+  assert.equal(item.recipe.creator.name, item.creator, 'file creator is the previewed creator');
+  assert.equal([...item.title].length, MAX_TITLE_CHARS);
+  assert.ok(item.title.startsWith('Safe title line two'));
+  assert.equal(item.creator, 'A creator');
+  const [file] = applyImport(plan).files;
+  assert.equal(JSON.parse(file.contents).title, item.title);
+  assert.ok(!file.contents.includes(rlo));
+  assert.equal(raw.title.includes(rlo), true, 'the input is not changed');
+});
+
 test('packFromRead rebuilds a pack that reads the same', () => {
   const read = readPack(wrap([makeRecipe('alpha', 1), null]));
   const again = readPack(packFromRead(read));
