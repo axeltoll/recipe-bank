@@ -3,7 +3,7 @@
 //   card-actions slot      "Add to week" on every recipe card
 //   recipe-actions slot    "Add to week" on the recipe page
 // Both modules keep their own storage and follow each other through the rb:plan-change event.
-import { mount as mountWeek, addRecipeToWeek } from './week-plan.mjs';
+import { mount as mountWeek, addRecipeToWeek, readPlan } from './week-plan.mjs';
 import { mount as mountShop } from './shopping-list.mjs';
 import { householdTarget } from './household-target.js';
 
@@ -16,11 +16,18 @@ export function install(rb) {
     parts = [];
   };
 
+  // "Add to week" puts the recipe on the "any day" slot. The toast says what the stored plan now holds:
+  // nothing new when it was already there, and a warning when the browser did not keep it.
   const add = (id) => {
     const r = rb.recipe(id);
     if (!r) return;
+    const planned = () => readPlan().items.some((it) => it.recipe === id && it.day === null);
+    if (planned()) {
+      rb.toast(`Already in this week: ${r.title}`);
+      return;
+    }
     addRecipeToWeek(id);
-    rb.toast(`Added to this week: ${r.title}`);
+    rb.toast(planned() ? `Added to this week: ${r.title}` : 'Could not add it: this browser is not saving the week plan');
   };
 
   rb.addRoute(ROUTE, {

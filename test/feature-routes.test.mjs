@@ -95,3 +95,16 @@ test('filters: "Clear these" on one panel leaves the other panels\' fields on', 
   click(els['filter-tags'], { '[data-clear]': {} });
   assert.deepEqual(rb.stored('rb:filters-extra'), { without: [], tags: [], minProtein: 40, maxCalories: null });
 });
+
+test('"Add to week" says added only when the stored plan gained the recipe', () => {
+  const rb = fakeRb({ recipes: [alpha] });
+  installPlan(rb);
+  const add = () => click(document, { '[data-plan-add]': { dataset: { planAdd: 'alpha' } } });
+  withStorage(memory(), () => {
+    add();
+    add();
+  });
+  assert.deepEqual(rb.toasts, ['Added to this week: Alpha', 'Already in this week: Alpha']);
+  withStorage(blocked, add);
+  assert.equal(rb.toasts.at(-1), 'Could not add it: this browser is not saving the week plan');
+});
