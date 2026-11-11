@@ -7,8 +7,7 @@ import { parseVideoUrl as parseUrl, videoKey } from '../lib/video.mjs';
 // Web pages are a valid queue input when the entry says so (the dashboard's "It's a web page" box).
 const parseVideoUrl = (url, video) => parseUrl(url, { allowWeb: video?.platform === 'web' });
 import { validateRecipe } from '../lib/recipe.mjs';
-
-const ROOT = path.resolve(import.meta.dirname, '..');
+import { dataPaths } from '../server.mjs';
 
 export function assertQueue(queue) {
   if (!Array.isArray(queue)) throw new Error('Queue must be an array.');
@@ -93,7 +92,8 @@ export async function recipeFiles(root) {
   }));
 }
 
-export async function queueMain(args, { root = ROOT, log = console.log, error = console.error } = {}) {
+// `root` is the data folder: RECIPE_BANK_DIR, else this repository (the same one the server uses).
+export async function queueMain(args, { root = dataPaths().root, log = console.log, error = console.error } = {}) {
   const [command, id, status, ...rest] = args;
   const file = path.join(root, 'data', 'queue.json');
   try {
