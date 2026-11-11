@@ -1,6 +1,6 @@
 // Recipe page (layout type: detail): video, ingredient checklist, steps with timestamps, nutrition, gaps and notes.
 import { embedUrl } from '/lib/video.mjs';
-import { esc, mmss, formatDate } from '/lib/format.mjs';
+import { esc, mmss, formatDate, safeUrl } from '/lib/format.mjs';
 import { ingredientKeys, stepCount, macros, shoppingList } from '/lib/catalog.mjs';
 import { $, $$, view, state, store, STATIC, PLATFORM, emit, icon, copy, isPhone, reducedMotion } from './core.js';
 import { renderMissing } from './states.js';
@@ -18,7 +18,8 @@ const BASIS_SHORT = { 'on-screen': 'on screen', spoken: 'spoken', description: '
 export function player(video, title = 'Recipe video') {
   const src = embedUrl(video);
   if (!src) {
-    return `<div class="player-fallback"><p>This link can't be embedded.</p><a href="${esc(video.url)}" target="_blank" rel="noopener">Open the video</a></div>`;
+    const href = safeUrl(video.url);
+    return `<div class="player-fallback"><p>This link can't be embedded.</p>${href ? `<a href="${esc(href)}" target="_blank" rel="noopener">Open the video</a>` : ''}</div>`;
   }
   return `<iframe src="${esc(src)}" title="${esc(title)}" loading="lazy"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -49,6 +50,9 @@ export function renderRecipe(id) {
   const seekable = r.video.platform === 'youtube';
   const platform = PLATFORM[r.video.platform] ?? 'the platform';
   const hasGaps = Boolean(r.gaps?.length);
+  // Links from the recipe file are only rendered when they are http(s) (lib/format.mjs safeUrl).
+  const videoUrl = safeUrl(r.video.url);
+  const creatorUrl = safeUrl(r.creator.url);
 
   view.innerHTML = `
     <article class="recipe">
@@ -56,8 +60,8 @@ export function renderRecipe(id) {
         <a class="back" href="#/">${icon('back')}<span>All recipes</span></a>
         <p class="recipe-status"><span class="badge ${partial ? 'badge-warn' : ''}">${partial ? 'Partial recipe: some details are missing' : 'Full recipe from the video'}</span></p>
         <h1>${esc(r.title)}</h1>
-        <p class="recipe-by">by ${r.creator.url
-          ? `<a href="${esc(r.creator.url)}" target="_blank" rel="noopener">${esc(r.creator.name)}</a>`
+        <p class="recipe-by">by ${creatorUrl
+          ? `<a href="${esc(creatorUrl)}" target="_blank" rel="noopener">${esc(r.creator.name)}</a>`
           : esc(r.creator.name)}${r.uploaded ? ` · posted ${esc(formatDate(r.uploaded))}` : ''}</p>
         <p class="print-only">Video: ${esc(r.video.url)}</p>
         <p class="recipe-summary">${esc(r.summary)}</p>
@@ -83,8 +87,8 @@ export function renderRecipe(id) {
         <div class="media-stick">
           <div class="player" id="player">${player(r.video, `Video: ${r.title}`)}</div>
           <p class="player-links">
-            <a href="${esc(r.video.url)}" target="_blank" rel="noopener">Open on ${esc(platform)}${icon('external')}</a>
-            ${r.creator.url ? `<a href="${esc(r.creator.url)}" target="_blank" rel="noopener">${esc(r.creator.handle ?? 'Creator')}${icon('external')}</a>` : ''}
+            ${videoUrl ? `<a href="${esc(videoUrl)}" target="_blank" rel="noopener">Open on ${esc(platform)}${icon('external')}</a>` : ''}
+            ${creatorUrl ? `<a href="${esc(creatorUrl)}" target="_blank" rel="noopener">${esc(r.creator.handle ?? 'Creator')}${icon('external')}</a>` : ''}
           </p>
         </div>
       </div>

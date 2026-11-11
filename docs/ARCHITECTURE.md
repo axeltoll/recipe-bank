@@ -63,13 +63,16 @@ Anything else renders home. Feature routes are registered with `rb.addRoute` and
 | `POST /api/recipes` | create `recipes/<id>.json` → 201 `{ recipe, dequeued }` | 400 problems, 409 duplicate id or video, 415 |
 | `PUT /api/recipes/<id>` | replace it → 200 `{ recipe, dequeued }` | 404, 400, 409, 415 |
 | `GET /api/queue` | `{ queue }` | |
-| `POST /api/queue` | `{ url, note, allowWeb? }` → 201 `{ entry }` | 400 not a supported link, 409 already there |
-| `DELETE /api/queue/<id>` | → 200 `{ ok: true }` | 404 |
+| `POST /api/queue` | `{ url, note, allowWeb? }` → 201 `{ entry }` | 400 not a supported link, 409 already there, 415 |
+| `DELETE /api/queue/<id>` | → 200 `{ ok: true }` | 404, 415 |
 | `POST /api/packs/import` | `{ pack, include? }` → 201/200 `{ created, skipped, counts }` | 400, 413, 415 |
 
-Writes go through one lock per server, are atomic (temp file, then rename, or the `wx` flag for packs) and the routes
-that create files require `application/json`, which a cross-site form cannot send without a CORS preflight the server
-never grants. There is no login: keep `HOST` on 127.0.0.1 unless the network is trusted.
+Writes go through one lock per server and are atomic (temp file, then rename, or the `wx` flag for packs). Every
+POST, PUT and DELETE passes `writeRefusal` in `server.mjs` first: it must be sent as `application/json` (415), which a
+cross-site page cannot send without a CORS preflight the server never grants, and it gets 403 when `Sec-Fetch-Site`
+says another site, when `Origin` is not the server's own, or when `Host` is not a loopback name or one listed in
+`RECIPE_BANK_HOSTS` (DNS rebinding). Requests from tools without those headers (curl, scripts) still work. There is
+no login: keep `HOST` on 127.0.0.1 unless the network is trusted.
 
 ## Tests
 

@@ -86,9 +86,11 @@ export function mount(element, options = {}) {
   let available = stored.available;
   const repaired = validateBudget(input?.budget).length || !Array.isArray(input?.shops) || shops.length !== input.shops.length;
   let message = repaired ? 'Some saved data was invalid and was skipped. Review your settings before saving.' : '';
-  const today = isDate(options.today) ? options.today : localToday();
+  // Read the date at every render: a tab left open past midnight (or a Sunday night) moves on to the
+  // new period. A fixed options.today (tests) stays fixed.
+  const today = () => (isDate(options.today) ? options.today : localToday());
   const render = () => {
-    element.innerHTML = renderBudget(budget, shops, { household, today, locale: options.locale,
+    element.innerHTML = renderBudget(budget, shops, { household, today: today(), locale: options.locale,
       message: message || (available ? 'Saved only on this device when you press Save or add a shop.' : 'Storage unavailable or unreadable. Changes work for this visit only.') });
   };
   const changed = () => {
@@ -96,7 +98,7 @@ export function mount(element, options = {}) {
     message = available ? 'Saved on this device.' : '';
     render();
     let report = null;
-    try { report = summary(budget, shops, { household, today }); } catch { /* The rendered error explains overflow. */ }
+    try { report = summary(budget, shops, { household, today: today() }); } catch { /* The rendered error explains overflow. */ }
     emit(element, 'recipe-bank:budget-change', { budget: cleanBudget(budget), shops: shops.map(cleanShop), summary: report });
   };
   const submit = (event) => {
@@ -138,7 +140,7 @@ export function mount(element, options = {}) {
     household = normalizeProfile(profile);
     // Refresh derived ratios without replacing forms or losing unsaved entries.
     try {
-      const report = summary(budget, shops, { household, today });
+      const report = summary(budget, shops, { household, today: today() });
       const container = element.querySelector('.rb-budget-summary');
       if (container) container.innerHTML = renderBudgetSummary(report, { locale: options.locale });
     } catch { /* Existing summary errors remain visible until budget data changes. */ }

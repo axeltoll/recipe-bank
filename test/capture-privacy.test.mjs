@@ -1,10 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
 import { mkdtemp, mkdir, symlink, rm, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { runCommand } from '../scripts/local-tools.mjs';
-import { assertPrivateCaptureDir, captureMain, captureKey, isInside, repositoryRoots, resolveCaptureDir, ROOT } from '../scripts/capture.mjs';
+import {
+  assertPrivateCaptureDir, captureMain, captureKey, directoryIdentity, isInside, repositoryRoots, resolveCaptureDir, ROOT,
+} from '../scripts/capture.mjs';
 
 const video = { platform: 'youtube', id: 'mhNQ8y5ud0A', url: 'https://youtu.be/mhNQ8y5ud0A' };
 const key = captureKey(video);
@@ -54,6 +57,47 @@ test('privacy guard rejects the repo itself, ignored evidence and symlink ancest
   assert.throws(() => assertPrivateCaptureDir(path.join(root, 'escape', key), roots), /inside the repository/);
 });
 
+test('privacy guard compares folder identity, not spelling (letter case on macOS and Windows volumes)', () => {
+  // A case-insensitive volume, simulated: every spelling of an existing folder has one identity.
+  const existing = new Set(['/', '/users', '/users/me', '/users/me/dev', '/users/me/dev/recipe-bank']);
+  const identify = (p) => {
+    const k = path.resolve(p).replaceAll('\\', '/').replace(/^[a-z]:/i, '').toLowerCase() || '/';
+    if (!existing.has(k)) throw Object.assign(new Error('missing'), { code: 'ENOENT' });
+    return k;
+  };
+  const roots = ['/Users/me/dev/recipe-bank'];
+  for (const destination of ['/Users/me/Dev/Recipe-Bank/captures/x', '/USERS/ME/DEV/RECIPE-BANK', '/users/me/dev/recipe-bank/evidence/x']) {
+    assert.throws(() => assertPrivateCaptureDir(destination, roots, { identify }), /inside the repository/, destination);
+  }
+  assert.equal(assertPrivateCaptureDir('/Users/me/captures/x', roots, { identify }), path.resolve('/Users/me/captures/x'));
+  assert.equal(assertPrivateCaptureDir('/Users/me/dev/recipe-bank-2/x', roots, { identify }), path.resolve('/Users/me/dev/recipe-bank-2/x'));
+});
+
+test('privacy guard on a real case-insensitive volume', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'recipe-case-test-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const root = path.join(dir, 'Repo');
+  await mkdir(root);
+  const shouted = path.join(dir, 'REPO');
+  if (!existsSync(shouted)) {
+    t.skip('this volume is case-sensitive: REPO and Repo are different folders');
+    return;
+  }
+  assert.throws(() => assertPrivateCaptureDir(path.join(shouted, 'captures', key), [root]), /inside the repository/);
+  assert.throws(() => assertPrivateCaptureDir(shouted, [root]), /inside the repository/);
+});
+
+test('privacy guard identity: the real directoryIdentity sees through symlinks and tells folders apart', async (t) => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'recipe-identity-test-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  await mkdir(path.join(dir, 'a'));
+  await mkdir(path.join(dir, 'b'));
+  await symlink(path.join(dir, 'a'), path.join(dir, 'link'), process.platform === 'win32' ? 'junction' : 'dir');
+  assert.equal(directoryIdentity(path.join(dir, 'link')), directoryIdentity(path.join(dir, 'a')));
+  assert.notEqual(directoryIdentity(path.join(dir, 'a')), directoryIdentity(path.join(dir, 'b')));
+  assert.throws(() => directoryIdentity(path.join(dir, 'missing')));
+});
+
 test('capture CLI refuses an in-repo destination before any optional tool is run or directory created', async () => {
   const before = await readdir(ROOT);
   const errors = [];
@@ -88,9 +132,14 @@ function captureLikeFiles(files) {
     || (!file.startsWith('docs/') && /\.(png|jpe?g|webp|gif|bmp|tiff?|avif)$/i.test(file)));
 }
 
-test('tracked-content guard rejects subtitles/audio/video anywhere and frame images outside docs', async () => {
+test('tracked-content guard rejects subtitles/audio/video anywhere and frame images outside docs', async (t) => {
   assert.deepEqual(captureLikeFiles(['docs/screenshot.png', 'agent/RECIPE-AGENT.md', 'recipes/meal.json', 'docs/subtitles.vtt',
     'evidence/audio.wav', 'frames/keyframe.jpg', 'clip.webm']), ['docs/subtitles.vtt', 'evidence/audio.wav', 'frames/keyframe.jpg', 'clip.webm']);
+  // A source archive or a "Download ZIP" has no .git: there is no tracked-file list to check (SELF-HOSTING.md).
+  if (!existsSync(path.join(ROOT, '.git'))) {
+    t.skip('not a git checkout: the tracked-file half needs git');
+    return;
+  }
   const result = await runCommand('git', ['-C', ROOT, 'ls-files', '-z']);
   assert.ifError(result.error);
   assert.equal(result.status, 0, 'Git must be available to check tracked capture files.');

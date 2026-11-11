@@ -1,5 +1,5 @@
 // Minimal Chrome DevTools Protocol driver. Node 22+, no packages.
-import { accessSync, constants } from 'node:fs';
+import { accessSync, constants, rmSync } from 'node:fs';
 import { mkdtemp, rm, writeFile, mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, win32 } from 'node:path';
@@ -13,7 +13,8 @@ export function findChrome({ env = process.env, platform = process.platform, exi
   const path = platform === 'win32' ? win32 : { join };
   const names = platform === 'win32' ? ['chrome.exe', 'chromium.exe', 'msedge.exe']
     : ['google-chrome', 'google-chrome-stable', 'chromium', 'chromium-browser', 'chrome'];
-  const candidates = (env.PATH ?? '').split(platform === 'win32' ? ';' : ':').filter(Boolean)
+  // An injected Windows environment may spell it "Path" (process.env itself is case-insensitive there).
+  const candidates = (env.PATH ?? env.Path ?? '').split(platform === 'win32' ? ';' : ':').filter(Boolean)
     .flatMap((dir) => names.map((name) => path.join(dir, name)));
   if (platform === 'darwin') candidates.push(
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
@@ -84,26 +85,50 @@ export class Connection {
 
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export async function launch({ headed = false, executable = findChrome() } = {}) {
+/**
+ * Start Chrome with a throw-away profile. Until close() has finished, the browser and its profile are
+ * cleaned up on every way out: close(), a failed start, Ctrl-C or SIGTERM (a second one too), an uncaught
+ * exception or unhandled rejection anywhere in the process (exit code 1), and, as a last resort,
+ * process.exit() (a synchronous kill and profile removal in the 'exit' event).
+ */
+export async function launch({ headed = false, executable = findChrome(), graceMs = 1500 } = {}) {
   if (!executable) return null;
   const profile = await mkdtemp(join(tmpdir(), 'recipe-bank-chrome-'));
   let child, connection, closing;
-  const onSignal = () => { close().finally(() => process.exit(130)); };
-  process.once('SIGINT', onSignal);
-  process.once('SIGTERM', onSignal);
+  const alive = () => Boolean(child?.pid) && child.exitCode === null && child.signalCode === null;
+  const onSignal = () => { close().catch(() => {}).finally(() => process.exit(130)); };
+  const onFatal = (error) => {
+    console.error(error);
+    close().catch(() => {}).finally(() => process.exit(1));
+  };
+  const onExit = () => {
+    // Synchronous only: the event loop is gone.
+    try { if (alive()) child.kill('SIGKILL'); } catch { /* already gone */ }
+    try { rmSync(profile, { recursive: true, force: true }); } catch { /* best effort */ }
+  };
+  const guards = [['SIGINT', onSignal], ['SIGTERM', onSignal], ['uncaughtException', onFatal], ['unhandledRejection', onFatal], ['exit', onExit]];
+  for (const [event, fn] of guards) process.on(event, fn);
+  // Each step has its own try, so a failing step never skips the next; the first error is rethrown.
   const close = () => closing ??= (async () => {
-    try {
-      connection?.close();
-      if (child?.pid && child.exitCode === null && child.signalCode === null) {
-        const exited = new Promise((resolve) => child.once('exit', resolve));
+    const errors = [];
+    const step = async (fn) => { try { await fn(); } catch (e) { errors.push(e); } };
+    await step(async () => {
+      if (!alive()) return;
+      const exited = new Promise((resolve) => child.once('exit', resolve));
+      // Ask Chrome to quit, so its renderer and GPU processes go with it; SIGKILL if it does not in time.
+      if (connection && !connection.closed) connection.send('Browser.close').catch(() => {});
+      let timer;
+      const quit = await Promise.race([exited.then(() => true), new Promise((resolve) => { timer = setTimeout(resolve, graceMs, false); })]);
+      clearTimeout(timer);
+      if (!quit && alive()) {
         child.kill('SIGKILL');
         await exited;
       }
-    } finally {
-      process.off('SIGINT', onSignal);
-      process.off('SIGTERM', onSignal);
-      await rm(profile, { recursive: true, force: true, maxRetries: 3 });
-    }
+    });
+    await step(() => connection?.close());
+    await step(() => rm(profile, { recursive: true, force: true, maxRetries: 3 }));
+    for (const [event, fn] of guards) process.off(event, fn);
+    if (errors.length) throw errors[0];
   })();
   try {
     child = spawn(executable, [
@@ -131,6 +156,8 @@ export async function launch({ headed = false, executable = findChrome() } = {})
       child.once('exit', onExit);
     });
     child.stderr.resume();
+    // A later 'error' (a failed kill, say) must not become an uncaught exception.
+    child.on('error', () => {});
     const socket = new WebSocket(url);
     connection = new Connection(socket);
     await new Promise((resolve, reject) => {
@@ -224,8 +251,10 @@ export async function launch({ headed = false, executable = findChrome() } = {})
     await send('Page.setLifecycleEventsEnabled', { enabled: true });
     await send('Runtime.enable');
     await send('Log.enable');
-    process.off('SIGINT', onSignal);
-    process.off('SIGTERM', onSignal);
     return { page, close };
-  } catch (e) { await close(); throw e; }
+  } catch (e) {
+    // The startup error is the one worth reporting, not a cleanup error after it.
+    await close().catch(() => {});
+    throw e;
+  }
 }

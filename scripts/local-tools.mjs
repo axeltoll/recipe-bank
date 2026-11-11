@@ -14,7 +14,9 @@ export function findExecutable(name, { env = process.env, platform = process.pla
   const paths = platform === 'win32' ? path.win32 : path.posix;
   const searchPath = env.PATH ?? env.Path ?? '';
   const extensions = platform === 'win32' ? (env.PATHEXT ?? '.EXE').split(';') : [''];
-  for (const dir of searchPath.split(paths.delimiter).filter(Boolean)) {
+  // Only absolute entries: a relative one ('.', 'bin') would resolve against the working directory, which
+  // is usually this repository, so a planted file there could run in place of a real tool.
+  for (const dir of searchPath.split(paths.delimiter).filter((d) => d && paths.isAbsolute(d))) {
     for (const ext of extensions) {
       // spawn without a shell: Windows batch wrappers are not executable here.
       if (platform === 'win32' && ext.toLowerCase() !== '.exe') continue;
@@ -33,7 +35,9 @@ export function detectTools(lookup = findExecutable) {
 }
 
 // Await each foreground command; never invoke a shell or silently ignore errors.
-export function runCommand(command, args, { cwd, maxBuffer = 16 * 1024 * 1024 } = {}) {
+// `timeout` (ms, 0 = none) kills a stalled tool and reports it as an error, so a hung download
+// cannot hang the capture (and the agent waiting for it).
+export function runCommand(command, args, { cwd, maxBuffer = 16 * 1024 * 1024, timeout = 0 } = {}) {
   return new Promise((resolve) => {
     let child;
     try { child = spawn(command, args, { cwd, stdio: ['ignore', 'pipe', 'pipe'] }); }
@@ -42,6 +46,10 @@ export function runCommand(command, args, { cwd, maxBuffer = 16 * 1024 * 1024 } 
     let stderr = '';
     let error;
     let bytes = 0;
+    const timer = timeout > 0 ? setTimeout(() => {
+      error = new Error(`Timed out after ${timeout / 1000} s; the tool was stopped.`);
+      child.kill('SIGKILL');
+    }, timeout) : null;
     child.stdout.setEncoding('utf8');
     child.stderr.setEncoding('utf8');
     const collect = (target) => (chunk) => {
@@ -56,7 +64,17 @@ export function runCommand(command, args, { cwd, maxBuffer = 16 * 1024 * 1024 } 
     };
     child.stdout.on('data', collect('stdout'));
     child.stderr.on('data', collect('stderr'));
-    child.on('error', (err) => { error = err; });
-    child.on('close', (status) => resolve({ status, stdout, stderr, error }));
+    child.on('error', (err) => {
+      error ??= err;
+      // A tool that never started may not emit 'close'; settle now (a later 'close' changes nothing).
+      if (child.pid === undefined) {
+        if (timer) clearTimeout(timer);
+        resolve({ status: null, stdout, stderr, error });
+      }
+    });
+    child.on('close', (status) => {
+      if (timer) clearTimeout(timer);
+      resolve({ status, stdout, stderr, error });
+    });
   });
 }

@@ -55,12 +55,12 @@ let targetServings = servingsPerMeal(profile);
 householdElement.addEventListener('recipe-bank:household-change', (event) => {
   profile = event.detail.profile;
   targetServings = event.detail.servingsPerMeal;
-  // Pass targetServings to the week-plan/serving-scaling lane's public interface.
+  // Pass targetServings to the week plan and serving scaling.
   // Recompute its combined shopping list; preserve amounts that cannot be scaled.
 });
 ```
 
-The event bubbles from the mounted element after a valid save, even if storage fails: `recipe-bank:household-change`, detail `{ profile, servingsPerMeal }`. Initial mount does not emit an event. Read initial state or supply a shared profile as above. Serving scaling and purchase-amount integration are deliberately left to the week-plan lane/PAM; no existing app routes or recipe quantities are changed here.
+The event bubbles from the mounted element after a valid save, even if storage fails: `recipe-bank:household-change`, detail `{ profile, servingsPerMeal }`. Initial mount does not emit an event. Read initial state or supply a shared profile as above. The household module itself changes no routes and no recipe quantities. In the dashboard, `features/household-target.js` reads the saved profile and hands the serving target to serving scaling and the week plan.
 
 ## Budget contract
 
@@ -80,7 +80,9 @@ After a budget save, shop addition/removal, or CSV import, the element emits the
 
 ## CSV and chart
 
-`exportShopsCsv(shops)` and `importShopsCsv(text)` in `lib/budget.mjs` use the exact header `date,total,currency,meals,note`. Export uses CRLF and quoted fields, escaping quotes by doubling them. Decimal inputs and literal notes are preserved. Import accepts LF/CRLF and an optional UTF-8 BOM, validates every row, and rejects the entire import on invalid dates, amounts, currencies, meals, notes or quoting. Limits are 1,000,000 text characters and 10,000 shops per import. The UI offers copy/paste export and append-only import; importing the same file twice creates duplicate records. No currency conversion or deduplication is implied. These files contain literal note text and are intended for this importer, which never executes it.
+`exportShopsCsv(shops)` and `importShopsCsv(text)` in `lib/budget.mjs` use the exact header `date,total,currency,meals,note`. Export uses CRLF and quoted fields, escaping quotes by doubling them. Decimal inputs and literal notes are preserved. Import accepts LF/CRLF and an optional UTF-8 BOM, skips fully blank lines, validates every row, and rejects the entire import on invalid dates, amounts, currencies, meals, notes or quoting (row numbers in the message count blank lines, so they match the file). Limits are 1,000,000 text characters and 10,000 shops per import. The UI offers copy/paste export and append-only import; importing the same file twice creates duplicate records. No currency conversion or deduplication is implied. These files contain literal note text and are intended for this importer, which never executes it. Opened in a spreadsheet, a note that starts with `=`, `+`, `-` or `@` is read as a formula: open the file as text, or not at all.
+
+Currencies come from the runtime's ISO 4217 list (`Intl.supportedValuesOf`), or a short fallback list in browsers without it; codes that are not money (`XAU`, `XTS`, `XXX` and the other `NON_MONEY` codes in `lib/budget.mjs`) are refused. The default budget currency is `SEK`; change it in the form.
 
 `renderSpendChart(history, { locale })` in `public/features/budget.mjs` renders a dependency-free SVG bar chart, themed with the same text/accent variables. Each bar has its period and right-aligned exact amount above it, leaving room for large totals. In the UI, the chart keeps a readable minimum width inside a keyboard-focusable scrolling region on narrow screens. The adjacent table is the exact-value and assistive-technology alternative, including per-person/per-meal values and foreign-currency totals. The chart shows only spend in the budget currency.
 

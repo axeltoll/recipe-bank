@@ -1,5 +1,5 @@
 // The saved household profile as a serving target, for the week plan and serving scaling.
-// The household lane's contract (HOUSEHOLD.md): servingsPerMeal(profile) is adult-equivalent servings
+// The household contract (HOUSEHOLD.md): servingsPerMeal(profile) is adult-equivalent servings
 // per meal; it is never multiplied again by head count or cooking days.
 import { normalizeProfile, servingsPerMeal, describeProfile } from '../../lib/household.mjs';
 import { HOUSEHOLD_KEY } from './household.mjs';

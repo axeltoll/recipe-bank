@@ -141,7 +141,7 @@
           "then": {
             "properties": {
               "id": { "type": ["string", "null"], "pattern": "^\\d+$" },
-              "url": { "pattern": "^https?://(?:(?:www\\.)?pinterest\\.[a-z.]+|pin\\.it)/" }
+              "url": { "pattern": "^https?://(?:(?:www\\.|[a-z]{2}\\.)?pinterest\\.[a-z.]+|pin\\.it)/" }
             }
           }
         },

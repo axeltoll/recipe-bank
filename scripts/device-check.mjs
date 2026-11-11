@@ -9,13 +9,14 @@ import { ROOT, options, browserAvailable, withBrowser } from './browser/support.
 import { SELECTORS, PAGES } from './browser/selectors.mjs';
 
 const VIEWPORTS = [[390, 844], [768, 1024], [1280, 800], [1920, 1080], [2560, 1440]];
-const opts = options();
 const names = PAGES.map(([name]) => name);
 const allowed = [...names, ...VIEWPORTS.map(([width]) => String(width))];
-if (opts.only && !allowed.includes(opts.only)) throw new Error(`--only must be one of: ${allowed.join(', ')}`);
 const output = join(ROOT, '.smoke/device');
 
 try {
+  // Bad options are reported as a FAIL line like every other error, not as a stack trace.
+  const opts = options();
+  if (opts.only && !allowed.includes(opts.only)) throw new Error(`--only must be one of: ${allowed.join(', ')}`);
   if (browserAvailable()) {
     const { recipes, invalid } = await loadRecipes();
     if (invalid.length || !recipes.length) throw new Error('Valid recipes are required for the device check');

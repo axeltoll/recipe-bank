@@ -7,7 +7,7 @@ import {
   handleFromUrl, emptyIngredient, emptyStep, formatRecipe, today, draftIndexMap, problemField,
 } from '../lib/draft.mjs';
 import { validateRecipe } from '../lib/recipe.mjs';
-import { videoKey } from '../lib/video.mjs';
+import { videoKey, PLATFORMS } from '../lib/video.mjs';
 
 const DIR = resolve(import.meta.dirname, '..', 'recipes');
 
@@ -134,10 +134,18 @@ test('checkDraft passes contract problems through', () => {
   const d = emptyDraft(undefined, { date: '2026-11-11' });
   const problems = checkDraft(d);
   for (const p of ['id must be a kebab-case slug', 'title is required', 'summary is required',
-    'video.url must be a supported YouTube / TikTok / Instagram link', 'creator.name is required',
-    'components must be a non-empty array']) {
+    'creator.name is required', 'components must be a non-empty array']) {
     assert.ok(problems.includes(p), p);
   }
+  // The video message names every platform lib/video.mjs accepts, so it is built from PLATFORMS.
+  const video = problems.find((p) => p.startsWith('video.url must be a supported '));
+  assert.ok(video, 'the video problem is passed through');
+  for (const { label } of PLATFORMS) assert.ok(video.includes(label), `${label} is named`);
+  // A creator link with another scheme is a contract problem too, pointed at its field.
+  d.creator.url = 'javascript:alert(1)';
+  const bad = checkDraft(d).find((p) => p.startsWith('creator.url '));
+  assert.ok(bad, 'creator.url problem');
+  assert.equal(problemField(bad, d), 'creator.url');
   d.status = 'partial';
   assert.ok(checkDraft(d).includes('partial recipes must list gaps'));
 });

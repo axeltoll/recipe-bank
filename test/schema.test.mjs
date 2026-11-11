@@ -87,6 +87,7 @@ const RULES = [
     bad: mutate((r) => { r.video = { platform: 'web', id: 'invented', url: 'https://example.com/recipe' }; }),
   },
   { line: 'creator.name is required', expect: 'creator.name is required', schema: '/$defs/creator/required', bad: mutate((r) => { r.creator = {}; }) },
+  { line: 'creator.url must be', expect: 'creator.url must be an http', schema: '/$defs/creator/properties/url/pattern', bad: mutate((r) => { r.creator.url = 'javascript:alert(1)'; }) },
   { line: 'tags must be lowercase strings', expect: 'tags must be lowercase', schema: '/$defs/lowercaseText/allOf/1/pattern', bad: mutate((r) => { r.tags = ['Chicken']; }) },
   { line: 'components must be a non-empty array', expect: 'components must be a non-empty array', schema: '/properties/components/minItems', bad: mutate((r) => { r.components = []; }) },
   { line: '${at}.name', expect: 'components[0].name is required', schema: '/$defs/component/properties/name/$ref', bad: mutate((r) => { r.components[0].name = ''; }) },
@@ -143,6 +144,8 @@ test('good fixtures are accepted by both', () => {
     'facebook short link': { ...minimal(), video: { platform: 'facebook', id: null, url: 'https://fb.watch/AbC123/' } },
     pinterest: { ...minimal(), video: { platform: 'pinterest', id: '12345', url: 'https://www.pinterest.com/pin/12345/' } },
     'pinterest short link': { ...minimal(), video: { platform: 'pinterest', url: 'https://pin.it/AbC123' } },
+    'pinterest language subdomain': { ...minimal(), video: { platform: 'pinterest', id: '12345', url: 'https://br.pinterest.com/pin/12345/' } },
+    'x media suffix': { ...minimal(), video: { platform: 'x', id: '12345', url: 'https://x.com/kitchen/status/12345/video/1' } },
     x: { ...minimal(), video: { platform: 'x', id: '12345', url: 'https://x.com/kitchen/status/12345' } },
     web: { ...minimal(), video: { platform: 'web', id: null, url: 'https://example.com/recipe-video' } },
     'web without id': { ...minimal(), video: { platform: 'web', url: 'https://example.com/recipe-video' } },
@@ -170,6 +173,19 @@ test('bad fixtures are rejected by both', () => {
     'schema as text': mutate((r) => { r.schema = '1'; })(),
     'web page over http': mutate((r) => { r.video = { platform: 'web', id: null, url: 'http://example.com/recipe' }; })(),
     'x link on another host': mutate((r) => { r.video = { platform: 'x', id: '12345', url: 'https://example.com/kitchen/status/12345' }; })(),
+    // Links end up in href attributes: every scheme trick is refused by both.
+    'creator url javascript:': mutate((r) => { r.creator.url = 'javascript:alert(1)'; })(),
+    'creator url mixed case': mutate((r) => { r.creator.url = 'JaVaScRiPt:alert(1)'; })(),
+    'creator url data:': mutate((r) => { r.creator.url = 'data:text/html,<script>alert(1)</script>'; })(),
+    'creator url vbscript:': mutate((r) => { r.creator.url = 'vbscript:msgbox(1)'; })(),
+    'creator url leading space': mutate((r) => { r.creator.url = ' javascript:alert(1)'; })(),
+    'creator url entity-encoded': mutate((r) => { r.creator.url = 'javascript&#58;alert(1)'; })(),
+    'creator url relative': mutate((r) => { r.creator.url = '//evil.example/x'; })(),
+    'creator url empty': mutate((r) => { r.creator.url = ''; })(),
+    'creator url not text': mutate((r) => { r.creator.url = 42; })(),
+    'video url padded': mutate((r) => { r.video.url = ' https://www.youtube.com/shorts/mhNQ8y5ud0A'; })(),
+    'video url upper-case scheme': mutate((r) => { r.video.url = 'HTTPS://www.youtube.com/shorts/mhNQ8y5ud0A'; })(),
+    'video url javascript:': mutate((r) => { r.video.url = 'javascript://www.youtube.com/watch?v=mhNQ8y5ud0A'; })(),
   };
   for (const [name, r] of Object.entries(fixtures)) {
     assert.ok(!contractOk(r, 'good-recipe'), `contract should reject: ${name}`);
@@ -184,7 +200,6 @@ test('bad fixtures are rejected by both', () => {
 test('the schema also checks optional fields that validateRecipe skips', () => {
   const stricter = {
     'handle without @': mutate((r) => { r.creator.handle = 'creator'; }),
-    'creator url not http': mutate((r) => { r.creator.url = 'javascript:alert(1)'; }),
     'calories as text': mutate((r) => { r.nutrition.calories = 'lots'; }),
     'negative protein': mutate((r) => { r.nutrition.protein_g = -5; }),
     'nutrition without per': mutate((r) => { delete r.nutrition.per; }),

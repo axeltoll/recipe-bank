@@ -13,6 +13,7 @@
     "dev": "node --watch-path=server.mjs --watch-path=lib server.mjs",
     "validate": "node scripts/validate.mjs",
     "test": "node --test \"test/*.test.mjs\"",
+    "check": "npm test && npm run validate && npm run build",
     "build": "node scripts/build-static.mjs",
     "migrate": "node scripts/migrate.mjs",
     "packs": "node scripts/pack.mjs",

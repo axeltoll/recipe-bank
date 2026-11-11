@@ -116,16 +116,16 @@ test('uses one three-second timeout for the whole redirect chain', async (t) => 
 
 test('does not request full URLs, arbitrary pages, HTTP links or untrusted short hosts', async (t) => {
   const fetch = t.mock.method(globalThis, 'fetch', () => { throw new Error('unexpected network request'); });
-  for (const input of [
-    pairs[0][1], pairs[1][1], pairs[2][1], 'https://example.com/video',
-    'http://fb.watch/AbC123/', 'http://vm.tiktok.com/AbC123/',
-  ]) {
+  for (const input of [pairs[0][1], pairs[1][1], pairs[2][1], 'https://example.com/video']) {
     const video = parseVideoUrl(input, { allowWeb: true });
     assert.equal(await resolveShortVideo(video), video);
   }
-  for (const url of ['https://fb.watch.evil.example/AbC123', 'https://fb.watch@evil.example/AbC123',
-    'https://user:password@fb.watch/AbC123', 'https://fb.watch:444/AbC123']) {
-    const video = { platform: 'facebook', id: null, url };
+  // The parser now stores http short links as https (test/platform-nits.test.mjs); an http link that
+  // reaches the resolver some other way is still never requested.
+  for (const [platform, url] of [['facebook', 'https://fb.watch.evil.example/AbC123'], ['facebook', 'https://fb.watch@evil.example/AbC123'],
+    ['facebook', 'https://user:password@fb.watch/AbC123'], ['facebook', 'https://fb.watch:444/AbC123'],
+    ['facebook', 'http://fb.watch/AbC123/'], ['tiktok', 'http://vm.tiktok.com/AbC123/']]) {
+    const video = { platform, id: null, url };
     assert.equal(await resolveShortVideo(video), video);
   }
   assert.equal(await resolveShortVideo(null), null);

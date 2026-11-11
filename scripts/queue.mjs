@@ -31,8 +31,12 @@ export function markEntry(queue, id, status, { reason, recipes = [], now = new D
   if (status === 'done') {
     if (entry.status !== 'analyzing') throw new Error('Only an analyzing entry can be completed.');
     const key = videoKey(parseVideoUrl(entry.video.url));
-    const recipe = recipes.find((item) => videoKey(parseVideoUrl(item.recipe?.video?.url)) === key);
-    if (!recipe || validateRecipe(recipe.recipe, recipe.fileId).length) throw new Error('Completion requires a matching valid recipe file.');
+    const recipe = recipes.find((item) => item.recipe && videoKey(parseVideoUrl(item.recipe.video?.url)) === key);
+    if (!recipe || validateRecipe(recipe.recipe, recipe.fileId).length) {
+      // A recipe file that does not parse cannot be matched; name it, it may be the one being completed.
+      const unreadable = recipes.filter((item) => item.error).map((item) => `recipes/${item.fileId}.json (${item.error})`);
+      throw new Error(`Completion requires a matching valid recipe file.${unreadable.length ? ` Unreadable: ${unreadable.join('; ')}.` : ''}`);
+    }
     return queue.filter((item) => item.id !== id);
   }
   const transitions = { queued: ['analyzing'], analyzing: ['failed'], failed: ['queued'] };
@@ -51,7 +55,14 @@ export async function updateQueueFile(file, transform) {
   // An exclusive temporary file serializes helper instances. The server does not
   // share this lock, so the documented workflow requires stopping it first.
   const temporary = `${file}.agent.tmp`;
-  const handle = await open(temporary, 'wx', 0o600);
+  let handle;
+  try {
+    handle = await open(temporary, 'wx', 0o600);
+  } catch (err) {
+    if (err.code !== 'EEXIST') throw err;
+    throw new Error(`${path.basename(temporary)} exists (EEXIST): another queue helper is running, or one stopped `
+      + 'without cleaning up. If no helper is running, delete that file and retry (see agent/QUEUE.md).');
+  }
   try {
     const before = await readFile(file, 'utf8');
     const next = await transform(JSON.parse(before));
@@ -66,10 +77,17 @@ export async function updateQueueFile(file, transform) {
   }
 }
 
-async function recipeFiles(root) {
-  return Promise.all((await readdir(path.join(root, 'recipes'))).filter((f) => f.endsWith('.json')).map(async (file) => ({
-    fileId: file.slice(0, -5), recipe: JSON.parse(await readFile(path.join(root, 'recipes', file), 'utf8')),
-  })));
+// Every recipe file; one that does not parse is kept as { fileId, recipe: null, error } so an unrelated
+// broken file neither blocks completion nor hides behind a bare SyntaxError.
+export async function recipeFiles(root) {
+  return Promise.all((await readdir(path.join(root, 'recipes'))).filter((f) => f.endsWith('.json')).map(async (file) => {
+    const fileId = file.slice(0, -5);
+    try {
+      return { fileId, recipe: JSON.parse(await readFile(path.join(root, 'recipes', file), 'utf8')) };
+    } catch (err) {
+      return { fileId, recipe: null, error: err.message };
+    }
+  }));
 }
 
 export async function queueMain(args, { root = ROOT, log = console.log, error = console.error } = {}) {

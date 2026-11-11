@@ -1,5 +1,5 @@
 // Queued-video page (layout type: detail): the video, where it is in the analysis, and what you can do meanwhile.
-import { esc, formatDate } from '/lib/format.mjs';
+import { esc, formatDate, safeUrl } from '/lib/format.mjs';
 import { analysisRequest, queueState, recipeForVideo } from '/lib/catalog.mjs';
 import { recipeHash } from '/lib/nav.mjs';
 import { $, view, state, STATIC, PLATFORM, icon, copy, removeQueued } from './core.js';
@@ -25,6 +25,7 @@ export function renderQueued(id) {
   const failed = x.status === 'failed';
   const recipe = x.status === 'done' ? recipeForVideo(state.recipes, x.video) : undefined;
   const platform = PLATFORM[x.video.platform] ?? 'the platform';
+  const videoUrl = safeUrl(x.video.url);
   const stageState = (i) => (i < s.stage ? 'done' : i > s.stage ? 'todo' : failed ? 'failed' : s.stage === 2 ? 'done' : 'current');
   const stageNote = { done: 'done', current: 'in progress', failed: 'failed', todo: 'not yet' };
   const removable = (x.status === 'queued' || failed) && !STATIC;
@@ -41,7 +42,7 @@ export function renderQueued(id) {
       <div class="recipe-media">
         <div class="media-stick">
           <div class="player">${player(x.video, `Video: ${title}`)}</div>
-          <p class="player-links"><a href="${esc(x.video.url)}" target="_blank" rel="noopener">Open on ${esc(platform)}${icon('external')}</a></p>
+          ${videoUrl ? `<p class="player-links"><a href="${esc(videoUrl)}" target="_blank" rel="noopener">Open on ${esc(platform)}${icon('external')}</a></p>` : ''}
         </div>
       </div>
 
