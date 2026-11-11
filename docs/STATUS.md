@@ -5,13 +5,13 @@ a decision by the owner. Plans and estimates live in [ROADMAP.md](../ROADMAP.md)
 
 ## Now
 
-Work packages in progress, each on its own branch. None of them is merged yet.
+Active and queued work packages. None of them is merged yet; each lands on its own branch.
 
 | Workstream | Branch | What | State |
 |---|---|---|---|
-| Dashboard redesign | (lane) | A design contract (`docs/design/`), a rebuilt dashboard in `public/`, cook mode, and mount points for the new feature modules | waiting to start |
-| Public website | (lane) | A landing page in `site/`, separate from the dashboard | waiting to start |
-| Roadmap functions | (lane) | Week plan and combined shopping list, exclude / tag / nutrition filters, serving scaling, server and API tests, UI modules in `public/features/` | waiting to start |
+| Dashboard redesign | not assigned yet | A design contract (`docs/design/`), a rebuilt dashboard in `public/`, cook mode, and mount points for the new feature modules | waiting to start |
+| Public website | not assigned yet | A landing page in `site/`, separate from the dashboard | waiting to start |
+| Roadmap functions | not assigned yet | Week plan and combined shopping list, exclude / tag / nutrition filters, serving scaling, server and API tests, UI modules in `public/features/` | waiting to start |
 | Recipe Agent | `feat/recipe-agent` | `agent/` definition with entry files per coding agent, an analysis skill, `SELF-HOSTING.md`, `npm run doctor`, captures kept outside the repo | running |
 | More platforms | `feat/more-platforms` | Facebook, Pinterest and X videos, and web pages with a video, in `lib/video.mjs` | running |
 | Browser smoke test and CI | `test/browser-smoke-ci` | A dependency-free headless smoke test, a device check at five widths, and a GitHub Actions workflow | running |
