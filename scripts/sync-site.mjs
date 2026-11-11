@@ -16,6 +16,7 @@
 import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { STATUSES, renderGroup, renderStatusNote, validateFeatures } from '../site/js/features-core.js';
+import { isMain } from './is-main.mjs';
 
 export const SITE = resolve(import.meta.dirname, '..', 'site');
 /** Stands in for the address while site.json has no baseUrl. `.invalid` can never be a real host. */
@@ -107,7 +108,7 @@ export async function loadData(dir = SITE) {
   return data;
 }
 
-if (process.argv[1] === import.meta.filename) {
+if (isMain(import.meta.url)) {
   const data = await loadData();
   const pages = await listPages();
   const changed = [];
