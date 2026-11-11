@@ -10,8 +10,15 @@ import { join, resolve } from 'node:path';
 export const ROOT = resolve(import.meta.dirname, '..', '..');
 const exec = promisify(execFile);
 
-/** An 11-character YouTube-style id: testvideo01, testvideo02, … */
-export const videoId = (n) => `testvideo${String(n).padStart(2, '0')}`;
+/**
+ * An 11-character YouTube-style id, different for every n: testvideo01 … testvideo99, then
+ * testvide100 … testvide999, testvid1000 and so on (the prefix shrinks as the number grows).
+ */
+export function videoId(n) {
+  const digits = String(n).padStart(2, '0');
+  if (!/^\d{2,11}$/.test(digits)) throw new RangeError(`videoId needs a whole number from 0 to 11 digits, not ${n}`);
+  return 'testvideo'.slice(0, 11 - digits.length) + digits;
+}
 
 /** A small recipe that passes validateRecipe, for video number `n`. */
 export function makeRecipe(id, n, extra = {}) {
