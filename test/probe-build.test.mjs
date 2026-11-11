@@ -66,7 +66,6 @@ test('index.html in the copy is marked static, so nothing in it tries to write',
 });
 
 test('the static marker does not depend on the exact <html lang="en"> spelling',
-  { todo: 'bug: build-static only replaces the literal "<html lang=\\"en\\">"; if the redesign adds an attribute or changes the order, the copy silently loses data-static="1" and its editor, Add video and pack import try to write' },
   async () => {
     const src = await readFile(join(ROOT, 'scripts', 'build-static.mjs'), 'utf8');
     assert.doesNotMatch(src, /\.replace\('<html lang="en">'/);

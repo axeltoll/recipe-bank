@@ -153,7 +153,10 @@ const LANGUAGE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/i;
 export function captionLanguages(language) {
   if (typeof language !== 'string' || !LANGUAGE.test(language)) return '.*-orig';
   const base = language.split('-')[0].toLowerCase();
-  return `${base},${base}-.*`;
+  // "all" is a real language code (Allar), but yt-dlp reads the bare word as every track. "al[l]" is a pattern
+  // for the same code that yt-dlp does not take as that keyword.
+  const pattern = base === 'all' ? 'al[l]' : base;
+  return `${pattern},${pattern}-.*`;
 }
 
 /** True for a caption file name the capture asked for: `source.<lang>.vtt|srt` in the original language. */

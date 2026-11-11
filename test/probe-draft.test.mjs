@@ -62,7 +62,8 @@ test('a draft round trip keeps unknown fields at every level and the empty forms
 // ---------- sources other than platform videos ----------
 
 const webRecipe = () => makeRecipe('probe-web', 1, { video: { platform: 'web', id: null, url: 'https://cooking.example.com/recipes/42' } });
-const shortRecipe = () => makeRecipe('probe-short', 1, { video: { platform: 'tiktok', url: 'https://vm.tiktok.com/ZMabc123/' } });
+// Stored in the parser's canonical form (no trailing slash), as the dashboard and the agent write it.
+const shortRecipe = () => makeRecipe('probe-short', 1, { video: { platform: 'tiktok', url: 'https://vm.tiktok.com/ZMabc123' } });
 
 test('fixtures: a web-page recipe and a short-link recipe are valid recipe files', () => {
   assert.deepEqual(validateRecipe(webRecipe()), []);
@@ -70,7 +71,6 @@ test('fixtures: a web-page recipe and a short-link recipe are valid recipe files
 });
 
 test('a web-page recipe survives the editor round trip and stays valid',
-  { todo: 'bug: recipeFromDraft parses video.url without allowWeb, so platform "web" is dropped and the saved recipe fails validateRecipe' },
   () => {
     const r = webRecipe();
     const back = recipeFromDraft(draftFromRecipe(r));
@@ -79,7 +79,6 @@ test('a web-page recipe survives the editor round trip and stays valid',
   });
 
 test('a queued web page can be written up in the editor (#/new/<queueId>)',
-  { todo: 'bug: same cause: a draft from a queued web page always fails checkDraft with "video.url must be a supported … link"' },
   () => {
     const entry = { id: 'q1', video: { platform: 'web', id: null, url: 'https://cooking.example.com/recipes/42' }, title: 'Soup', creator: 'Cook', creatorUrl: null };
     const d = emptyDraft(entry, { date: '2026-11-11' });
@@ -92,7 +91,6 @@ test('a queued web page can be written up in the editor (#/new/<queueId>)',
   });
 
 test('a short-link recipe without video.id round-trips without gaining "id": null',
-  { todo: 'bug: recipeFromDraft always writes video.id, so a short-link recipe that omitted it comes back with "id": null (valid, but the file changes on an untouched save)' },
   () => {
     const r = shortRecipe();
     const back = recipeFromDraft(draftFromRecipe(r));
@@ -112,7 +110,6 @@ test('a recipe stored with a non-canonical but valid URL keeps a valid video aft
 // ---------- third-party data in queue entries ----------
 
 test('a queue entry with a malformed percent-escape in its creator URL still opens in the editor',
-  { todo: 'bug: handleFromUrl calls decodeURIComponent unguarded, so an oEmbed author_url like https://www.tiktok.com/@a%E0 throws URIError and emptyDraft crashes' },
   () => {
     assert.equal(typeof handleFromUrl('https://www.tiktok.com/@a%E0'), 'string');
     const d = emptyDraft({ id: 'q', video: { url: 'https://youtu.be/testvideo01' }, creatorUrl: 'https://www.tiktok.com/@a%E0b' });
@@ -140,7 +137,6 @@ test('formatTimestamp → parseTimestamp round-trips the times a recipe can hold
 });
 
 test('formatTimestamp → parseTimestamp holds for every number validateRecipe accepts ("always holds")',
-  { todo: 'bug: tiny or huge times print in exponent form ("1e-7", "1e+21…"), which parseTimestamp reads as NaN, so the editor reports a valid file as broken' },
   () => {
     for (const t of [1e-7, 5e-324, 1e21]) assert.equal(parseTimestamp(formatTimestamp(t)), t, String(t));
   });

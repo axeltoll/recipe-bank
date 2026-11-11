@@ -49,7 +49,7 @@ test('equivalent spellings of one video give one key', () => {
 });
 
 test('a web page with and without a #fragment is one page (one queue entry, one recipe)',
-  { todo: 'bug: parseVideoUrl keeps u.href with the fragment for web pages, so https://site/recipe#step-2 and https://site/recipe are different dedupe keys' },
+  { todo: 'design decision: docs/PLATFORMS.md keeps the query and fragment of a web page because they can identify a particular video, so https://site/recipe#step-2 and https://site/recipe are different dedupe keys on purpose' },
   () => {
     const a = parseVideoUrl('https://cooking.example.com/recipe', { allowWeb: true });
     const b = parseVideoUrl('https://cooking.example.com/recipe#step-2', { allowWeb: true });
@@ -66,7 +66,6 @@ test('web pages need a public dotted host name, HTTPS and the explicit opt-in', 
 });
 
 test('Instagram ids are plain shortcodes, never encoded paths or quotes',
-  { todo: 'bug: any second path segment is taken as the Instagram id ("..%2F..%2Fx", "A%22B"), and embedUrl puts it into the iframe path unchecked' },
   () => {
     for (const u of ['https://www.instagram.com/reel/..%2F..%2Fx/', 'https://instagram.com/p/A%22B/', 'https://instagram.com/reel/a%3Cb/']) {
       assert.equal(parseVideoUrl(u), null, u);
@@ -105,13 +104,22 @@ function mockFetch(routes) {
 }
 
 test('short-link resolution only ever sends HEAD requests to the platform hosts', async () => {
+  // The parser stores short links without a trailing slash, so that is the URL requested first.
+  // The resolver also follows TikTok /t/ and Facebook /share/r|v/ hops, through the same host allowlist.
   const calls = mockFetch({
-    'https://vm.tiktok.com/ZMabc/': { status: 301, location: 'https://www.tiktok.com/@cook/video/123?is_from_webapp=1' },
+    'https://vm.tiktok.com/ZMabc': { status: 301, location: 'https://www.tiktok.com/t/ZTabc/' },
+    'https://www.tiktok.com/t/ZTabc/': { status: 301, location: 'https://www.tiktok.com/@cook/video/123?is_from_webapp=1' },
     'https://www.tiktok.com/@cook/video/123?is_from_webapp=1': { status: 200 },
+    'https://www.facebook.com/share/r/abc': { status: 302, location: 'https://www.facebook.com/reel/1234567890/' },
+    'https://www.facebook.com/reel/1234567890/': { status: 200 },
   });
   const v = await resolveShortVideo(parseVideoUrl('https://vm.tiktok.com/ZMabc/'));
   assert.deepEqual(v, { platform: 'tiktok', id: '123', url: 'https://www.tiktok.com/@cook/video/123' });
+  const fb = await resolveShortVideo(parseVideoUrl('https://www.facebook.com/share/r/abc/'));
+  assert.deepEqual(fb, { platform: 'facebook', id: '1234567890', url: 'https://www.facebook.com/watch/?v=1234567890' });
+  assert.equal(calls.length, 5);
   assert.ok(calls.every((c) => c.method === 'HEAD'));
+  assert.ok(calls.every((c) => ['vm.tiktok.com', 'www.tiktok.com', 'www.facebook.com'].includes(new URL(c.url).hostname)));
 });
 
 test('redirects to other hosts, other platforms, credentials, ports, http or javascript are not followed', async () => {
@@ -119,7 +127,7 @@ test('redirects to other hosts, other platforms, credentials, ports, http or jav
     'https://evil.example/video/1', 'http://www.tiktok.com/@a/video/1', 'https://user@www.tiktok.com/@a/video/1', 'https://www.tiktok.com:444/@a/video/1',
     `https://www.youtube.com/shorts/${ID}`, 'javascript:alert(1)', 'https://www.tiktok.com.evil.example/@a/video/1', '//evil.example/x', 'data:text/plain,x',
   ]) {
-    const calls = mockFetch({ 'https://vm.tiktok.com/ZMabc/': { status: 302, location } });
+    const calls = mockFetch({ 'https://vm.tiktok.com/ZMabc': { status: 302, location } });
     const v = await resolveShortVideo(parseVideoUrl('https://vm.tiktok.com/ZMabc/'));
     assert.equal(v.id, null, location);
     assert.equal(calls.length, 1, location);

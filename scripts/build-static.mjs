@@ -37,7 +37,11 @@ export async function buildStatic({ outDir = join(ROOT, 'dist'), dataDir = ROOT,
   await writeFile(join(outDir, 'api', 'queue.json'), JSON.stringify({ queue }));
 
   const index = join(outDir, 'index.html');
-  await writeFile(index, (await readFile(index, 'utf8')).replace('<html lang="en">', '<html lang="en" data-static="1">'));
+  // Without the marker the copy's editor, Add video and pack import would try to write, so a missing <html> tag
+  // stops the build instead of passing silently.
+  const html = await readFile(index, 'utf8');
+  if (!/<html\b[^>]*>/i.test(html)) throw new Error('public/index.html has no <html> tag to mark as static.');
+  await writeFile(index, html.replace(/<html\b([^>]*)>/i, '<html$1 data-static="1">'));
   await writeFile(join(outDir, '_headers'), [
     '/lib/*',
     '  Content-Type: text/javascript; charset=utf-8',

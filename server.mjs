@@ -16,7 +16,7 @@ import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { parseVideoUrl, videoKey, PLATFORMS } from './lib/video.mjs';
 import { validateRecipe, isWebLink, SLUG } from './lib/recipe.mjs';
 import { resolveShortVideo } from './lib/video-resolver.mjs';
-import { readPack, planImport, applyImport, MAX_PACK_BYTES } from './lib/pack.mjs';
+import { readPack, planImport, applyImport, forbiddenKey, MAX_PACK_BYTES } from './lib/pack.mjs';
 
 const ROOT = resolve(import.meta.dirname);
 
@@ -53,8 +53,18 @@ export function dataPaths(dataDir = DATA_ROOT) {
 
 const DEFAULT = dataPaths();
 
+// The recipe file names in `dir`; none when the folder does not exist yet (a fresh RECIPE_BANK_DIR).
+async function recipeFiles(dir) {
+  try {
+    return (await readdir(dir)).filter((f) => f.endsWith('.json')).sort();
+  } catch (e) {
+    if (e.code === 'ENOENT') return [];
+    throw e;
+  }
+}
+
 export async function loadRecipes(dir = DEFAULT.recipesDir) {
-  const files = (await readdir(dir)).filter((f) => f.endsWith('.json')).sort();
+  const files = await recipeFiles(dir);
   const recipes = [];
   const invalid = [];
   for (const f of files) {
@@ -71,13 +81,20 @@ export async function loadRecipes(dir = DEFAULT.recipesDir) {
   return { recipes, invalid };
 }
 
+// A queue file that is not a JSON list (a hand edit gone wrong) is reported, never read as empty: the next write
+// would replace it. The status makes the server answer with this message instead of a bare "Server error".
 export async function loadQueue(file = DEFAULT.queueFile) {
+  let queue;
   try {
-    return JSON.parse(await readFile(file, 'utf8'));
+    queue = JSON.parse(await readFile(file, 'utf8'));
   } catch (e) {
     if (e.code === 'ENOENT') return [];
-    throw e;
+    if (!(e instanceof SyntaxError)) throw e;
   }
+  if (!Array.isArray(queue)) {
+    throw Object.assign(new Error('data/queue.json must be a JSON list. Fix the file; npm run validate shows the problem.'), { status: 409 });
+  }
+  return queue;
 }
 
 // Write to a temp file in the same folder, then rename over the target, so a crash never leaves half a file.
@@ -314,8 +331,11 @@ export function createHandler({
       // validateRecipe reads c.name, ing.item and s.text, so a null in one of those lists throws.
       problems = ['malformed recipe (a component, ingredient or step is not an object)'];
     }
+    // Packs refuse prototype keys, so a recipe holding one could be saved but never shared.
+    const forbidden = body && typeof body === 'object' ? forbiddenKey(body) : null;
+    if (forbidden) problems = [...problems, `the recipe contains ${forbidden}`];
     return withLock(async () => {
-      const files = new Set((await readdir(dirs.recipesDir)).filter((f) => f.endsWith('.json')));
+      const files = new Set(await recipeFiles(dirs.recipesDir));
       if (id && !files.has(`${id}.json`)) return json(res, 404, { error: 'No recipe with that id.' });
       if (problems.length) return json(res, 400, { error: 'The recipe does not match the contract.', problems });
       if (!id && files.has(`${body.id}.json`)) {
@@ -326,7 +346,12 @@ export function createHandler({
       const other = recipes.find((r) => r.id !== body.id && videoKey(r.video) === key);
       if (other) return json(res, 409, { error: 'That video is already in the bank.', recipeId: other.id });
 
-      await writeJsonAtomic(join(dirs.recipesDir, `${body.id}.json`), body);
+      try {
+        await writeJsonAtomic(join(dirs.recipesDir, `${body.id}.json`), body);
+      } catch (e) {
+        if (e.code !== 'ENAMETOOLONG') throw e;
+        return json(res, 400, { error: 'The recipe does not match the contract.', problems: ['id is too long for a file name'] });
+      }
 
       // The recipe file now exists, so its queue entry is done: remove it.
       const queue = await loadQueue(dirs.queueFile);
@@ -357,6 +382,7 @@ export function createHandler({
       const plan = planImport(read, [...recipes, ...taken]);
       const { files, skipped } = applyImport(plan, include ? { include } : {});
       const created = [];
+      if (files.length) await mkdir(dirs.recipesDir, { recursive: true });
       for (const f of files) {
         if (!SLUG.test(f.id)) {
           skipped.push({ index: f.index, id: f.id, reason: 'not a valid id' });
@@ -366,8 +392,13 @@ export function createHandler({
           await createFileOnce(join(dirs.recipesDir, `${f.id}.json`), f.contents);
           created.push(f.id);
         } catch (e) {
-          if (e.code !== 'EEXIST') throw e;
-          skipped.push({ index: f.index, id: f.id, reason: 'a recipe file with this id already exists' });
+          // One file that cannot be written (an id too long for the file system, say) must not hide the ones
+          // already created: it is reported with the other skipped recipes.
+          const reason = e.code === 'EEXIST' ? 'a recipe file with this id already exists'
+            : e.code === 'ENAMETOOLONG' ? 'the id is too long for a file name'
+              : 'the recipe file could not be written';
+          if (e.code !== 'EEXIST') console.error(e);
+          skipped.push({ index: f.index, id: f.id, reason });
         }
       }
       skipped.sort((a, b) => a.index - b.index);

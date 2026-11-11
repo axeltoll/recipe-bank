@@ -13,25 +13,32 @@ const URLS = [
   'https://de.pinterest.com/pin/123/', 'https://pin.it/AbC', 'https://x.com/cook/status/1',
 ];
 
+// The parser refuses Instagram ids holding "%" or "/"; capture names are still safe for hand-made ones.
+const HOSTILE = [{ platform: 'instagram', id: '../../x', url: 'https://www.instagram.com/reel/x/' }, { platform: 'instagram', id: 'a%b', url: 'https://www.instagram.com/reel/x/' }];
+
 test('every capture folder name is one safe path segment', () => {
-  for (const url of URLS) {
-    const key = captureKey(parseVideoUrl(url));
-    assert.match(key, /^[a-z]+-[A-Za-z0-9._-]+$/, url);
+  for (const url of [...URLS, ...HOSTILE]) {
+    const video = typeof url === 'string' ? parseVideoUrl(url) : url;
+    if (!video) continue; // refused by the parser
+    const key = captureKey(video);
+    assert.match(key, /^[a-z]+-[A-Za-z0-9._-]+$/, video.url);
     assert.ok(!key.includes('..') || !key.includes('/'), url);
     assert.equal(path.basename(key), key);
-    const dir = resolveCaptureDir(parseVideoUrl(url), { env: { RECIPE_BANK_CAPTURE_DIR: '/captures' }, platform: 'linux', home: '/srv/u' });
+    const dir = resolveCaptureDir(video, { env: { RECIPE_BANK_CAPTURE_DIR: '/captures' }, platform: 'linux', home: '/srv/u' });
     assert.equal(path.dirname(dir), '/captures', url);
   }
 });
 
-test('different videos never share a capture folder',
-  { todo: 'bug: captureKey maps "%" to "_" after encodeURIComponent, so Instagram ids "a%5F" and "a_255F" (both accepted by parseVideoUrl) share one folder' },
-  () => {
-    const a = parseVideoUrl('https://www.instagram.com/reel/a%5F/');
-    const b = parseVideoUrl('https://www.instagram.com/reel/a_255F/');
+test('different videos never share a capture folder', () => {
+  // captureKey maps "%" to "_", so an id holding "%" could collide with another; the parser refuses such ids.
+  const a = parseVideoUrl('https://www.instagram.com/reel/a%5F/');
+  const b = parseVideoUrl('https://www.instagram.com/reel/a_255F/');
+  if (a) {
     assert.notEqual(a.id, b.id);
     assert.notEqual(captureKey(a), captureKey(b));
-  });
+  }
+  assert.notEqual(captureKey(parseVideoUrl('https://www.instagram.com/reel/a_b/')), captureKey(parseVideoUrl('https://www.instagram.com/reel/a-b/')));
+});
 
 test('relative capture and data folders are refused on every platform', () => {
   const v = parseVideoUrl(URLS[0]);
@@ -56,6 +63,7 @@ test('every planned command passes the URL after "--" and as one argument, with 
   const tools = { 'yt-dlp': '/bin/yt-dlp', ffmpeg: '/bin/ffmpeg', 'whisper-ctranslate2': '/bin/w', tesseract: '/bin/t' };
   for (const url of URLS) {
     const video = parseVideoUrl(url);
+    if (!video) continue; // refused by the parser
     const plan = buildCapturePlan({ video, captureDir: '/captures/%(title)s; rm -rf ~', tools, modelPath: '/models/m', transcribe: true });
     for (const c of plan.commands) {
       assert.ok(c.args.every((a) => typeof a === 'string'), c.id);
@@ -82,9 +90,9 @@ test('caption languages never ask for every track and match only the original la
 });
 
 test('a video whose language code is "all" does not ask yt-dlp for every caption track',
-  { todo: 'bug: "all" passes the LANGUAGE pattern (it is the ISO 639-3 code of Allar), and yt-dlp reads --sub-langs "all,all-.*" as every track, which the comment says must never happen' },
   () => {
     assert.ok(!captionLanguages('all').split(',').includes('all'));
+    assert.equal(captionLanguages('all'), 'al[l],al[l]-.*', 'still asks for the Allar captions themselves');
   });
 
 test('the capture command refuses web pages, odd flags and several URLs without touching anything', async () => {

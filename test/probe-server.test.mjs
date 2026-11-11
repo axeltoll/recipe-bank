@@ -57,13 +57,17 @@ function rawRequest(method, path, parts, headers = {}) {
 
 // ---------- content types and bodies ----------
 
-test('every write route refuses non-JSON content types with 415, including look-alikes', async () => {
-  const routes = [['POST', '/api/recipes'], ['PUT', '/api/recipes/probe-eggs'], ['POST', '/api/queue'], ['POST', '/api/packs/import'], ['DELETE', '/api/queue/x']];
+test('every write route with a body refuses non-JSON content types with 415, including look-alikes', async () => {
+  // POST and PUT carry a body, so they need JSON. DELETE has no body and is not a simple
+  // cross-site request, so its content type does not matter: it gets its normal answer.
+  const routes = [['POST', '/api/recipes'], ['PUT', '/api/recipes/probe-eggs'], ['POST', '/api/queue'], ['POST', '/api/packs/import']];
   for (const type of ['text/plain', 'application/x-www-form-urlencoded', 'multipart/form-data; boundary=x', 'application/jsonp', 'application/json-patch+json', 'text/json']) {
     for (const [method, path] of routes) {
       const res = await send(method, path, '{}', { 'content-type': type });
       assert.equal(res.status, 415, `${method} ${path} as ${type}`);
     }
+    const del = await send('DELETE', '/api/queue/x', undefined, { 'content-type': type });
+    assert.equal(del.status, 404, `DELETE /api/queue/x as ${type} is judged on its id, not its content type`);
   }
   const none = await fetch(base + '/api/queue', { method: 'POST', body: '{}' });
   assert.ok([415].includes(none.status), 'a body without content type is refused');
@@ -97,7 +101,6 @@ test('oversized bodies get 413 and nothing is written', async () => {
 });
 
 test('a recipe whose UTF-8 characters are split across packets is stored intact',
-  { todo: 'bug: readBody decodes each chunk on its own, so a multi-byte character split between packets becomes U+FFFD' },
   async () => {
     const r = makeRecipe('probe-utf8', 9, { title: 'Crème brûlée — 鶏の唐揚げ 🍗' });
     const bytes = Buffer.from(JSON.stringify(r));
@@ -192,7 +195,6 @@ test('PUT cannot move a recipe onto the video of another recipe', async () => {
 });
 
 test('a recipe carrying prototype keys is not written by POST (packs refuse the same keys)',
-  { todo: 'bug: POST /api/recipes accepts "__proto__"/"constructor" keys that lib/pack.mjs refuses, so such a file can be saved but never shared' },
   async () => {
     const body = JSON.stringify(makeRecipe('probe-proto', 80)).replace('{"id"', '{"__proto__":{"polluted":true},"id"');
     const res = await send('POST', '/api/recipes', body);
@@ -292,7 +294,6 @@ test('an invalid recipe file on disk still blocks its id for POST and pack impor
 });
 
 test('a fresh data folder without recipes/ answers GET and POST without a server error',
-  { todo: 'bug: loadRecipes/readdir throw ENOENT when RECIPE_BANK_DIR has no recipes/ folder yet, so GET /api/recipes and every write answer 500' },
   async () => {
     const empty = await mkdtemp(join(tmpdir(), 'recipe-bank-probe-empty-'));
     const app = createApp({ dataDir: empty, oembed: null, resolve: async (v) => v });
@@ -311,7 +312,6 @@ test('a fresh data folder without recipes/ answers GET and POST without a server
   });
 
 test('a queue file that is not a list gives a clear error, not a generic 500',
-  { todo: 'bug: data/queue.json holding an object (hand edit) makes GET /api/queue throw "map is not a function" (500 "Server error")' },
   async () => {
     const bank = await tempBank([]);
     await writeFile(join(bank, 'data', 'queue.json'), '{"queue": []}');
@@ -320,6 +320,7 @@ test('a queue file that is not a list gives a clear error, not a generic 500',
     try {
       const res = await fetch(`http://127.0.0.1:${app.address().port}/api/queue`);
       assert.notEqual(res.status, 500);
+      assert.match((await res.json()).error, /queue\.json must be a JSON list/);
     } finally {
       app.closeAllConnections?.();
       await new Promise((ok) => app.close(ok));

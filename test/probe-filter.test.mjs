@@ -27,7 +27,6 @@ test('normalizeFilter turns any junk into a safe filter', () => {
 });
 
 test('a blank number field (spaces only, as typed or in a URL) does not turn the nutrition filter on',
-  { todo: 'bug: num() treats "  " as 0 (Number("  ") === 0), so minProtein "  " hides every recipe without stated protein' },
   () => {
     const n = normalizeFilter({ minProtein: '  ', maxCalories: '\t' });
     assert.equal(n.minProtein, null);

@@ -14,9 +14,9 @@
 
 import {
   emptyDraft, draftFromRecipe, recipeFromDraft, checkDraft, slugify, parseTimestamp, formatRecipe,
-  emptyIngredient, emptyStep, emptyComponent, problemField, BASES, STATUSES,
+  emptyIngredient, emptyStep, emptyComponent, problemField, draftVideo, BASES, STATUSES,
 } from '../../lib/draft.mjs';
-import { parseVideoUrl, videoKey, embedUrl, PLATFORMS } from '../../lib/video.mjs';
+import { videoKey, embedUrl, PLATFORMS } from '../../lib/video.mjs';
 import { esc } from './shared.mjs';
 
 const STATIC = typeof document !== 'undefined' && document.documentElement.dataset.static === '1';
@@ -249,7 +249,8 @@ export function mount(element, { recipe, video, readOnly = STATIC, recipes } = {
   function videoHint() {
     const url = draft.video.url.trim();
     if (!url) return '';
-    const v = parseVideoUrl(url);
+    const v = draftVideo(draft);
+    if (v?.platform === 'web') return `✓ ${PLATFORM.web} (link only)`;
     return v ? `✓ ${PLATFORM[v.platform]} video` : 'Not a supported video link yet';
   }
 
@@ -421,7 +422,7 @@ export function mount(element, { recipe, video, readOnly = STATIC, recipes } = {
   function loadPlayer(start, autoplay) {
     const box = body.querySelector('[data-frame]');
     if (!box) return;
-    const v = parseVideoUrl(draft.video.url);
+    const v = draftVideo(draft);
     const src = v && embedUrl(v, { start, autoplay });
     box.innerHTML = src
       ? `<iframe src="${esc(src)}" title="Recipe video" loading="lazy"

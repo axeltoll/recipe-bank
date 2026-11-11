@@ -87,11 +87,20 @@ test('damaged links never throw and say why', () => {
 // ---------- hostile packs ----------
 
 test('deeply nested data in a recipe or in the wrapper is refused without a stack overflow', () => {
-  let deep = {};
-  let cur = deep;
-  for (let i = 0; i < 10_000; i++) cur = cur.a = {};
-  assert.match(readPack(wrap([makeRecipe('probe-deep', 1, { deep })])).entries[0].problems[0], /nested too deeply/);
-  assert.equal(readPack(wrap([makeRecipe('probe-deep', 1)], { meta: deep })).ok, false);
+  // As JSON text, a too-deep recipe is a problem of that entry; the rest of the pack still reads.
+  const deepText = `${'{"a":'.repeat(10_000)}{}${'}'.repeat(10_000)}`;
+  const text = JSON.stringify(wrap([makeRecipe('probe-deep', 1, { deep: 'DEEP' })])).replace('"DEEP"', deepText);
+  assert.match(readPack(text).entries[0].problems[0], /nested too deeply/);
+  // A parsed pack is measured as JSON text first, so a too-deep or cyclic one is refused as a whole.
+  const deep = JSON.parse(deepText);
+  for (const pack of [wrap([makeRecipe('probe-deep', 1, { deep })]), wrap([makeRecipe('probe-deep', 1)], { meta: deep })]) {
+    const read = readPack(pack);
+    assert.equal(read.ok, false);
+    assert.equal(read.errors.length, 1);
+  }
+  const cyclic = wrap([makeRecipe('probe-cyclic', 1)]);
+  cyclic.recipes[0].self = cyclic;
+  assert.equal(readPack(cyclic).ok, false);
   const arrays = `{"format":"${PACK_FORMAT}","version":1,"recipes":[${'['.repeat(50_000)}${']'.repeat(50_000)}]}`;
   const read = readPack(arrays);
   assert.equal(read.entries[0].recipe, null);
@@ -111,7 +120,6 @@ test('prototype keys anywhere are refused and never pollute Object.prototype', (
 });
 
 test('exportPack refuses a recipe that readPack would refuse',
-  { todo: 'bug: exportPack only runs validateRecipe, so a recipe holding a "__proto__" key (which POST /api/recipes accepts) exports into a pack that every importer rejects' },
   () => {
     const r = JSON.parse(JSON.stringify(makeRecipe('probe-proto', 1)).replace('{"id"', '{"__proto__":{"a":1},"id"'));
     let pack;
@@ -220,7 +228,6 @@ test('API: concurrent imports of the same pack create each recipe once', async (
 });
 
 test('API: a pack with one recipe whose id is too long for the file system imports the rest and reports it',
-  { todo: 'bug: the contract has no id length limit; a 251-character id makes writeFile fail with ENAMETOOLONG, the import answers 500 and the recipes written before it stay without a report' },
   async () => {
     const dir = await tempBank([]);
     try {

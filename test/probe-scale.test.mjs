@@ -79,7 +79,6 @@ test('words, rates, percentages and broken fractions are kept exactly', () => {
 });
 
 test('both sides of a dual-unit amount written without spaces are scaled ("200g/7oz")',
-  { todo: 'bug: QTY lookbehind (?<![\\w.,/]) skips a number right after "/", so "200g/7oz" ×2 gives "400g/7oz" and "2 cups/480ml" gives "4 cups/480ml"' },
   () => {
     assert.equal(scaleAmount('200g/7oz', 2).amount, '400g/14oz');
     assert.equal(scaleAmount('2 cups/480ml', 2).amount, '4 cups/960ml');
@@ -87,14 +86,12 @@ test('both sides of a dual-unit amount written without spaces are scaled ("200g/
   });
 
 test('a fraction written with the fraction slash (U+2044) is read as one number',
-  { todo: 'bug: "1⁄2 cup" is scaled as two numbers: ×2 gives "2⁄4 cups", ×0.5 gives "½⁄1 cup"' },
   () => {
     const r = scaleAmount('1⁄2 cup', 2);
     assert.ok(r.amount === '1 cup' || r.reason === 'words', r.amount);
   });
 
 test('a pack size written after the count ("400g x 2") is not scaled twice',
-  { todo: 'bug: "400g x 2" ×2 gives "800g x 4" (four times the food); only "2 x 400g" is recognised as a pack size' },
   () => {
     const r = scaleAmount('400g x 2', 2);
     assert.ok(['400g x 4', '800g x 2'].includes(r.amount), r.amount);
@@ -164,7 +161,6 @@ test('purchaseList survives garbage plans, recipes and overrides', () => {
 });
 
 test('the purchase amount for a fraction-slash amount is never a wrong number',
-  { todo: 'bug: follows from the scale bug: "1⁄2 cup" for a recipe serving 1 and a household of 2 is listed as "2⁄4 cups"' },
   () => {
     const recipe = { id: 'p', title: 'P', serves: '1', components: [{ name: 'M', steps: [], ingredients: [{ item: 'Milk', key: 'milk', amount: '1⁄2 cup', basis: 'on-screen' }] }] };
     const p = purchaseList(plan('p'), [recipe], defaultProfile());
