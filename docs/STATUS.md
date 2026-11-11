@@ -5,38 +5,39 @@ a decision by the owner. Plans and estimates live in [ROADMAP.md](../ROADMAP.md)
 
 ## Now
 
-Active and queued work packages. None of them is merged yet; each lands on its own branch.
+Round 1 is built, integrated and in review as nine stacked pull requests. Merge them in order; each one's base is the
+one before it. Every part passes `npm test`, `npm run validate` and `npm run build` on its own.
 
-| Workstream | Branch | What | State |
-|---|---|---|---|
-| Dashboard redesign | not assigned yet | A design contract (`docs/design/`), a rebuilt dashboard in `public/`, cook mode, and mount points for the new feature modules | waiting to start |
-| Public website | not assigned yet | A landing page in `site/`, separate from the dashboard | waiting to start |
-| Roadmap functions | not assigned yet | Week plan and combined shopping list, exclude / tag / nutrition filters, serving scaling, server and API tests, UI modules in `public/features/` | waiting to start |
-| Recipe Agent | `feat/recipe-agent` | `agent/` definition with entry files per coding agent, an analysis skill, `SELF-HOSTING.md`, `npm run doctor`, captures kept outside the repo | running |
-| More platforms | `feat/more-platforms` | Facebook, Pinterest and X videos, and web pages with a video, in `lib/video.mjs` | running |
-| Browser smoke test and CI | `test/browser-smoke-ci` | A dependency-free headless smoke test, a device check at five widths, and a GitHub Actions workflow | running |
-| Household and budget | `feat/household-budget` | An anonymous household profile and a food budget, as pure logic and UI modules | running |
+| PR | Part |
+|---|---|
+| #3 | Recipe contract, more platforms (Facebook, Pinterest, X, web pages), JSON Schema, migration, recipe packs |
+| #4 | Week plan and combined shopping list, Without / tag / nutrition filters, serving scaling, household profile, food budget, purchase amounts, local-prices groundwork, editor logic |
+| #5 | Server API (recipe editor, pack import, write checks), static build, the self-hosted Recipe Agent |
+| #6 | Dashboard feature modules (`public/features/`) |
+| #7 | Dashboard redesign and design contract (`public/`, `docs/design/`) |
+| #8 | Browser smoke test, device check at five widths, GitHub Actions CI |
+| #9 | Public website: landing page (`site/`) |
+| #10 | Public website: docs pages |
+| #11 | README, CLAUDE.md, ROADMAP and changelog |
 
-Every branch must pass `npm test` and `npm run validate`, gets a review by a model from a different family than the
-one that wrote it, and lands through a pull request.
+On the full stack: 528 tests pass; the smoke test passes against the live server and the static build; the device
+check passes for six pages at 390, 768, 1280, 1920 and 2560 px. A cross-family review and a security and privacy read
+found seven blocking issues, all fixed with tests before the split. A review of each part is under way.
 
 ## Next
 
-1. Take in each finished workstream on its branch: run the tests, fix what fails, check the dashboard at phone,
-   tablet, desktop and wide widths, and open the pull request.
-2. Wire the feature modules (week plan, shopping list, scaling, filters, household, budget) into the redesigned
-   dashboard's mount points.
-3. Queued work packages: add and edit recipes in the dashboard; recipe packs with a schema version, migration and a
-   JSON Schema export (`lib/recipe.mjs` already refers to `schema/recipe.schema.json`, which does not exist yet);
-   household purchase amounts on top of the week plan; a second design round on what the first one shows; the
-   offline / installable app.
+1. Merge the stack once each part has its review.
+2. Follow-ups already being built: the design round's remaining logic changes (darker palette, one text-width token,
+   timers that survive a reload, nav icons, view transitions), device-check coverage for cook mode and the queue page,
+   servings for recipes that count items ("12 nuggets"), and the community list for self-hosters.
+3. More tests that probe edge cases across the new modules.
 
 ## Waiting on a decision
 
-- **Where the public website is hosted, and under which domain.** Nothing is deployed until this is decided.
-  Previews only.
+- **Where the public website is hosted, and under which domain.** Nothing is deployed until this is decided. The
+  website's base URL stays empty until then.
 
 ## Known gaps
 
-- `lib/recipe.mjs` points to `schema/recipe.schema.json` for the full field reference; that file is missing.
 - `thai-chicken-satay-sandwich` is `partial`: the method was not available from the video.
+- Local prices and deals have groundwork only; no price source is connected.
