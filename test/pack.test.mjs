@@ -1,14 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rm, truncate, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
-  PACK_FORMAT, PACK_VERSION, MAX_PACK_CHARS, MAX_PACK_RECIPES, MAX_LINK_CHARS, MAX_TITLE_CHARS, PackError,
+  PACK_FORMAT, PACK_VERSION, MAX_PACK_CHARS, MAX_PACK_BYTES, MAX_PACK_RECIPES, MAX_LINK_CHARS, MAX_TITLE_CHARS, PackError,
   exportPack, serializePack, packFileName, readPack, packFromRead, planImport, applyImport,
   packLink, packFromLink, packParam, hasPackLink, toBase64url, fromBase64url, slugify, uniqueId,
 } from '../lib/pack.mjs';
 import { validateRecipe } from '../lib/recipe.mjs';
-import { makeRecipe, ROOT } from './helpers/bank.mjs';
+import { makeRecipe, ROOT, tempBank } from './helpers/bank.mjs';
+import { readPackFile } from '../scripts/pack-file.mjs';
 
 const EXPORTED = '2026-11-11T10:00:00.000Z';
 const wrap = (recipes, extra = {}) => ({ format: PACK_FORMAT, version: PACK_VERSION, title: 'T', exported: EXPORTED, recipes, ...extra });
@@ -45,6 +46,14 @@ test('exportPack refuses empty, invalid and doubled recipes', () => {
   assert.equal(code(() => exportPack([a, a])), 'duplicate');
   assert.equal(code(() => exportPack([a, { ...makeRecipe('other', 1) }])), 'duplicate', 'same video, other id');
   assert.equal(code(() => exportPack(Array.from({ length: MAX_PACK_RECIPES + 1 }, (_, i) => makeRecipe(`r${i}`, i)))), 'too-many');
+});
+
+test('exportPack refuses a pack that would be larger than readPack accepts', () => {
+  const big = Array.from({ length: 20 }, (_, i) => makeRecipe(`r${i}`, i, { notes: ['x'.repeat(110_000)] }));
+  assert.throws(() => exportPack(big), (e) => e instanceof PackError && e.code === 'too-large' && /too large/.test(e.message));
+  const fits = exportPack(big.slice(0, 15));
+  assert.ok(serializePack(fits).length <= MAX_PACK_CHARS);
+  assert.equal(readPack(serializePack(fits)).ok, true, 'what exportPack makes, readPack reads');
 });
 
 test('serializePack and packFileName', () => {
@@ -96,6 +105,36 @@ test('readPack rejects wrappers that are not a usable pack', () => {
     assert.deepEqual(read.entries, []);
   }
   for (const v of [null, undefined, 42, []]) assert.equal(readPack(v).ok, false);
+});
+
+test('readPack applies the size limit to a parsed pack too, and never throws on one', () => {
+  const big = wrap([makeRecipe('alpha', 1, { notes: ['x'.repeat(MAX_PACK_CHARS)] })]);
+  const read = readPack(big);
+  assert.equal(read.ok, false);
+  assert.match(read.errors[0], /too large/);
+  const cyclic = wrap([makeRecipe('alpha', 1)]);
+  cyclic.self = cyclic;
+  assert.equal(readPack(cyclic).ok, false);
+  assert.equal(readPack(wrap([makeRecipe('alpha', 1)])).ok, true);
+});
+
+test('pack files are size-checked before they are read', async () => {
+  const dir = await tempBank([]);
+  try {
+    const huge = join(dir, 'huge.recipe-pack.json');
+    await writeFile(huge, '');
+    await truncate(huge, MAX_PACK_BYTES + 1); // sparse: nothing is written to disk
+    await assert.rejects(readPackFile(huge), /too large/);
+    const folder = join(dir, 'folder.json');
+    await mkdir(folder);
+    await assert.rejects(readPackFile(folder), /not a regular file|EISDIR/);
+    const small = join(dir, 'small.recipe-pack.json');
+    const text = serializePack(exportPack([makeRecipe('alpha', 1)], { exported: EXPORTED }));
+    await writeFile(small, text);
+    assert.equal(await readPackFile(small), text);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
 
 test('hostile packs: prototype-pollution keys are refused, nothing is polluted', () => {
