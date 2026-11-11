@@ -128,3 +128,24 @@ test('CLI rejects unsupported arguments and malformed files without modifying th
   assert.equal(await queueMain(['mark', 'a', 'analyzing'], options), 1);
   assert.equal(await readFile(file, 'utf8'), 'broken JSON');
 });
+
+test('web page entries are valid queue rows and complete only against the matching web recipe', async () => {
+  const web = (url) => ({ platform: 'web', id: null, url });
+  const page = web('https://cooking.example/stew');
+  const queue = [entry('yt', '2026-11-02'), { id: 'page', video: page, addedAt: '2026-11-01', status: 'queued' }];
+  // One web row must not make the whole file look broken (validate accepts it too).
+  assert.doesNotThrow(() => assertQueue(queue));
+  assert.equal(nextQueued(queue).id, 'page');
+  const claimed = markEntry(queue, 'page', 'analyzing');
+  assert.equal(markEntry(claimed, 'yt', 'analyzing').find((q) => q.id === 'yt').status, 'analyzing');
+
+  const base = JSON.parse(await readFile(new URL('../recipes/gochujang-chicken-thighs.json', import.meta.url), 'utf8'));
+  const recipeFor = (video, id) => ({ fileId: id, recipe: { ...base, id, video } });
+  const other = recipeFor(web('https://cooking.example/soup'), 'other-web-recipe');
+  // A different web page is not this entry's recipe (both used to collapse to the same empty key).
+  assert.throws(() => markEntry(claimed, 'page', 'done', { recipes: [other] }), /matching valid recipe/);
+  const done = markEntry(claimed, 'page', 'done', { recipes: [other, recipeFor(page, 'stew-from-the-web')] });
+  assert.deepEqual(done.map((q) => q.id), ['yt']);
+  // A web URL without platform "web" is still not a valid queue row.
+  assert.throws(() => assertQueue([{ ...queue[1], video: { ...page, platform: 'youtube' } }]), /Queue/);
+});
