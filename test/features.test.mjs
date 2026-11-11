@@ -213,3 +213,20 @@ test('filters render chips, numbers and a summary', () => {
     without: ['pork'], tags: [], minProtein: null, maxCalories: 600,
   });
 });
+
+test('a panel with some sections only reports and clears its own fields', () => {
+  const recipes = [alpha, beta];
+  const all = { without: ['pork'], tags: ['quick'], minProtein: 40 };
+  assert.deepEqual(filtersUi.sectionFilter(all, ['tags']), { without: [], tags: ['quick'], minProtein: null, maxCalories: null });
+  assert.match(filtersUi.renderFilters(recipes, all, { sections: ['without'] }), /data-summary aria-live="polite">without pork</);
+  // A tag or protein floor from another panel is not this panel's to show or clear.
+  assert.match(filtersUi.renderFilters(recipes, { tags: ['quick'], minProtein: 40 }, { sections: ['without'] }), /data-clear hidden/);
+
+  const el = fakeEl();
+  const changes = [];
+  const panel = filtersUi.mount(el, { recipes, filter: all, persist: false, css: false, sections: ['without'], onChange: (f) => changes.push(f) });
+  fire(el, 'click', { '[data-clear]': {} });
+  assert.deepEqual(panel.getFilter(), { without: [], tags: ['quick'], minProtein: 40, maxCalories: null });
+  assert.deepEqual(changes.at(-1).without, []);
+  panel.destroy();
+});
