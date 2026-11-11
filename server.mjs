@@ -418,6 +418,8 @@ export function createHandler({
       return await serveStatic(res, pathname);
     } catch (e) {
       console.error(e);
+      // A body cut off at the size limit leaves unread bytes on the socket: close it rather than let the client reuse it.
+      if (e.status === 413) res.setHeader('connection', 'close');
       json(res, e.status ?? 500, { error: e.status ? e.message : 'Server error' });
     }
   };
