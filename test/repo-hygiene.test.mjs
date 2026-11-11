@@ -28,9 +28,8 @@ test('CI pins every action to a full commit SHA, keeps no token in .git/config a
   assert.match(ci, /node:\s*\[22\b/, 'Node 22 (the engines floor) is in the matrix');
 });
 
-const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', '.smoke', '_fix', 'evidence']);
-// docs/design/ is kept by the design work; AUDIT.md there still says "this lane" (reported, not ours to edit).
-const SKIP_PATHS = ['docs/design/'];
+// Working folders that never belong in the repository (any top-level folder starting with _) are a failure, not a skip.
+const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', '.smoke', 'evidence']);
 
 async function* files(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -44,7 +43,7 @@ test('public docs and code use project words, not internal process words', async
   const found = [];
   for await (const file of files(ROOT)) {
     const rel = relative(ROOT, file).replaceAll('\\', '/');
-    if (!/\.(md|mjs|js|html|json|yml)$/.test(rel) || /^LANE-/.test(rel) || SKIP_PATHS.some((p) => rel.startsWith(p))) continue;
+    if (!/\.(md|mjs|js|html|json|yml|css)$/.test(rel) || /^LANE-/.test(rel)) continue;
     if (rel === 'test/repo-hygiene.test.mjs') continue;
     const text = await readFile(file, 'utf8');
     for (const m of text.matchAll(/\bPAM\b|\b(?:the|this|a|each|every|other|dashboard|household|week-plan)[ -]lanes?\b|\brbank-[a-z]+|\bround-1\b/gi)) {
@@ -52,4 +51,9 @@ test('public docs and code use project words, not internal process words', async
     }
   }
   assert.deepEqual(found, []);
+});
+
+test('no working folder is committed (top-level folders starting with _)', async () => {
+  const top = (await readdir(ROOT, { withFileTypes: true })).filter((e) => e.isDirectory() && e.name.startsWith('_'));
+  assert.deepEqual(top.map((e) => e.name), []);
 });

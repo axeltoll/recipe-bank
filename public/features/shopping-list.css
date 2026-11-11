@@ -80,7 +80,7 @@
   background: var(--_surface); color: var(--_fg); font: inherit; font-size: max(1em, 16px); font-weight: 400;
 }
 
-/* ---- purchase option (rbank-amounts): mount(el, { household: true }) ---- */
+/* ---- purchase option: mount(el, { household: true }) ---- */
 .rbf-purchase .rbf-household { color: var(--_fg); font-weight: 600; }
 .rbf-purchase .rbf-unscaled { color: var(--_warn); }
 .rbf-purchase .rbf-item label { flex-wrap: wrap; }

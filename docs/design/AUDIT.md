@@ -1,6 +1,6 @@
 # Dashboard audit
 
-An audit of `public/` as it stood before the redesign (`index.html`, `styles.css`, `app.js`; routes `#/`, `#/r/<id>`, `#/q/<queueId>`). It was done by reading the code, not in a browser: this lane has no Node or browser. Contrast ratios are calculated by hand from the hex values with the WCAG relative-luminance formula. Line numbers refer to the files before the rebuild.
+An audit of `public/` as it stood before the redesign (`index.html`, `styles.css`, `app.js`; routes `#/`, `#/r/<id>`, `#/q/<queueId>`). It was done by reading the code, not in a browser. Contrast ratios are calculated by hand from the hex values with the WCAG relative-luminance formula. Line numbers refer to the files before the rebuild.
 
 The short version: the dashboard works and has a consistent warm look, but it is one desktop layout that shrinks. On a phone in a kitchen the targets are small, the type is small, several colour pairs miss AA, and there is no loading state, no cook mode and no place for the planned features to attach.
 

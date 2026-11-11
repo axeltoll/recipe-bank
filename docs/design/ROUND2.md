@@ -12,7 +12,7 @@ Round 1 rebuilt the dashboard to a written contract. Since then six feature inst
 
 ## What still felt unfinished
 
-Findings are numbered so `DESIGN.md`, the stylesheet comments and the lane report can point at them.
+Findings are numbered so `DESIGN.md`, and the stylesheet comments can point at them.
 
 ### Every width
 
@@ -75,7 +75,7 @@ The thinnest margin is `--muted` on `--surface-3`. Two things were done:
 1. **The contract now forbids that pairing** (`--surface-3` is for skeletons and tracks; text on it is `--ink-2`), which nothing used anyway. The floor for muted text becomes 5.6:1.
 2. **A margin is enforced by test**: `test/design-round2.test.mjs` requires 5:1 for the muted, ok and warn pairs in both themes, so a later palette change cannot slide back to the edge.
 
-Darker values were worked out (`--muted: #5e544c` gives 5.6 on `--surface-3`, `--ok: #1a5c36` gives 6.8, `--info: #254f8f` gives 6.7) but **not applied**: `test/site.test.mjs` requires the website's palette to equal the dashboard's, and `site/` belongs to another lane. They are listed in the lane report under "Needs a logic change".
+Darker values were worked out (`--muted: #5e544c` gives 5.6 on `--surface-3`, `--ok: #1a5c36` gives 6.8, `--info: #254f8f` gives 6.7) but **not applied**: `test/site.test.mjs` requires the website's palette to equal the dashboard's, so they need a change to the website's stylesheet and that test at the same time. They are on the follow-up list.
 
 ## Plan, in the order it was done
 
