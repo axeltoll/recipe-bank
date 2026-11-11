@@ -15,6 +15,18 @@ const text = (html) => html.replace(/<\/?(?:a|code|em|strong|span)\b[^>]*>/g, ''
   .replace(/\s+/g, ' ').trim();
 
 
+test('the changelog names the version in package.json as the current one', async () => {
+  const { version } = JSON.parse(await readFile(join(ROOT, 'package.json'), 'utf8'));
+  const html = await page('changelog.html');
+  const lede = text(/<p class="lede">([\s\S]*?)<\/p>/.exec(html)[1]);
+  assert.match(lede, new RegExp(`the version in the repository, ${version.replace(/\./g, '\\.')} in package\\.json`));
+  const current = [...html.matchAll(/<section class="release"[^>]*>([\s\S]*?)<\/section>/g)]
+    .map((m) => m[1]).filter((s) => /<span class="badge">Current<\/span>/.test(s));
+  assert.equal(current.length, 1, 'one release is marked Current');
+  assert.equal(text(/<h2[^>]*>([\s\S]*?)<\/h2>/.exec(current[0])[1]), version);
+  assert.match(text(/<nav class="toc"[\s\S]*?<\/nav>/.exec(html)[0]), new RegExp(`${version.replace(/\./g, '\\.')}, the current version`));
+});
+
 test('the self-hosting page describes the write gate: a wildcard HOST allows no name, RECIPE_BANK_HOSTS does', async () => {
   const html = await page('self-hosting.html');
   const start = text(/<h2 id="start">[\s\S]*?(?=<h2 id="data">)/.exec(html)[0]);
