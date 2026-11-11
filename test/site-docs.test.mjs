@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { allowedHosts, writeRefusal } from '../server.mjs';
+import { markEntry } from '../scripts/queue.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const page = (name) => readFile(join(ROOT, 'site', name), 'utf8');
@@ -14,6 +15,13 @@ const text = (html) => html.replace(/<\/?(?:a|code|em|strong|span)\b[^>]*>/g, ''
   .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&')
   .replace(/\s+/g, ' ').trim();
 
+/** The text of the table row whose first cell is `command`. */
+function row(html, command) {
+  const rows = [...html.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map((m) => text(m[1]));
+  const found = rows.find((r) => r.startsWith(command));
+  assert.ok(found, `a row for ${command}`);
+  return found;
+}
 
 test('the changelog names the version in package.json as the current one', async () => {
   const { version } = JSON.parse(await readFile(join(ROOT, 'package.json'), 'utf8'));
@@ -25,6 +33,17 @@ test('the changelog names the version in package.json as the current one', async
   assert.equal(current.length, 1, 'one release is marked Current');
   assert.equal(text(/<h2[^>]*>([\s\S]*?)<\/h2>/.exec(current[0])[1]), version);
   assert.match(text(/<nav class="toc"[\s\S]*?<\/nav>/.exec(html)[0]), new RegExp(`${version.replace(/\./g, '\\.')}, the current version`));
+});
+
+test('the Recipe Agent page says failed and done need an analyzing entry, as the queue helper does', async () => {
+  const html = await page('recipe-agent.html');
+  const video = { platform: 'youtube', id: 'mhNQ8y5ud0A', url: 'https://youtu.be/mhNQ8y5ud0A' };
+  const queued = [{ id: 'a', video, addedAt: '2026-11-01', status: 'queued' }];
+  assert.throws(() => markEntry(queued, 'a', 'failed', { reason: 'No captions' }), /Cannot mark queued as failed/);
+  assert.throws(() => markEntry(queued, 'a', 'done'), /Only an analyzing entry/);
+  for (const command of ['node scripts/queue.mjs mark <id> failed', 'node scripts/queue.mjs mark <id> done']) {
+    assert.match(row(html, command), /already marked analyzing/, `${command} states that it needs an analyzing entry`);
+  }
 });
 
 test('the self-hosting page describes the write gate: a wildcard HOST allows no name, RECIPE_BANK_HOSTS does', async () => {
