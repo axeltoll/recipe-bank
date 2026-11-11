@@ -37,7 +37,10 @@ const STATUSES = ['queued', 'analyzing', 'failed'];
 queue.forEach((q, i) => {
   const at = `data/queue.json[${i}]`;
   if (!q.id) fail(at, 'id is required');
-  if (!parseVideoUrl(q.video?.url)) fail(at, 'video.url is not a supported link');
+  const parsed = parseVideoUrl(q.video?.url, { allowWeb: q.video?.platform === 'web' });
+  if (!parsed) fail(at, 'video.url is not a supported link (web pages require platform "web" and HTTPS)');
+  if (parsed && q.video.platform !== parsed.platform) fail(at, `video.platform must be "${parsed.platform}"`);
+  if (parsed?.id && q.video.id !== parsed.id) fail(at, `video.id must be "${parsed.id}"`);
   if (!STATUSES.includes(q.status)) fail(at, `status must be one of ${STATUSES.join(', ')}`);
   if (seen.has(videoKey(q.video))) {
     console.warn(`! ${at}: already analyzed as ${seen.get(videoKey(q.video))}; remove it from the queue`);

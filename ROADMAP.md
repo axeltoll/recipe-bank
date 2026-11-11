@@ -33,7 +33,7 @@ Today an AI agent turns a video into a recipe file, but its instructions live ou
 - [ ] **Analysis skill** (~8 h). Package the video-analysis workflow as a reusable skill: read the platform's captions and description first, fall back to local speech-to-text on the audio, sample keyframes for on-screen text, then write the recipe in its own words with amounts only as the creator gave them.
 - [ ] **Local dependencies and setup** (~4 h). A `SELF-HOSTING.md` and a `npm run doctor` check for the optional tools the agent needs: `ffmpeg`, `yt-dlp`, a local speech-to-text engine (for example faster-whisper) and `tesseract` for on-screen text. The dashboard keeps working without any of them.
 - [ ] **Keep captures private** (~2 h). The agent writes transcripts, captions and frames to a configurable folder outside the repository and never commits them; only the finished recipe goes in `recipes/`. Users are responsible for following each platform's terms.
-- [ ] **More platforms** (~6 h). Today: YouTube (including Shorts), TikTok and Instagram Reels. Next: Facebook and Pinterest videos, X, and plain web pages with a video, with embeds where the platform offers them and a link otherwise.
+- [ ] **More platforms** (~6 h). URL parsing, public embeds, recipe validation and queue metadata support YouTube (including Shorts), TikTok, Instagram Reels, Facebook, Pinterest, X and explicitly opted-in HTTPS web pages. Dashboard labels, copy and web-page opt-in still need wiring; see [PLATFORMS.md](docs/PLATFORMS.md).
 
 ## Sharing
 

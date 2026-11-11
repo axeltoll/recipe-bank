@@ -6,8 +6,9 @@ import { createServer } from 'node:http';
 import { readFile, readdir, writeFile, rename, mkdir } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { extname, join, normalize, resolve, sep } from 'node:path';
-import { parseVideoUrl, videoKey } from './lib/video.mjs';
+import { parseVideoUrl, videoKey, PLATFORMS } from './lib/video.mjs';
 import { validateRecipe } from './lib/recipe.mjs';
+import { resolveShortVideo } from './lib/video-resolver.mjs';
 
 const ROOT = resolve(import.meta.dirname);
 const RECIPES_DIR = join(ROOT, 'recipes');
@@ -62,10 +63,12 @@ async function saveQueue(queue) {
 }
 
 // Best-effort title/creator lookup; the queue entry is still saved if this fails.
-async function oembed(video) {
+export async function oembed(video) {
   const endpoint = {
     youtube: 'https://www.youtube.com/oembed?format=json&url=',
     tiktok: 'https://www.tiktok.com/oembed?url=',
+    pinterest: 'https://www.pinterest.com/oembed.json?url=',
+    x: 'https://publish.x.com/oembed?url=',
   }[video.platform];
   if (!endpoint) return {};
   try {
@@ -94,8 +97,10 @@ async function api(req, res, path) {
   }
   if (req.method === 'POST' && path === '/api/queue') {
     const body = await readBody(req);
-    const video = parseVideoUrl(body?.url);
-    if (!video) return json(res, 400, { error: 'Paste a YouTube, TikTok or Instagram video link.' });
+    const video = await resolveShortVideo(parseVideoUrl(body?.url, { allowWeb: body?.allowWeb === true }));
+    if (!video) return json(res, 400, {
+      error: `Paste a video link from ${PLATFORMS.filter((p) => p.id !== 'web').map((p) => p.label).join(', ')}. For another HTTPS page, set allowWeb: true.`,
+    });
     const note = typeof body.note === 'string' ? body.note.trim().slice(0, 500) : '';
     const meta = await oembed(video);
     return withQueue(async () => {
