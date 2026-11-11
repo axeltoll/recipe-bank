@@ -35,6 +35,10 @@ test('plans metadata and original-language captions before conditional audio, tr
   assert.equal(after(download.args, '-f'), 'bv*[height<=1080]+ba/b', 'real pixels for OCR, not the 360p pre-merged file');
   assert.ok(frames.args.includes('fps=1/10,scale=1280:-2'));
   assert.ok(frames.args.includes('60'));
+  // A "%" in the capture folder must not reach ffmpeg's output pattern: the runner's cwd is the folder.
+  const odd = planFor({ captureDir: '/captures/100%-real' }).commands.find((c) => c.id === 'frames');
+  assert.equal(odd.args.at(-1), 'frame-%03d.jpg');
+  assert.ok(!odd.args.some((a) => a.includes('100%')), 'the folder is never in an ffmpeg argument');
   assert.equal(ocr.when, 'each-frame');
   assert.match(formatCommand(metadata), /"yt-dlp"/);
 });
