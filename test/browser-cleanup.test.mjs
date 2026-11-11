@@ -55,6 +55,19 @@ test('the static server serves dist/ and nothing outside it', async (t) => {
   assert.equal((await get(port, '/..%2fsecret.txt')).status, 403);
 });
 
+test('the static server labels fonts and images, so Chrome does not refuse them', async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), 'recipe-static-types-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const expected = { 'a.woff': 'font/woff', 'a.woff2': 'font/woff2', 'a.webp': 'image/webp', 'a.jpg': 'image/jpeg', 'a.jpeg': 'image/jpeg' };
+  for (const name of Object.keys(expected)) await writeFile(join(dir, name), 'x');
+  const server = staticServer(dir);
+  const origin = await listen(server);
+  t.after(() => stop(server));
+  for (const [name, type] of Object.entries(expected)) {
+    assert.equal((await fetch(`${origin}/${name}`)).headers.get('content-type'), type, name);
+  }
+});
+
 // ---------- launch and close with a fake browser ----------
 
 const posix = process.platform !== 'win32' && !/\s/.test(process.execPath);
