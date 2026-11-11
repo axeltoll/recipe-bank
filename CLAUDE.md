@@ -7,8 +7,10 @@ A personal recipe bank. Recipe videos from social media (YouTube Shorts, TikTok,
 ```bash
 npm start          # http://127.0.0.1:4780 (PORT / HOST env to override)
 npm run dev        # same, restarts on server/lib changes
-npm run validate   # checks every recipes/*.json and data/queue.json
+npm run validate   # checks every recipes/*.json (contract + JSON Schema) and data/queue.json; add -- --json for a report
 npm test           # node:test: URL parsing + recipe contract
+node scripts/migrate.mjs [--write] [--stamp]                 # upgrade recipes to the current contract version (dry run by default)
+node scripts/pack.mjs export <id…> --out f.json              # recipe pack; import f.json [--write] (dry run by default)
 ```
 
 No dependencies. Node ≥ 22 (built-in `fetch`, `node:test`, `import.meta.dirname`). `.claude/launch.json` has the `recipe-bank` preview config.
@@ -20,17 +22,25 @@ No dependencies. Node ≥ 22 (built-in `fetch`, `node:test`, `import.meta.dirnam
 | `recipes/<id>.json` | One file per analyzed recipe. **The data.** The filename must equal `id`. |
 | `data/queue.json` | Videos waiting for analysis (`queued` → `analyzing` → removed once the recipe file lands; `failed` if analysis is impossible). |
 | `lib/video.mjs` | URL parsing, embed and thumbnail URLs. Shared by the server, validator and browser (served at `/lib/`). |
-| `lib/recipe.mjs` | Recipe contract (`validateRecipe`). The enforced source of truth for the format below. |
+| `lib/recipe.mjs` | Recipe contract (`validateRecipe`, `SCHEMA_VERSION`). The enforced source of truth for the format below. |
+| `schema/recipe.schema.json` | JSON Schema (draft 2020-12) of the full recipe file, optional fields included. `test/schema.test.mjs` keeps it in step with `validateRecipe`. |
+| `lib/json-schema.mjs` | Dependency-free validator for the subset of JSON Schema that file uses (used by `npm run validate`). |
+| `lib/migrate.mjs` | Ordered, pure contract migrations: `migrate(recipe) → { recipe, changes }`. |
+| `lib/pack.mjs` | Recipe packs: export, read (untrusted input), plan an import, links. See `public/features/PACKS.md`. |
 | `server.mjs` | `node:http` server: static `public/` and `/lib/`, plus the JSON API. |
 | `public/` | Dashboard (vanilla ES modules + CSS, light/dark). Hash routes: `#/`, `#/r/<id>`, `#/q/<queueId>`. |
-| `scripts/validate.mjs` | CLI validator; exits 1 on any problem. |
+| `public/features/packs.mjs` | Self-contained packs panel, `mount(element, options)` → `{ destroy() }`, with `packs.css` and `PACKS.md`. |
+| `scripts/validate.mjs` | CLI validator (contract, then JSON Schema; `--json` report); exits 1 on any problem. |
+| `scripts/migrate.mjs` | Applies `lib/migrate.mjs` to `recipes/`; writes only with `--write`. |
+| `scripts/pack.mjs` | `export` / `import` recipe packs; import writes only with `--write` and never overwrites. |
 
-API: `GET /api/recipes` → `{recipes, invalid}` · `GET /api/queue` · `POST /api/queue {url, note}` (409 if the video is already a recipe or queued; best-effort oEmbed title) · `DELETE /api/queue/<id>`.
+API: `GET /api/recipes` → `{recipes, invalid}` · `GET /api/queue` · `POST /api/queue {url, note}` (409 if the video is already a recipe or queued; best-effort oEmbed title) · `DELETE /api/queue/<id>` · `POST /api/packs/import {pack, include?}` (JSON content type required; creates new recipe files only, never overwrites; duplicates by video are skipped). `RECIPE_BANK_DIR` points the server and scripts at another data folder (tests use a temp one).
 
 ## Recipe file contract (for analysis agents)
 
 ```jsonc
 {
+  "schema": 1,                               // optional: contract version; missing means 1
   "id": "gochujang-chicken-thighs",          // kebab-case, == filename
   "title": "…",
   "status": "analyzed" | "partial",           // partial = creator withheld the method; gaps[] required
@@ -59,6 +69,16 @@ Rules that matter more than the format:
 3. **`key` is the shopping-level filter key**: lowercase, singular, what you'd filter by (`chicken`, not `skin-on chicken thighs`; `chicken stock` stays distinct). Reuse existing keys: `npm start`, then the chip list, or `grep -h '"key"' recipes/*.json | sort -u`.
 4. Add a `t` timestamp to each step where possible. The dashboard turns it into a "play from here" button.
 5. Run `npm run validate` before committing. Once the recipe file exists, remove the matching entry from `data/queue.json`. The dashboard already hides queue entries whose video is in `recipes/`.
+
+The full field reference, optional fields included, is `schema/recipe.schema.json`; `validateRecipe` stays the enforced contract.
+
+## Schema version and migration
+
+`SCHEMA_VERSION` in `lib/recipe.mjs` is the contract version (now 1). A recipe's optional `schema` field says which version it was written for; a missing field means 1, and a file newer than the code is rejected. To change the contract: bump `SCHEMA_VERSION` and the `maximum` of `schema` in the JSON Schema, add one pure step to `MIGRATIONS` in `lib/migrate.mjs`, update `validateRecipe`, the schema and its cross-check table in `test/schema.test.mjs`, then run `node scripts/migrate.mjs` (dry run) and `--write`. Written files are re-serialised as 2-space JSON.
+
+## Recipe packs
+
+A pack is one JSON file, `{ format: "recipe-bank-pack", version: 1, title, exported, recipes: [...] }`, or a link that carries it as `#pack=<base64url>` (up to 32,000 characters). Import sorts each recipe into new, conflict (same id, other video: saved as `<id>-2`), duplicate (same video: skipped) or invalid, and only ever creates files. Packs are untrusted: `lib/pack.mjs` caps sizes and refuses `__proto__`/`constructor`/`prototype` keys, and every title must still be escaped when shown. Details: `public/features/PACKS.md`.
 
 ## Analysis pipeline
 

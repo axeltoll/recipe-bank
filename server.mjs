@@ -7,11 +7,14 @@ import { readFile, readdir, writeFile, rename, mkdir } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { extname, join, normalize, resolve, sep } from 'node:path';
 import { parseVideoUrl, videoKey } from './lib/video.mjs';
-import { validateRecipe } from './lib/recipe.mjs';
+import { validateRecipe, SLUG } from './lib/recipe.mjs';
+import { readPack, planImport, applyImport, MAX_PACK_CHARS } from './lib/pack.mjs';
 
 const ROOT = resolve(import.meta.dirname);
-const RECIPES_DIR = join(ROOT, 'recipes');
-const QUEUE_FILE = join(ROOT, 'data', 'queue.json');
+// RECIPE_BANK_DIR: a folder holding recipes/ and data/ to use instead of this repo's (tests use a temp folder).
+const DATA_ROOT = resolve(process.env.RECIPE_BANK_DIR ?? ROOT);
+const RECIPES_DIR = join(DATA_ROOT, 'recipes');
+const QUEUE_FILE = join(DATA_ROOT, 'data', 'queue.json');
 const PORT = Number(process.env.PORT ?? 4780);
 const HOST = process.env.HOST ?? '127.0.0.1';
 
@@ -55,7 +58,7 @@ async function loadQueue() {
 }
 
 async function saveQueue(queue) {
-  await mkdir(join(ROOT, 'data'), { recursive: true });
+  await mkdir(join(DATA_ROOT, 'data'), { recursive: true });
   const tmp = `${QUEUE_FILE}.${process.pid}.tmp`;
   await writeFile(tmp, JSON.stringify(queue, null, 2) + '\n');
   await rename(tmp, QUEUE_FILE);
@@ -121,6 +124,14 @@ async function api(req, res, path) {
       return json(res, 201, { entry });
     });
   }
+  if (req.method === 'POST' && path === '/api/packs/import') {
+    // Requiring a JSON content type forces a CORS preflight, which this server never grants,
+    // so another website open in the same browser cannot write recipes through this route.
+    if (!/^application\/json\b/i.test(req.headers['content-type'] ?? '')) {
+      return json(res, 415, { error: 'Send the pack as application/json.' });
+    }
+    return importPack(res, await readBody(req, MAX_PACK_CHARS + 10_000));
+  }
   const del = path.match(/^\/api\/queue\/([\w-]+)$/);
   if (req.method === 'DELETE' && del) {
     return withQueue(async () => {
@@ -132,6 +143,44 @@ async function api(req, res, path) {
     });
   }
   return json(res, 404, { error: 'Not found' });
+}
+
+// POST /api/packs/import { pack, include?: [position, …] }. Plans the import against the
+// recipes on disk right now (never trusting a plan from the browser) and only creates new
+// files: the 'wx' flag fails instead of overwriting, even if a file appeared meanwhile.
+async function importPack(res, body) {
+  if (!body || typeof body !== 'object' || body.pack == null) {
+    return json(res, 400, { error: 'Send JSON: { "pack": <recipe pack>, "include": [positions] }.' });
+  }
+  const { include } = body;
+  if (include != null && !(Array.isArray(include) && include.every(Number.isInteger))) {
+    return json(res, 400, { error: '"include" must be a list of recipe positions in the pack.' });
+  }
+  const read = readPack(body.pack);
+  if (!read.ok) return json(res, 400, { error: read.errors[0], errors: read.errors });
+  // Same lock as the queue: both check recipes/ before they write.
+  return withQueue(async () => {
+    const { recipes, invalid } = await loadRecipes();
+    const taken = invalid.map((i) => ({ id: i.file.slice(0, -5) }));
+    const plan = planImport(read, [...recipes, ...taken]);
+    const { files, skipped } = applyImport(plan, include ? { include } : {});
+    const created = [];
+    for (const f of files) {
+      if (!SLUG.test(f.id)) {
+        skipped.push({ index: f.index, id: f.id, reason: 'not a valid id' });
+        continue;
+      }
+      try {
+        await writeFile(join(RECIPES_DIR, `${f.id}.json`), f.contents, { flag: 'wx' });
+        created.push(f.id);
+      } catch (e) {
+        if (e.code !== 'EEXIST') throw e;
+        skipped.push({ index: f.index, id: f.id, reason: 'a recipe file with this id already exists' });
+      }
+    }
+    skipped.sort((a, b) => a.index - b.index);
+    return json(res, created.length ? 201 : 200, { created, skipped, counts: plan.counts });
+  });
 }
 
 async function serveStatic(res, path) {
@@ -154,11 +203,11 @@ function json(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
-async function readBody(req) {
+async function readBody(req, max = 10_000) {
   let raw = '';
   for await (const chunk of req) {
     raw += chunk;
-    if (raw.length > 10_000) throw Object.assign(new Error('Body too large'), { status: 413 });
+    if (raw.length > max) throw Object.assign(new Error('Body too large'), { status: 413 });
   }
   try {
     return JSON.parse(raw || '{}');
@@ -167,7 +216,7 @@ async function readBody(req) {
   }
 }
 
-const server = createServer(async (req, res) => {
+export const server = createServer(async (req, res) => {
   const { pathname } = new URL(req.url, 'http://localhost');
   try {
     if (pathname.startsWith('/api/')) return await api(req, res, pathname);

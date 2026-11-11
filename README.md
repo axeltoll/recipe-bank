@@ -17,6 +17,7 @@ Me, first: I save a lot of cooking videos and could never find the one I wanted,
 - **Shopping list.** Copy a recipe's ingredients as a shopping list.
 - **Honest amounts.** Amounts are the creator's own words ("1 can", "about 1 cup"). When a video doesn't say, the recipe says "amount not given" instead of guessing, and recipes with a withheld method are marked *partial* with the gaps listed.
 - **Queue new videos.** Paste a video link to add it to the queue for analysis.
+- **Recipe packs.** Share a few recipes as one file or a link, and import someone else's: recipes whose video you already have are skipped, and nothing is overwritten.
 - **Credit.** Every recipe links back to the creator and the original video. Videos are embedded from the platform, never re-hosted.
 
 ## Built with
@@ -24,7 +25,7 @@ Me, first: I save a lot of cooking videos and could never find the one I wanted,
 - Node.js 22 and nothing else: no runtime dependencies, no framework, no build step for development.
 - `node:http` server with a small JSON API (`server.mjs`).
 - Vanilla ES-module dashboard with light and dark themes (`public/`).
-- A recipe schema with a validator (`lib/recipe.mjs`, `npm run validate`) and tests on the built-in `node:test` runner.
+- A versioned recipe contract with a validator (`lib/recipe.mjs`, `npm run validate`), a JSON Schema of the full file format (`schema/recipe.schema.json`), migrations between contract versions (`lib/migrate.mjs`) and tests on the built-in `node:test` runner.
 - Static export for Cloudflare Pages (`npm run build`).
 
 ## Run it
@@ -41,10 +42,15 @@ Other commands:
 
 ```bash
 npm run dev        # restarts on server/lib changes
-npm run validate   # checks every recipes/*.json and data/queue.json
+npm run validate   # checks every recipes/*.json (contract and JSON Schema) and data/queue.json
 npm test           # URL parsing and recipe-contract tests
 npm run build      # static copy in dist/ (read-only: "Add video" copies a request instead of queueing)
+node scripts/pack.mjs export <id…> --out favourites.json   # share recipes as a pack
+node scripts/pack.mjs import favourites.json --write       # import one (without --write: just show the plan)
+node scripts/migrate.mjs                                   # upgrade recipe files after a contract change (--write to save)
 ```
+
+Recipe packs are described in [public/features/PACKS.md](public/features/PACKS.md).
 
 ## Project layout
 
@@ -52,10 +58,11 @@ npm run build      # static copy in dist/ (read-only: "Add video" copies a reque
 |---|---|
 | `recipes/<id>.json` | One file per recipe. The format is documented in [CLAUDE.md](CLAUDE.md) and enforced by `lib/recipe.mjs`. |
 | `data/queue.json` | Videos waiting for analysis. |
-| `lib/` | Video-URL parsing and the recipe contract, shared by the server, the validator and the browser. |
-| `server.mjs` | Static files plus the JSON API (`/api/recipes`, `/api/queue`). |
+| `lib/` | Video-URL parsing, the recipe contract, migrations and recipe packs, shared by the server, the scripts and the browser. |
+| `schema/` | JSON Schema of the recipe file. |
+| `server.mjs` | Static files plus the JSON API (`/api/recipes`, `/api/queue`, `/api/packs/import`). |
 | `public/` | The dashboard. |
-| `scripts/` | Validator and static build. |
+| `scripts/` | Validator, static build, migrations and recipe packs. |
 | `test/` | `node:test` suites. |
 
 ## Plans

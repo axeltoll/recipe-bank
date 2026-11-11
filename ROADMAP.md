@@ -15,7 +15,7 @@ Work I plan to do on Recipe Bank, roughly in order. Estimates are my own and inc
 - [ ] **Serving scaling** (~5 h). Scale amounts that are plain numbers and units, and leave words like "a good amount" untouched, marking scaled amounts clearly.
 - [ ] **Add and edit recipes in the dashboard** (~8 h). A form that writes a valid `recipes/<id>.json` through the contract in `lib/recipe.mjs`, so a recipe doesn't need hand-written JSON.
 - [ ] **Queue from the static site** (~4 h). Let the deployed copy queue a video (for example through a small Cloudflare Function) instead of only copying a request.
-- [ ] **Schema version and migration** (~3 h). A `schema` field, a migration script and a JSON Schema export of the recipe contract.
+- [x] **Schema version and migration** (~3 h). A `schema` field, a migration script and a JSON Schema export of the recipe contract.
 - [ ] **Offline and mobile** (~4 h). Installable PWA with the recipes cached for cooking without signal, and a pass on the mobile layout and keyboard navigation.
 
 ## Household planning and budget
@@ -37,7 +37,7 @@ Today an AI agent turns a video into a recipe file, but its instructions live ou
 
 ## Sharing
 
-- [ ] **Recipe packs** (~5 h). Export favourite recipes as a single file or link and import someone else's pack, with duplicates detected by video. No accounts and no server needed.
+- [ ] **Recipe packs** (~5 h). Export favourite recipes as a single file or link and import someone else's pack, with duplicates detected by video. No accounts and no server needed. Format, import API, CLI and a self-contained panel are done (`public/features/PACKS.md`); left: show the panel in the dashboard.
 - [ ] **Community list for self-hosters** (~6 h). An optional, read-only "top recipes" page for a self-hosted copy, built from the packs its owner chooses to include. Ratings stay local.
 
 About 111 hours in total.
