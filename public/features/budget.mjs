@@ -13,20 +13,36 @@ const cleanShop = (s) => ({ date: s.date, total: s.total, currency: s.currency,
 export function renderSpendChart(history, { locale = 'en' } = {}) {
   if (!history.length) return '';
   const max = Math.max(1, ...history.map((p) => p.spendMinor));
-  const height = history.length * 40 + 12;
+  const height = history.length * 48 + 8;
   return `<svg class="rb-budget-chart" viewBox="0 0 600 ${esc(height)}" role="img" aria-label="Spend by period; exact amounts are in the table below">
     <title>Spend by period</title>
-    ${history.map((p, i) => `<g><text x="0" y="${esc(i * 40 + 25)}">${esc(p.key)}</text>
-      <rect x="140" y="${esc(i * 40 + 8)}" width="${esc(Math.round(p.spendMinor / max * 260))}" height="24"><title>${esc(p.key)}: ${esc(formatMoney(p.spendMinor, p.currency, locale))}</title></rect>
-      <text x="420" y="${esc(i * 40 + 25)}">${esc(formatMoney(p.spendMinor, p.currency, locale))}</text></g>`).join('')}
+    ${history.map((p, i) => `<g><text x="0" y="${esc(i * 48 + 20)}">${esc(p.key)}</text>
+      <text x="600" y="${esc(i * 48 + 20)}" text-anchor="end">${esc(formatMoney(p.spendMinor, p.currency, locale))}</text>
+      <rect x="0" y="${esc(i * 48 + 28)}" width="${esc(Math.round(p.spendMinor / max * 600))}" height="12"><title>${esc(p.key)}: ${esc(formatMoney(p.spendMinor, p.currency, locale))}</title></rect></g>`).join('')}
   </svg>`;
+}
+
+function renderBudgetSummary(report, { locale = 'en' } = {}) {
+  if (!report) return '';
+  const money = (minor, currency = report.currency) => esc(formatMoney(minor, currency, locale));
+  return `<h3>${esc(report.key)} · ${esc(report.start)} to ${esc(report.end)}</h3>
+      <dl class="rb-budget-totals"><div><dt>Spent</dt><dd>${money(report.spendMinor)}</dd></div>
+      <div><dt>${report.remainingMinor < 0 ? 'Over budget' : 'Remaining'}</dt><dd>${money(Math.abs(report.remainingMinor))}</dd></div>
+      <div><dt>Per recorded meal</dt><dd>${report.perMealMinor == null ? 'Not enough data' : money(report.perMealMinor)}</dd></div>
+      <div><dt>Per person</dt><dd>${report.perPersonMinor == null ? 'Not enough data' : money(report.perPersonMinor)}</dd></div></dl>
+      <p>Per-meal cost uses only shops with a meal count (${esc(report.meals)} meals recorded). Per-person cost uses actual people in the current household.</p>
+      ${report.otherCurrencies.length ? `<p class="rb-budget-warning" role="status">Other currencies excluded from the budget: ${report.otherCurrencies.map((c) => money(c.spendMinor, c.currency)).join('; ')}.</p>` : ''}
+      <h3>Spend over time</h3>
+      <div class="rb-budget-scroll" tabindex="0" role="region" aria-label="Spend chart">${renderSpendChart(report.history, { locale })}</div>
+      <div class="rb-budget-scroll" tabindex="0" role="region" aria-label="Spend history"><table><caption>Current settings applied to the last ${esc(report.history.length)} periods</caption>
+      <thead><tr><th scope="col">Period</th><th scope="col">Spent</th><th scope="col">Per meal</th><th scope="col">Per person</th><th scope="col">Other currencies</th></tr></thead>
+      <tbody>${report.history.map((p) => `<tr><th scope="row">${esc(p.key)}</th><td>${money(p.spendMinor)}</td><td>${p.perMealMinor == null ? '—' : money(p.perMealMinor)}</td><td>${p.perPersonMinor == null ? '—' : money(p.perPersonMinor)}</td><td>${p.otherCurrencies.length ? p.otherCurrencies.map((c) => money(c.spendMinor, c.currency)).join('; ') : '—'}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 export function renderBudget(budget, shops, { household, today = localToday(), locale = 'en', message = 'Saved only on this device.', errors = [] } = {}) {
   let report;
   try { report = summary(budget, shops, { household, today }); }
   catch (error) { errors = [...errors, error.message]; }
-  const money = (minor, currency = budget.currency) => esc(formatMoney(minor, currency, locale));
   return `<section class="rb-budget" aria-label="Food budget">
     <h2>Food budget</h2><p>Record actual shops. Currency totals are never converted.</p>
     ${renderNotice(message, errors)}
@@ -35,18 +51,7 @@ export function renderBudget(budget, shops, { household, today = localToday(), l
       <label>Amount<input name="amount" type="number" min="0" step="any" required value="${esc(budget.amount)}"></label>
       <label>Currency (ISO code)<input name="currency" pattern="[A-Z]{3}" maxlength="3" required value="${esc(budget.currency)}"></label>
       </div><button type="submit">Save budget</button></fieldset></form>
-    ${report ? `<h3>${esc(report.key)} · ${esc(report.start)} to ${esc(report.end)}</h3>
-      <dl class="rb-budget-totals"><div><dt>Spent</dt><dd>${money(report.spendMinor)}</dd></div>
-      <div><dt>${report.remainingMinor < 0 ? 'Over budget' : 'Remaining'}</dt><dd>${money(Math.abs(report.remainingMinor))}</dd></div>
-      <div><dt>Per recorded meal</dt><dd>${report.perMealMinor == null ? 'Not enough data' : money(report.perMealMinor)}</dd></div>
-      <div><dt>Per person</dt><dd>${report.perPersonMinor == null ? 'Not enough data' : money(report.perPersonMinor)}</dd></div></dl>
-      <p>Per-meal cost uses only shops with a meal count (${esc(report.meals)} meals recorded). Per-person cost uses actual people in the current household.</p>
-      ${report.otherCurrencies.length ? `<p class="rb-budget-warning" role="status">Other currencies excluded from the budget: ${report.otherCurrencies.map((c) => money(c.spendMinor, c.currency)).join('; ')}.</p>` : ''}
-      <h3>Spend over time</h3>
-      ${renderSpendChart(report.history, { locale })}
-      <div class="rb-budget-scroll"><table><caption>Current settings applied to the last ${esc(report.history.length)} periods</caption>
-      <thead><tr><th scope="col">Period</th><th scope="col">Spent</th><th scope="col">Per meal</th><th scope="col">Per person</th><th scope="col">Other currencies</th></tr></thead>
-      <tbody>${report.history.map((p) => `<tr><th scope="row">${esc(p.key)}</th><td>${money(p.spendMinor)}</td><td>${p.perMealMinor == null ? '—' : money(p.perMealMinor)}</td><td>${p.perPersonMinor == null ? '—' : money(p.perPersonMinor)}</td><td>${p.otherCurrencies.length ? p.otherCurrencies.map((c) => money(c.spendMinor, c.currency)).join('; ') : '—'}</td></tr>`).join('')}</tbody></table></div>` : ''}
+    <div class="rb-budget-summary">${renderBudgetSummary(report, { locale })}</div>
     <form data-rb-form="shop"><fieldset><legend>Record a shop</legend><div class="rb-budget-grid">
       <label>Date<input name="date" type="date" required value="${esc(today)}"></label>
       <label>Total<input name="total" type="number" min="0" step="any" required></label>
@@ -129,7 +134,15 @@ export function mount(element, options = {}) {
     if (!Number.isInteger(index) || index < 0 || index >= shops.length) return;
     shops.splice(index, 1); changed();
   };
-  const setHousehold = (profile) => { household = normalizeProfile(profile); render(); };
+  const setHousehold = (profile) => {
+    household = normalizeProfile(profile);
+    // Refresh derived ratios without replacing forms or losing unsaved entries.
+    try {
+      const report = summary(budget, shops, { household, today });
+      const container = element.querySelector('.rb-budget-summary');
+      if (container) container.innerHTML = renderBudgetSummary(report, { locale: options.locale });
+    } catch { /* Existing summary errors remain visible until budget data changes. */ }
+  };
   const householdChange = (event) => setHousehold(event.detail.profile);
   element.addEventListener('submit', submit); element.addEventListener('click', click);
   options.householdElement?.addEventListener('recipe-bank:household-change', householdChange);

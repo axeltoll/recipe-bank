@@ -29,7 +29,7 @@
 .rb-budget :focus-visible { outline: 3px solid var(--rb-focus, #2873cc); outline-offset: var(--rb-space-xs, 0.25rem); }
 .rb-budget .rb-feature-status, .rb-budget dt { color: var(--rb-muted, #52636e); }
 .rb-budget .rb-feature-errors, .rb-budget [role="alert"], .rb-budget-warning { color: var(--rb-danger, #a62727); }
-.rb-budget dd { margin: var(--rb-space-zero, 0); font-size: 1.3em; font-weight: 650; }
+.rb-budget dd { margin: var(--rb-space-zero, 0); font-size: 1.3em; font-weight: 650; overflow-wrap: anywhere; }
 .rb-budget-scroll { overflow-x: auto; }
 .rb-budget table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
 .rb-budget caption { text-align: left; color: var(--rb-muted, #52636e); padding-bottom: var(--rb-space-sm, 0.5rem); }
@@ -41,6 +41,6 @@
 .rb-budget details { margin-top: var(--rb-space-lg, 1.5rem); }
 .rb-budget summary { cursor: pointer; color: var(--rb-accent, #286449); }
 .rb-budget textarea { resize: vertical; }
-.rb-budget-chart { display: block; width: 100%; height: auto; margin: var(--rb-space-md, 1rem) var(--rb-space-zero, 0); }
+.rb-budget-chart { display: block; width: 100%; min-width: 38rem; height: auto; margin: var(--rb-space-md, 1rem) var(--rb-space-zero, 0); }
 .rb-budget-chart text { fill: var(--rb-text, #202b32); font: 14px var(--rb-font, system-ui, sans-serif); }
 .rb-budget-chart rect { fill: var(--rb-accent, #286449); }

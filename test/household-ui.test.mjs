@@ -7,11 +7,15 @@ import { esc, readStored, writeStored } from '../public/features/shared.mjs';
 
 // Only the event/element surface used by mount. No browser globals or dependencies needed.
 class Element extends EventTarget {
-  innerHTML = '';
+  markup = '';
+  renders = 0;
+  get innerHTML() { return this.markup; }
+  set innerHTML(html) { this.markup = html; this.renders++; }
   status = { textContent: '', setAttribute() {} };
+  summary = { innerHTML: '' };
   ownerDocument = { defaultView: { CustomEvent } };
   contains(target) { return target.inside !== false; }
-  querySelector() { return this.status; }
+  querySelector(selector) { return selector === '.rb-budget-summary' ? this.summary : this.status; }
 }
 const form = (kind, values) => ({ dataset: { rbForm: kind }, elements: { namedItem: (name) => ({ value: String(values[name] ?? '') }) } });
 function submit(root, kind, values) {
@@ -94,8 +98,13 @@ test('budget forms, currency flags, event details, household updates, remove and
   assert.match(root.innerHTML, /Other currencies excluded/);
   assert.equal(JSON.parse(storage.getItem(BUDGET_KEY)).shops.length, 2);
   const p = defaultProfile(); p.people.adult = 1;
+  const rendersBeforeHouseholdSave = root.renders;
   h.dispatchEvent(new CustomEvent('recipe-bank:household-change', { detail: { profile: p } }));
-  assert.match(root.innerHTML, /Per person<\/dt><dd>SEK\s*10.00/);
+  assert.equal(root.renders, rendersBeforeHouseholdSave, 'household saves must preserve unsaved budget and shop forms');
+  assert.match(root.summary.innerHTML, /Per person<\/dt><dd>SEK\s*10.00/);
+  mounted.setHousehold(defaultProfile());
+  assert.equal(root.renders, rendersBeforeHouseholdSave);
+  assert.match(root.summary.innerHTML, /Per person<\/dt><dd>SEK\s*5.00/);
   detail.shops[0].total = '10000';
   const button = { dataset: { rbRemove: '1' } };
   const click = new Event('click'); Object.defineProperty(click, 'target', { value: { closest: () => button } });

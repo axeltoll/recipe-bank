@@ -71,3 +71,12 @@ test('normalization fills nested invalid values and keeps independent planning d
   assert.equal(p.portionFactors.size.normal, 0.1); assert.equal(p.portionFactors.size.hearty, 3);
   assert.deepEqual(validateProfile(p), []);
 });
+
+test('small custom factors keep a nonzero serving target for a single person', () => {
+  const p = defaultProfile();
+  p.people.adult = 0; p.people.toddler = 1;
+  p.portionFactors.age.toddler = 0.1; p.portionFactors.size.normal = 0.1;
+  assert.deepEqual(validateProfile(p), []);
+  assert.equal(servingsPerMeal(p), 0.1);
+  assert.equal(describeProfile(p), '1 toddler under 2');
+});

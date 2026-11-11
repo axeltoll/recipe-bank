@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { currencyDigits, toMinor, formatMoney, validateBudget, validateShop, periodOf, summary } from '../lib/budget.mjs';
+import { currencyDigits, toMinor, formatMoney, validateBudget, validateShop, periodOf, summary, isDate } from '../lib/budget.mjs';
 import { defaultProfile } from '../lib/household.mjs';
 const budget = { period: 'week', amount: '100.00', currency: 'SEK' };
 const shop = { date: '2026-11-11', total: '10.00', currency: 'SEK' };
@@ -56,6 +56,18 @@ test('calendar months include leap days and year transitions', () => {
   assert.equal(periodOf('2026-12-31', 'month').end, '2026-12-31');
   assert.equal(periodOf('2026-04-30', 'month').end, '2026-04-30');
   assert.throws(() => periodOf('2025-02-29', 'week')); assert.throws(() => periodOf('2026-11-11', 'year'));
+});
+
+test('dates and period history stay within the four-digit calendar contract', () => {
+  assert.equal(isDate('0000-01-01'), false);
+  assert.ok(validateShop({ ...shop, date: '0000-01-01' }).length);
+  assert.equal(isDate('0001-01-01'), true);
+  assert.equal(isDate('9999-12-31'), true);
+  assert.deepEqual(periodOf('0001-01-01', 'week'), { key: '0001-W01', start: '0001-01-01', end: '0001-01-07' });
+  assert.deepEqual(periodOf('9999-12-31', 'month'), { key: '9999-12', start: '9999-12-01', end: '9999-12-31' });
+  assert.throws(() => periodOf('9999-12-31', 'week'), /0001–9999/);
+  assert.equal(summary(budget, [], { today: '0001-01-01', periods: 1 }).key, '0001-W01');
+  assert.throws(() => summary(budget, [], { today: '0001-01-01', periods: 2 }), /0001–9999/);
 });
 
 test('summary separates currencies, avoids float drift and uses only explicit meal data', () => {

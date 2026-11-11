@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { exportShopsCsv, importShopsCsv, summary } from '../lib/budget.mjs';
+import { exportShopsCsv, importShopsCsv, summary, formatMoney } from '../lib/budget.mjs';
 import { renderSpendChart } from '../public/features/budget.mjs';
 const shop = { date: '2024-02-29', total: '1.005', currency: 'SEK', meals: 2, note: 'Beans, "large" tins' };
 
@@ -40,4 +40,7 @@ test('SVG chart escapes text, handles empty spend, and exposes exact values', ()
   assert.ok(!svg.includes('NaN')); assert.ok(!svg.includes('Infinity'));
   const hostile = renderSpendChart([{ key: '<script>&"', spendMinor: 0, currency: 'USD' }]);
   assert.ok(hostile.includes('&lt;script&gt;&amp;&quot;')); assert.ok(!hostile.includes('<script>'));
+  const large = renderSpendChart([{ key: '2026-W53', spendMinor: Number.MAX_SAFE_INTEGER, currency: 'SEK' }]);
+  assert.ok(large.includes(formatMoney(Number.MAX_SAFE_INTEGER, 'SEK')));
+  assert.ok(!large.includes('NaN')); assert.ok(!large.includes('Infinity'));
 });
