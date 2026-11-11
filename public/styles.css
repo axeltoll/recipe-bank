@@ -1039,7 +1039,7 @@ main[data-view='new'] .feature-page, main[data-view='edit'] .feature-page { widt
     color-scheme: light;
   }
   .topbar, .footer, .skip, .toast, .recipe-top, .back, .recipe-media, .recipe-actions, .mount, .panel-tools, .cook, .modal,
-  .step-tools button, .tags, .scrim { display: none !important; }
+  .step-tools .timer, .tags, .scrim { display: none !important; }
   .print-only { display: block; }
   body { display: block; font-size: 11pt; }
   main { padding: 0; }
@@ -1060,6 +1060,11 @@ main[data-view='new'] .feature-page, main[data-view='edit'] .feature-page { widt
   .ing input:checked ~ .ing-text .ing-name { color: inherit; text-decoration: none; }
   .steps li::before { border: 1px solid var(--line-strong); }
   .step-text { max-width: none; font-size: 11pt; }
+  /* Timestamps print as plain text ("at 0:17"); on YouTube recipes they are play buttons on screen. */
+  .step-tools { margin-top: 2pt; }
+  .ts { min-height: 0; padding: 0; border: 0; background: none; color: var(--muted); font-size: 9pt; font-weight: 400; }
+  .ts .icon { display: none; }
+  button.ts::before { content: 'at '; }
   .callout { border: 1px solid var(--line-strong); }
   /* The week-plan page prints as the shopping list alone. */
   .feature-head p, .feature-cols > [data-part='week'] { display: none; }
