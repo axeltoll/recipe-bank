@@ -62,6 +62,14 @@ export function matches(r, { q = '', keys = [], mode = 'all' } = {}) {
 
 export const filterRecipes = (recipes, filter) => recipes.filter((r) => matches(r, filter));
 
+/** What the list says when nothing matches. Switching mode is offered only when it could help. */
+export function emptyMessage({ keys = [], mode = 'all' } = {}) {
+  const picked = (keys.size ?? keys.length) > 0;
+  if (!picked) return 'No recipe matches that search. Try other words, or clear the search.';
+  if (mode === 'all') return 'No recipe has all of those. Try removing an ingredient or switching to Has any.';
+  return 'No recipe has any of those and matches the search. Try other words, or clear the search.';
+}
+
 /** [[key, recipeCount], ...] sorted by count (high first), then by key. */
 export function keyCounts(recipes) {
   const counts = new Map();
