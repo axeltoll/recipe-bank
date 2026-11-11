@@ -1,7 +1,7 @@
 // Recipe page (layout type: detail): video, ingredient checklist, steps with timestamps, nutrition, gaps and notes.
 import { embedUrl } from '/lib/video.mjs';
 import { esc, mmss, formatDate, safeUrl } from '/lib/format.mjs';
-import { ingredientKeys, stepCount, macros, shoppingList } from '/lib/catalog.mjs';
+import { ingredientKeys, stepCount, macros, shoppingList, withShownAmounts } from '/lib/catalog.mjs';
 import {
   $, $$, view, state, store, STATIC, PLATFORM, emit, icon, copy, isPhone, reducedMotion, timerChips, paintTimers,
 } from './core.js';
@@ -209,12 +209,19 @@ export function renderRecipe(id) {
     buttons[Math.min(Math.max(i + (e.key === 'ArrowDown' ? 1 : -1), 0), buttons.length - 1)].focus();
   });
 
-  $('#copy-list').addEventListener('click', () => copy(shoppingList(r), 'Shopping list copied'));
+  // The amounts as the page shows them: serving scaling rewrites .ing-amt-text and marks it data-scaled
+  // (docs/design/MOUNT-POINTS.md). Copy list and cook mode use these, so they never disagree with the page.
+  const shownAmounts = () => new Map($$('.ing-amt[data-scaled]', view).map((span) =>
+    [`${span.dataset.ci}.${span.dataset.ii}`, $('.ing-amt-text', span)?.textContent ?? '']));
+
+  $('#copy-list').addEventListener('click', () =>
+    copy(shoppingList(withShownAmounts(r, shownAmounts())), 'Shopping list copied'));
   $('#print').addEventListener('click', () => window.print());
   $('#cook-open')?.addEventListener('click', () =>
     openCook(r, {
       checked,
       onCheck: setChecked,
+      amounts: shownAmounts(),
       canWatch: seekable,
       onWatch: playFrom,
       returnFocus: $('#cook-open'),
