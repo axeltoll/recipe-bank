@@ -15,7 +15,8 @@
 
 import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { STATUSES, renderGroup, renderStatusNote, validateFeatures } from '../site/js/features-core.js';
+import { STATUSES, esc, renderGroup, renderStatusNote, validateFeatures } from '../site/js/features-core.js';
+import { isMain } from './is-main.mjs';
 
 export const SITE = resolve(import.meta.dirname, '..', 'site');
 /** Stands in for the address while site.json has no baseUrl. `.invalid` can never be a real host. */
@@ -31,6 +32,16 @@ export function baseUrl(site) {
   if (!raw) return '';
   if (!/^https:\/\/[^\s"'<>]+$/.test(raw)) throw new Error(`site.json baseUrl must be an https address, got "${raw}"`);
   return raw.replace(/\/+$/, '');
+}
+
+/** ogImage from site.json: a relative path to a file inside site/ (no scheme, no leading slash, no ..). */
+export function ogImagePath(site) {
+  const raw = String(site?.ogImage ?? '').trim();
+  const parts = raw.split('/');
+  if (!/^[\w.\/-]+$/.test(raw) || raw.startsWith('/') || parts.some((p) => p === '' || p === '.' || p === '..')) {
+    throw new Error(`site.json ogImage must be a relative path inside site/, got "${raw}"`);
+  }
+  return raw;
 }
 
 /** The public address of a page. index.html is the folder itself. */
@@ -50,11 +61,12 @@ export function metaLines(site, page) {
   if (!base) {
     return ['<!-- baseUrl in data/site.json is empty. Once it is set, npm run site:sync writes canonical, og:url and og:image here. -->'];
   }
-  const url = pageUrl(base, page);
+  // Escaped like every other value written into the pages: the checks above are not the only line of defence.
+  const url = esc(pageUrl(base, page));
   return [
     `<link rel="canonical" href="${url}">`,
     `<meta property="og:url" content="${url}">`,
-    `<meta property="og:image" content="${base}/${site.ogImage}">`,
+    `<meta property="og:image" content="${esc(`${base}/${ogImagePath(site)}`)}">`,
   ];
 }
 
@@ -107,7 +119,7 @@ export async function loadData(dir = SITE) {
   return data;
 }
 
-if (process.argv[1] === import.meta.filename) {
+if (isMain(import.meta.url)) {
   const data = await loadData();
   const pages = await listPages();
   const changed = [];

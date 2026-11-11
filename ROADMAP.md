@@ -40,4 +40,4 @@ The self-hosted Recipe Agent can run with the coding agent you already use. See 
 - [x] **Recipe packs** (~5 h). Export favourite recipes as a single file or link and import someone else's pack, with duplicates detected by video. No accounts and no server needed. *`lib/pack.mjs`, `npm run packs`, `POST /api/packs/import` and the "Share" page (`#/packs`).*
 - [ ] **Community list for self-hosters** (~6 h). An optional, read-only "top recipes" page for a self-hosted copy, built from the packs its owner chooses to include. Ratings stay local.
 
-About 111 hours in total.
+About 111 hours in total, ticked items included; the open items add up to about 33 hours.

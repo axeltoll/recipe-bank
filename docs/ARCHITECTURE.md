@@ -64,15 +64,20 @@ Anything else renders home. Feature routes are registered with `rb.addRoute` and
 | `PUT /api/recipes/<id>` | replace it → 200 `{ recipe, dequeued }` | 404, 400, 409, 415 |
 | `GET /api/queue` | `{ queue }` | |
 | `POST /api/queue` | `{ url, note, allowWeb? }` → 201 `{ entry }` | 400 not a supported link, 409 already there, 415 |
-| `DELETE /api/queue/<id>` | → 200 `{ ok: true }` | 404, 415 |
+| `DELETE /api/queue/<id>` | → 200 `{ ok: true }` | 404, 403 |
 | `POST /api/packs/import` | `{ pack, include? }` → 201/200 `{ created, skipped, counts }` | 400, 413, 415 |
 
-Writes go through one lock per server and are atomic (temp file, then rename, or the `wx` flag for packs). Every
-POST, PUT and DELETE passes `writeRefusal` in `server.mjs` first: it must be sent as `application/json` (415), which a
-cross-site page cannot send without a CORS preflight the server never grants, and it gets 403 when `Sec-Fetch-Site`
-says another site, when `Origin` is not the server's own, or when `Host` is not a loopback name or one listed in
-`RECIPE_BANK_HOSTS` (DNS rebinding). Requests from tools without those headers (curl, scripts) still work. There is
-no login: keep `HOST` on 127.0.0.1 unless the network is trusted.
+Writes go through one lock per server and are atomic (temp file, then rename; for packs, a temp file hard-linked into
+place, so an existing recipe is never overwritten). Every
+POST, PUT and DELETE passes `writeRefusal` in `server.mjs` first. A POST or PUT must be sent as `application/json`
+(415), which a cross-site page cannot send without a CORS preflight the server never grants; DELETE has no body and is
+not a simple request either, so it is exempt from that check. Any of the three gets 403 when `Sec-Fetch-Site` says
+another site, when `Origin` is not the server's own, when `Host` is not a loopback name, a name listed in
+`RECIPE_BANK_HOSTS` or the `HOST` the server binds to (a wildcard `HOST`, `0.0.0.0`, `::` or `[::]`, adds no name;
+this stops DNS rebinding), or when a loopback or missing `Host` comes from another machine. A request with no
+`Origin` and no `Sec-Fetch-Site` (curl, scripts) is allowed. Reads under `/api/` pass `hostRefusal`, the Host part of
+the same check, so a rebinding domain cannot read the collection or the queue either. There is no login: keep `HOST` on 127.0.0.1 unless the
+network is trusted.
 
 ## Tests
 

@@ -386,8 +386,8 @@ test('docs pages share one sidebar, and it marks the page you are on', () => {
     assert.equal(order[0].attrs.id, 'docs-nav', page);
     assert.ok(hasClass(order.at(-1), 'prose') || hasClass(order.at(-1), 'sheet-wrap'), page);
   }
-  assert.match(css, /\.js \.docs-nav \{ display: none; \}/);
-  assert.match(css, /\.docs-nav, \.js \.docs-nav \{ display: block; \}/, 'from the desktop breakpoint the sidebar always shows');
+  assert.match(css, /\.docs-nav\.is-collapsible \{ display: none; \}/, "the list folds only once main.js has shown its menu button");
+  assert.match(css, /\.docs-nav, \.docs-nav\.is-collapsible \{ display: block; \}/, 'from the desktop breakpoint the sidebar always shows');
 });
 
 test('the primary action is the same everywhere and leads to the repository', () => {

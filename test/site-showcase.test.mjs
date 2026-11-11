@@ -6,7 +6,7 @@ import showcase from '../site/data/showcase.js';
 import { buildShowcase, SHOWCASE_IDS, slimRecipe } from '../scripts/build-site-data.mjs';
 import { ingredientKeys } from '../lib/recipe.mjs';
 import {
-  filterRecipes, keyCounts, mmss, recipeKeys, renderCard, renderChips, renderDetail, shoppingList, stepCount,
+  emptyMessage, filterRecipes, keyCounts, mmss, recipeKeys, renderCard, renderChips, renderDetail, shoppingList, stepCount,
   watchUrl,
 } from '../site/js/showcase-core.js';
 
@@ -133,4 +133,13 @@ test('strings from recipe data are escaped, and a partial recipe is labelled', (
   assert.match(html, /A &amp; B/);
   assert.match(html, /Partial recipe: some details are missing/);
   assert.match(html, /aria-label="Open the video at 0:05 on TikTok">0:05<\/a>/);
+});
+
+test('the empty-list message offers Has any only when it could help', () => {
+  assert.match(emptyMessage({ keys: new Set(), mode: 'all' }), /^No recipe matches that search/);
+  assert.match(emptyMessage({ keys: new Set(), mode: 'any' }), /^No recipe matches that search/);
+  assert.match(emptyMessage({ keys: new Set(['egg']), mode: 'all' }), /switching to Has any/);
+  const any = emptyMessage({ keys: new Set(['egg']), mode: 'any' });
+  assert.doesNotMatch(any, /Has any/, 'already on Has any');
+  for (const m of [emptyMessage({ keys: new Set() }), any]) assert.doesNotMatch(m, /switching/);
 });

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { findChrome, devToolsUrl, StderrParser, Connection } from '../scripts/browser/cdp.mjs';
+import { findChrome, devToolsUrl, StderrParser, Connection, fulfilment, interceptor } from '../scripts/browser/cdp.mjs';
 
 const lookup = (options, available) => findChrome({ ...options, exists: (file) => available.includes(file) });
 test('Chrome override is authoritative; PATH lookup is injected and ordered', () => {
@@ -57,4 +57,34 @@ test('CDP rejects protocol errors, closed connections, send failures and timeout
   await assert.rejects(slow.send('Slow'), /timeout/);
   assert.equal(slow.pending.size, 0);
   assert.equal(cdp.pending.size, 0);
+});
+
+test('remote assets are stubbed with the right type and CORS; local origins go through', () => {
+  const origins = new Set(['http://127.0.0.1:4780']);
+  const at = (url, resourceType) => fulfilment({ request: { url }, resourceType }, origins);
+  assert.deepEqual(at('http://127.0.0.1:4780/app.js', 'Script'), { method: 'Fetch.continueRequest', params: {} });
+  const header = (r, name) => r.params.responseHeaders.find((h) => h.name === name)?.value;
+  for (const [type, expected] of [['Stylesheet', 'text/css'], ['Script', 'application/javascript'],
+    ['Image', 'image/svg+xml'], ['Font', 'text/html'], ['Document', 'text/html']]) {
+    const r = at('https://cdn.example/x', type);
+    assert.equal(r.method, 'Fetch.fulfillRequest');
+    assert.equal(header(r, 'Content-Type'), expected, type);
+    assert.equal(header(r, 'Access-Control-Allow-Origin'), '*', `${type} passes CORS`);
+  }
+  assert.equal(at('not a url', 'Other').method, 'Fetch.fulfillRequest');
+});
+
+test('a paused request Chrome already canceled is not recorded as a page exception', async () => {
+  const exceptions = [];
+  const failing = (message) => interceptor({ sessionId: 's', origins: () => new Set(), exceptions,
+    send: () => Promise.reject(new Error(message)) });
+  const event = { sessionId: 's', method: 'Fetch.requestPaused', params: { requestId: 'r1', request: { url: 'https://cdn.example/a.css' }, resourceType: 'Stylesheet' } };
+  await failing('Invalid InterceptionId.')(event);
+  assert.deepEqual(exceptions, []);
+  await failing('Fetch domain is broken')(event);
+  assert.deepEqual(exceptions, ['Fetch domain is broken']);
+  const sent = [];
+  interceptor({ sessionId: 's', origins: () => new Set(), exceptions, send: (m, p) => { sent.push([m, p.requestId]); return Promise.resolve(); } })(event);
+  assert.deepEqual(sent, [['Fetch.fulfillRequest', 'r1']]);
+  assert.equal(interceptor({ sessionId: 's', origins: () => new Set(), exceptions, send: () => assert.fail() })({ ...event, sessionId: 'other' }), undefined);
 });

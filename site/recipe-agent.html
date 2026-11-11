@@ -185,8 +185,8 @@
                 <tbody>
                   <tr><td><code>node scripts/queue.mjs next</code></td><td>Prints the oldest queued entry. It reads only and claims nothing.</td></tr>
                   <tr><td><code>node scripts/queue.mjs mark &lt;id&gt; analyzing</code></td><td>Claims a queued entry.</td></tr>
-                  <tr><td><code>node scripts/queue.mjs mark &lt;id&gt; failed "reason"</code></td><td>Records why analysis was impossible and keeps the entry.</td></tr>
-                  <tr><td><code>node scripts/queue.mjs mark &lt;id&gt; done</code></td><td>Removes the entry, but only if a matching recipe exists and passes the contract.</td></tr>
+                  <tr><td><code>node scripts/queue.mjs mark &lt;id&gt; failed "reason"</code></td><td>Records why analysis was impossible and keeps the entry. Only an entry already marked <code>analyzing</code> can be marked failed.</td></tr>
+                  <tr><td><code>node scripts/queue.mjs mark &lt;id&gt; done</code></td><td>Removes an entry already marked <code>analyzing</code>, but only if a matching recipe exists and passes the contract.</td></tr>
                   <tr><td><code>node scripts/queue.mjs mark &lt;id&gt; queued</code></td><td>Puts a failed entry back for a deliberate retry.</td></tr>
                 </tbody>
               </table>

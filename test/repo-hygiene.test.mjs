@@ -28,6 +28,13 @@ test('CI pins every action to a full commit SHA, keeps no token in .git/config a
   assert.match(ci, /node:\s*\[22\b/, 'Node 22 (the engines floor) is in the matrix');
 });
 
+test('CI smoke finds the runner browser on PATH instead of pinning one binary', async () => {
+  const ci = await readFile(join(ROOT, '.github', 'workflows', 'ci.yml'), 'utf8');
+  assert.match(ci, /SMOKE_REQUIRED:\s*'1'/);
+  // findChrome treats CHROME_PATH as authoritative even when that file is missing.
+  assert.doesNotMatch(ci, /^\s*CHROME_PATH:/m, 'a fixed CHROME_PATH fails on a runner that has only chromium');
+});
+
 // Working folders that never belong in the repository (any top-level folder starting with _) are a failure, not a skip.
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', '.smoke', 'evidence']);
 

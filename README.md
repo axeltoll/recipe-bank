@@ -18,7 +18,6 @@ Me, first: I save a lot of cooking videos and could never find the one I wanted,
 - **Serving scaling.** Scale plain numbers and units (fractions, ranges, decimals); amounts given in words stay as they are, and every scaled amount is marked. With a household profile, one button scales a recipe to your household.
 - **Week plan and one shopping list.** Add recipes to the days of the week and get one list, merged by ingredient and grouped by aisle. Each recipe's amount stays in the creator's words; nothing is added up or guessed. You can still copy a single recipe's list, or print it.
 - **Household and food budget.** An anonymous, device-local household profile (age groups, portion size, cooking days, editable portion estimates) and a weekly or monthly food budget with recorded shops and spend per meal and per person. Currencies are kept apart, never converted.
-- **Amounts for your household.** The shopping-list module can show how much to buy for the household profile ("for 2 adults, 1 child aged 6-10"). Amounts in the same unit are added up across the week, grams and cups are never converted into each other, and amounts in words or from recipes without stated servings are shown as written and flagged. A pantry (salt, pepper, oil by default) is left out. See [`public/features/PURCHASE.md`](public/features/PURCHASE.md); the groundwork for local prices is in [`docs/PRICES.md`](docs/PRICES.md).
 - **Honest amounts.** Amounts are the creator's own words ("1 can", "about 1 cup"). When a video doesn't say, the recipe says "amount not given" instead of guessing, and recipes with a withheld method are marked *partial* with the gaps listed.
 - **Add and edit recipes.** A form writes a valid `recipes/<id>.json` through the recipe contract, with live checks, from scratch or from a queued video. The static copy offers the file as a download instead.
 - **Queue new videos.** Paste a video link to add it to the queue for analysis. A web page needs an explicit "it's a web page" tick.
@@ -115,7 +114,7 @@ Use the coding agent you already have to turn a supported video link into a cred
 
 ## Plans
 
-See [ROADMAP.md](ROADMAP.md) and [CHANGELOG.md](CHANGELOG.md). Next up: purchase amounts for your household, queueing from the static site, and prices from nearby shops.
+See [ROADMAP.md](ROADMAP.md) and [CHANGELOG.md](CHANGELOG.md). Next up: purchase amounts for your household (the logic and the shopping-list option are built, see [`public/features/PURCHASE.md`](public/features/PURCHASE.md), but the dashboard does not show them yet), queueing from the static site, and prices from nearby shops ([`docs/PRICES.md`](docs/PRICES.md)).
 
 ## License
 

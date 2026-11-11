@@ -47,7 +47,7 @@ test('the worker registers install, activate and fetch handlers', () => {
   assert.match(api.VERSION, /^v\d+$/);
 });
 
-test('policy: recipes and shell are cached, the queue is network-first, everything else is left alone', () => {
+test('policy: the shell is cached, recipes and the queue are network-first, everything else is left alone', () => {
   const { api } = loadWorker();
   const p = (method, url) => api.policy(method, url.startsWith('http') ? url : ORIGIN + url, ORIGIN);
   assert.equal(p('GET', '/api/recipes'), 'recipes');
@@ -148,7 +148,7 @@ test('cache first: a cached file is served at once and refreshed in the backgrou
   assert.equal(puts[0][1], 'FRESH-COPY');
 });
 
-test('cache first: with nothing cached the network answer is returned and stored; recipes use the data cache', async () => {
+test('network first: the recipes answer is returned and stored in the data cache', async () => {
   const puts = [];
   const fresh = { ok: true, clone() { return 'FRESH-COPY'; } };
   const { listeners } = loadWorker({
@@ -224,4 +224,14 @@ test('recipes are network first: a save or an import shows at once, offline fall
   });
   const res = await dispatchFetch(empty.listeners, 'GET', '/api/recipes').responded;
   assert.deepEqual(await res.json(), { recipes: [], invalid: [] });
+});
+
+test('network first: a cache that refuses to store the answer does not hide it', async () => {
+  for (const path of ['/api/recipes', '/api/queue']) {
+    const { listeners } = loadWorker({
+      fetch: async () => ({ ok: true, clone() { return this; }, tag: 'LIVE' }),
+      caches: { open: async () => ({ match: async () => 'STALE', put: async () => { throw new Error('QuotaExceededError'); } }) },
+    });
+    assert.equal((await dispatchFetch(listeners, 'GET', path).responded).tag, 'LIVE', path);
+  }
 });
