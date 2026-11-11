@@ -52,3 +52,36 @@
   font: inherit; color: var(--_fg); background: var(--_surface);
   border: 1px solid var(--_line); border-radius: calc(var(--_radius) / 2); padding: 8px;
 }
+
+/* ---- purchase option (rbank-amounts): mount(el, { household: true }) ---- */
+.rbf-purchase .rbf-household { color: var(--_fg); font-weight: 600; }
+.rbf-purchase .rbf-unscaled { color: var(--_warn); }
+.rbf-purchase .rbf-item label { flex-wrap: wrap; }
+.rbf-purchase .rbf-buy { margin-left: auto; font-weight: 600; text-align: right; }
+.rbf-purchase .rbf-check {
+  color: var(--_warn); border: 1px solid currentColor; border-radius: calc(var(--_radius) / 2);
+  padding: 0 6px; font-size: 0.8125em;
+}
+.rbf-purchase .rbf-flag-note { color: var(--_warn); font-size: 0.875em; }
+.rbf-purchase .rbf-pantry {
+  display: grid; gap: calc(var(--_gap) / 2);
+  border: 1px dashed var(--_line); border-radius: var(--_radius); padding: var(--_gap);
+}
+.rbf-purchase .rbf-pantry-edit { display: grid; gap: calc(var(--_gap) / 2); }
+.rbf-purchase .rbf-pantry-edit summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.rbf-purchase .rbf-chips { list-style: none; margin: 0 0 calc(var(--_gap) / 2); padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.rbf-purchase .rbf-chip {
+  font: inherit; cursor: pointer; min-height: 44px; padding: 6px 12px;
+  border-radius: 999px; border: 1px solid var(--_line); background: var(--_surface); color: var(--_fg);
+}
+.rbf-purchase .rbf-pantry-form { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin-bottom: calc(var(--_gap) / 2); }
+.rbf-purchase .rbf-pantry-form label { display: grid; gap: 4px; color: var(--_muted); flex: 1 1 12em; }
+.rbf-purchase .rbf-pantry-form input {
+  font: inherit; font-size: max(1em, 16px); min-height: 44px; padding: 8px; color: var(--_fg); background: var(--_surface);
+  border: 1px solid var(--_line); border-radius: calc(var(--_radius) / 2);
+}
+@media print {
+  .rbf-purchase .rbf-actions, .rbf-purchase .rbf-pantry-edit, .rbf-purchase .rbf-copy-fallback { display: none; }
+  .rbf-purchase .rbf-aisle { break-inside: avoid; }
+}
+/* ---- end purchase option ---- */
