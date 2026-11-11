@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Recipe Bank: turn recipe videos into exact ingredients and steps</title>
+  <meta name="description" content="Recipe Bank is an open-source, self-hosted cookbook for the cooking videos you save. It keeps each video as a structured recipe: the creator's own amounts, and steps that jump to the right moment in the video.">
+  <meta name="theme-color" content="#f8f4ee">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Recipe Bank">
+  <meta property="og:title" content="Recipe Bank: turn recipe videos into exact ingredients and steps">
+  <meta property="og:description" content="An open-source, self-hosted cookbook for the cooking videos you save. The creator's own amounts, steps with timestamps, and a dashboard that filters by what is in the fridge.">
+  <meta name="twitter:card" content="summary">
+  <!-- og:url and og:image need the final address of the site. See site/README.md, "What a deploy needs". -->
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <script src="js/theme.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,650;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+  <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"}}</script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="inner">
+      <a class="logo" href="index.html">
+        <svg class="logo-mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect class="m-bg" width="32" height="32" rx="8"/><path class="m-fg" d="M9 20c0-5 3-9 7-9s7 4 7 9z"/><rect class="m-fg" x="7" y="20" width="18" height="3" rx="1.5"/></svg>
+        <span>Recipe Bank</span>
+      </a>
+      <nav class="site-nav" id="site-nav" aria-label="Sections">
+        <ul>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#showcase">Showcase</a></li>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#self-host">Self-hosting</a></li>
+          <li><a href="#roadmap">Roadmap</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </nav>
+      <button class="icon-btn theme-toggle" id="theme-toggle" type="button" aria-label="Switch theme">
+        <svg class="i-sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
+        <svg class="i-moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 14.2A8 8 0 0 1 9.8 4a8 8 0 1 0 10.2 10.2z"/></svg>
+      </button>
+      <a class="btn btn-primary btn-small header-cta" href="https://github.com/axeltoll/recipe-bank">
+        <svg class="i-star" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>
+        <span><span class="cta-long">Star on </span>GitHub</span>
+      </a>
+      <button class="icon-btn nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+    <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+  </header>
+
+  <main id="main">
+
+    <!-- 1. Hero -->
+    <section class="band hero" id="hero" aria-labelledby="hero-title">
+      <div class="inner">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Open source · MIT licensed</p>
+            <h1 id="hero-title">Turn any recipe video into <em>exact ingredients and steps.</em></h1>
+            <p class="lede">Recipe Bank keeps the short cooking videos you save as structured recipes: the ingredients in the creator's own amounts, and steps whose timestamps jump to that moment in the video. Today it reads links from YouTube (including Shorts), TikTok and Instagram Reels, and it runs on your own machine.</p>
+            <div class="cta-row">
+              <a class="btn btn-primary" data-cta="primary" href="https://github.com/axeltoll/recipe-bank">
+                <svg class="i-star" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>
+                <span>Star and run it from GitHub</span>
+              </a>
+              <a class="btn btn-ghost" href="#showcase">See a real recipe</a>
+            </div>
+            <p class="cta-note">Free and MIT licensed. Node.js 22 or newer, no dependencies, no account.</p>
+          </div>
+
+          <div class="hero-slot" id="hero-slot">
+            <div class="hero-stage" id="hero-stage">
+              <!-- Poster: the video shape of the 3D mark, drawn with the same tiles. Stays when WebGL is off,
+                   when motion is reduced, and until the live mark has rendered. -->
+              <svg class="poster" viewBox="0 0 180 320" role="img" aria-label="A phone-shaped video frame with a play button, built from small tiles">
+                <defs>
+                  <pattern id="tile-plain" width="10" height="10" patternUnits="userSpaceOnUse"><rect class="p-tile" x="1" y="1" width="8" height="8" rx="1.6"/></pattern>
+                  <pattern id="tile-accent" width="10" height="10" patternUnits="userSpaceOnUse"><rect class="p-accent" x="1" y="1" width="8" height="8" rx="1.6"/></pattern>
+                </defs>
+                <g fill="url(#tile-plain)">
+                  <rect x="10" y="0" width="160" height="10"/>
+                  <rect x="10" y="310" width="160" height="10"/>
+                  <rect x="0" y="10" width="10" height="300"/>
+                  <rect x="170" y="10" width="10" height="300"/>
+                  <rect x="30" y="250" width="90" height="10"/>
+                  <rect x="80" y="280" width="70" height="10"/>
+                </g>
+                <g fill="url(#tile-accent)">
+                  <rect x="60" y="110" width="10" height="10"/>
+                  <rect x="60" y="120" width="20" height="10"/>
+                  <rect x="60" y="130" width="40" height="10"/>
+                  <rect x="60" y="140" width="50" height="10"/>
+                  <rect x="60" y="150" width="70" height="10"/>
+                  <rect x="60" y="160" width="70" height="10"/>
+                  <rect x="60" y="170" width="50" height="10"/>
+                  <rect x="60" y="180" width="40" height="10"/>
+                  <rect x="60" y="190" width="20" height="10"/>
+                  <rect x="60" y="200" width="10" height="10"/>
+                  <rect x="30" y="280" width="50" height="10"/>
+                </g>
+              </svg>
+            </div>
+            <button class="hero-toggle" id="hero-toggle" type="button" aria-pressed="false" hidden>Show it as a recipe</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Four facts, all from the README -->
+    <section class="band facts-band" aria-label="Recipe Bank in four facts">
+      <div class="inner">
+        <ul class="facts">
+          <li><strong>MIT</strong><span>licensed: free to run, read and change</span></li>
+          <li><strong>0</strong><span>runtime dependencies, and no build step for development</span></li>
+          <li><strong>3</strong><span>platforms today: YouTube, TikTok and Instagram Reels</span></li>
+          <li><strong>Local</strong><span>runs on your machine with Node.js 22 or newer</span></li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 3. How it works -->
+    <section class="band band-alt how" id="how" aria-labelledby="how-title">
+      <div class="inner">
+        <div class="section-head reveal">
+          <p class="eyebrow">How it works</p>
+          <h2 id="how-title">From a saved video <em>to a recipe you can cook.</em></h2>
+        </div>
+        <div class="how-grid">
+          <!-- Desktop only: the 3D mark lands here as a recipe. Empty on purpose. -->
+          <div class="how-slot" id="how-slot" aria-hidden="true"></div>
+          <ol class="how-steps">
+            <li class="reveal">
+              <span class="how-num" aria-hidden="true">1</span>
+              <div>
+                <h3>Paste the link</h3>
+                <p>Press Add video on the dashboard and paste a YouTube Short, TikTok or Instagram Reel. It joins the queue, with the title looked up for you when the platform offers it.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <span class="how-num" aria-hidden="true">2</span>
+              <div>
+                <h3>The recipe gets written</h3>
+                <p>An analysis agent reads the video's captions, description and on-screen text and writes one recipe file: ingredients in the creator's own amounts, steps with timestamps, and a list of what the video does not say. A validator checks the file against the recipe contract.</p>
+              </div>
+            </li>
+            <li class="reveal">
+              <span class="how-num" aria-hidden="true">3</span>
+              <div>
+                <h3>Cook from it</h3>
+                <p>Filter the collection by what is in the fridge, tick ingredients off as you go, tap a timestamp to play the video from that step, and copy the ingredients as a shopping list.</p>
+              </div>
+            </li>
+          </ol>
+        </div>
+        <aside class="callout how-note reveal" aria-label="What is in the repository today">
+          <h3>Good to know</h3>
+          <p>The dashboard, the queue, the recipe contract and the validator are in the repository today. The agent's own instructions are not yet: packaging it as a Recipe Agent you host yourself is <a href="#roadmap">on the roadmap</a>. Until then, the contract in <a href="https://github.com/axeltoll/recipe-bank/blob/main/CLAUDE.md">CLAUDE.md</a> is what a coding agent, or you, writes a recipe file from.</p>
+        </aside>
+      </div>
+    </section>
+
+    <!-- 4. Showcase: real recipe files, filtered in the page -->
+    <section class="band" id="showcase" aria-labelledby="showcase-title">
+      <div class="inner">
+        <div class="section-head reveal">
+          <p class="eyebrow">Real recipes, real files</p>
+          <h2 id="showcase-title">Three recipes from the repository. <em>Filter them like the dashboard does.</em></h2>
+          <p class="lede">These are files from <a href="https://github.com/axeltoll/recipe-bank/tree/main/recipes">recipes/</a>, shown as they are, each credited to its creator. Pick an ingredient, switch between Has all and Has any, then open a recipe.</p>
+        </div>
+
+        <div class="demo" id="demo">
+          <p class="demo-fallback" id="demo-fallback">The interactive sample needs JavaScript. The same recipes are plain JSON files in the repository: <a href="https://github.com/axeltoll/recipe-bank/tree/main/recipes">browse recipes/ on GitHub</a>.</p>
+
+          <div class="demo-side" id="demo-side" hidden>
+            <div class="demo-controls">
+              <label class="field" for="demo-search">
+                <span class="field-label">Search</span>
+                <input id="demo-search" type="search" placeholder="Dish, creator, ingredient" autocomplete="off" enterkeyhint="search">
+              </label>
+              <div class="field">
+                <span class="field-label" id="demo-mode-label">Ingredients</span>
+                <div class="seg" role="group" aria-labelledby="demo-mode-label">
+                  <button type="button" data-mode="all" aria-pressed="true">Has all</button>
+                  <button type="button" data-mode="any" aria-pressed="false">Has any</button>
+                </div>
+                <div class="chips" id="demo-chips"></div>
+              </div>
+              <div class="demo-foot">
+                <span id="demo-count" role="status"></span>
+                <button type="button" class="btn btn-small btn-ghost" id="demo-clear">Clear</button>
+              </div>
+            </div>
+            <div class="demo-list" id="demo-list" aria-label="Matching recipes"></div>
+          </div>
+
+          <article class="demo-detail" id="demo-detail" aria-label="Recipe" hidden></article>
+        </div>
+
+        <p class="demo-note">On the dashboard, a timestamp plays the embedded video from that step. This page does not embed videos, so a timestamp here opens the video on YouTube at the same moment.</p>
+      </div>
+    </section>
+
+    <!-- 5. Features, as the README lists them -->
+    <section class="band band-alt" id="features" aria-labelledby="features-title">
+      <div class="inner">
+        <div class="section-head reveal">
+          <p class="eyebrow">What it does</p>
+          <h2 id="features-title">Built for the moment <em>you actually cook.</em></h2>
+        </div>
+        <ul class="cards cards-3">
+          <li class="card reveal">
+            <svg class="card-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M3.5 5h17l-6.5 7.6V19l-4 1.5v-7.9z"/></svg>
+            <h3>Filter by ingredient</h3>
+            <p>Pick ingredients and switch between Has all and Has any, or search by dish or creator.</p>
+          </li>
+          <li class="card reveal">
+            <svg class="card-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M10 9v6l5-3z"/></svg>
+            <h3>Cook from the video</h3>
+            <p>Each recipe embeds the original video. Every step has a play from here timestamp, and you can tick off ingredients as you go.</p>
+          </li>
+          <li class="card reveal">
+            <svg class="card-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>
+            <h3>Shopping list</h3>
+            <p>Copy a recipe's ingredients as a shopping list, in the creator's amounts.</p>
+          </li>
+          <li class="card reveal">
+            <svg class="card-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M12 4v16M5 8h14M5 8l-2.5 6a3 3 0 0 0 5 0zM19 8l-2.5 6a3 3 0 0 0 5 0zM8 20h8"/></svg>
+            <h3>Honest amounts</h3>
+            <p>Amounts are the creator's own words. When a video does not say, the recipe says amount not given instead of guessing.</p>
+          </li>
+          <li class="card reveal">
+            <svg class="card-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M12 5v14M5 12h14"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg>
+            <h3>Queue new videos</h3>
+            <p>Paste a video link to add it to the queue for analysis.</p>
+          </li>
+          <li class="card reveal">
+            <svg class="card-icon" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>
+            <h3>Credit to the creator</h3>
+            <p>Every recipe links back to the creator and the original video. Videos are embedded from the platform, never re-hosted.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 6. The rule -->
+    <section class="band" id="amounts" aria-labelledby="amounts-title">
+      <div class="inner">
+        <div class="split">
+          <div class="section-head reveal">
+            <p class="eyebrow">The rule</p>
+            <h2 id="amounts-title">It never invents <em>an amount.</em></h2>
+            <p class="lede">An amount is the creator's own words, with a note of where it came from: said in the video, shown on screen or written in the description. If the video does not say, the recipe says so. If part of the method is missing, the recipe is marked partial and lists the gaps.</p>
+          </div>
+          <div class="examples reveal">
+            <p class="examples-title">Four ingredients from the recipes above</p>
+            <ul class="example-list">
+              <li data-example="banana-milk|Evaporated milk|1 can|spoken"><span class="ex-item">Evaporated milk</span><span class="ex-amt">1 can<small>said in the video</small></span></li>
+              <li data-example="cold-pan-chicken|Chicken stock|about 1 cup|spoken"><span class="ex-item">Chicken stock</span><span class="ex-amt">about 1 cup<small>said in the video</small></span></li>
+              <li data-example="air-fried-chicken-nuggets|Chicken breast, diced|680 g|description"><span class="ex-item">Chicken breast, diced</span><span class="ex-amt">680 g<small>from the video description</small></span></li>
+              <li data-example="cold-pan-chicken|Cold butter||unstated"><span class="ex-item">Cold butter</span><span class="ex-amt unstated">amount not given</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Open source and self-hosting -->
+    <section class="band band-alt" id="self-host" aria-labelledby="self-host-title" data-sticky-quiet>
+      <div class="inner">
+        <div class="section-head reveal">
+          <p class="eyebrow">Open source and self-hosted</p>
+          <h2 id="self-host-title">Open source. <em>Runs on your machine.</em></h2>
+          <p class="lede">The code and the recipe files are MIT licensed. There is nothing to install besides Node.js 22 or newer: no packages, no database, no account.</p>
+        </div>
+        <div class="split split-top">
+          <div class="reveal">
+            <div class="code-card">
+              <div class="code-head">
+                <span>Run it</span>
+                <button type="button" class="btn btn-small btn-ghost" data-copy-from="run-commands" hidden>Copy</button>
+                <span class="code-status" data-copy-status role="status"></span>
+              </div>
+              <pre tabindex="0" aria-label="Commands to run Recipe Bank"><code id="run-commands">git clone https://github.com/axeltoll/recipe-bank.git
+cd recipe-bank
+npm start</code></pre>
+            </div>
+            <p class="code-after">The dashboard opens at <code>http://127.0.0.1:4780</code>. Set <code>PORT</code> or <code>HOST</code> to change that.</p>
+            <div class="cta-row">
+              <a class="btn btn-primary" data-cta="primary" href="https://github.com/axeltoll/recipe-bank">
+                <svg class="i-star" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>
+                <span>Star and run it from GitHub</span>
+              </a>
+              <a class="btn btn-ghost" href="self-hosting.html">Read the self-hosting guide</a>
+            </div>
+          </div>
+          <div class="two-lists reveal">
+            <div>
+              <h3>In the repository today</h3>
+              <ul class="ticks">
+                <li>The dashboard: ingredient filter, recipe pages with the embedded video, shopping list, light and dark themes</li>
+                <li>The queue for new video links, with a small JSON API</li>
+                <li>The recipe contract and a validator (<code>npm run validate</code>)</li>
+                <li>Tests on Node's built-in test runner (<code>npm test</code>)</li>
+                <li>A read-only static export (<code>npm run build</code>)</li>
+                <li>The author's own analyzed recipes as sample data</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Planned, not in the repository yet</h3>
+              <ul class="ticks planned">
+                <li>The Recipe Agent that turns a video link into a recipe file</li>
+                <li>A form to add and edit recipes in the dashboard</li>
+                <li>Queueing a video from the static copy</li>
+                <li>A self-hosting document and a setup check for the agent's optional tools</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. Roadmap highlights: everything here is planned -->
+    <section class="band" id="roadmap" aria-labelledby="roadmap-title">
+      <div class="inner">
+        <div class="section-head reveal">
+          <p class="eyebrow">Roadmap</p>
+          <h2 id="roadmap-title">What comes next. <em>Planned, not shipped.</em></h2>
+          <p class="lede">None of this exists yet. It is the author's own plan, roughly in order, and it can change.</p>
+        </div>
+        <ul class="cards cards-3">
+          <li class="card reveal">
+            <span class="badge planned">Planned</span>
+            <h3>Week plan and one shopping list</h3>
+            <p>Pick several recipes for the week and get one shopping list, with the same ingredient merged and amounts kept in the creators' own words.</p>
+          </li>
+          <li class="card reveal">
+            <span class="badge planned">Planned</span>
+            <h3>More ways to filter</h3>
+            <p>A without filter next to Has all and Has any, tags such as air fryer or high protein as chips, and protein and calorie limits for recipes that state macros.</p>
+          </li>
+          <li class="card reveal">
+            <span class="badge planned">Planned</span>
+            <h3>A Recipe Agent you host yourself</h3>
+            <p>The video analysis packaged for the coding agent you already use: captions and description first, local speech-to-text as a fallback, keyframes for on-screen text.</p>
+          </li>
+          <li class="card reveal">
+            <span class="badge planned">Planned</span>
+            <h3>Household planning and budget</h3>
+            <p>An anonymous household profile that stays on the device, purchase amounts for everyone at the table, and a food budget with spend per meal.</p>
+          </li>
+          <li class="card reveal">
+            <span class="badge planned">Planned</span>
+            <h3>More platforms</h3>
+            <p>Facebook and Pinterest videos, X, and plain web pages with a video, with embeds where the platform offers them and a link otherwise.</p>
+          </li>
+          <li class="card reveal">
+            <span class="badge planned">Planned</span>
+            <h3>Recipe packs</h3>
+            <p>Export favourite recipes as a single file or link and import someone else's pack, with duplicates detected by video. No accounts and no server.</p>
+          </li>
+        </ul>
+        <p class="after-cards"><a class="text-link" href="https://github.com/axeltoll/recipe-bank/blob/main/ROADMAP.md">Read the full roadmap on GitHub</a></p>
+      </div>
+    </section>
+
+    <!-- 9. FAQ: answers only from facts already on this page or in the README -->
+    <section class="band band-alt" id="faq" aria-labelledby="faq-title">
+      <div class="inner">
+        <div class="section-head reveal">
+          <p class="eyebrow">Questions</p>
+          <h2 id="faq-title">Before you <em>clone it.</em></h2>
+        </div>
+        <div class="faq">
+          <details>
+            <summary>Is Recipe Bank free?</summary>
+            <p>Yes. The code and the recipe files are MIT licensed. The videos belong to their creators; Recipe Bank only links to and embeds them.</p>
+          </details>
+          <details>
+            <summary>Which videos does it work with?</summary>
+            <p>Today: YouTube, including Shorts, TikTok and Instagram Reels. Facebook and Pinterest videos, X and plain web pages with a video are planned.</p>
+          </details>
+          <details>
+            <summary>Does it re-host videos?</summary>
+            <p>No. Videos are embedded from their platform, never re-hosted, and every recipe links back to the creator and the original video. Material captured for analysis, such as transcripts and frames, is kept out of the repository.</p>
+          </details>
+          <details>
+            <summary>Where do the amounts come from?</summary>
+            <p>From the video: what the creator says, shows on screen or writes in the description. Each amount records which one. Nothing is estimated.</p>
+          </details>
+          <details>
+            <summary>What is a partial recipe?</summary>
+            <p>A recipe where part of the method is missing. It lists what it lacks instead of filling the holes with generic cooking knowledge.</p>
+          </details>
+          <details>
+            <summary>Can I add a recipe myself?</summary>
+            <p>Yes. A recipe is one JSON file in <code>recipes/</code>, in the format documented in CLAUDE.md. Run <code>npm run validate</code> to check it. A form for adding and editing recipes in the dashboard is planned.</p>
+          </details>
+          <details>
+            <summary>Is there an account or a hosted version?</summary>
+            <p>There is no account and no sign-up. Recipe Bank runs on your machine. <code>npm run build</code> makes a read-only static copy you can host yourself; on that copy, Add video copies a request instead of queueing.</p>
+          </details>
+          <details>
+            <summary>Does the dashboard work on a phone?</summary>
+            <p>It has layouts for narrow screens. An installable version that works offline is planned.</p>
+          </details>
+          <details>
+            <summary>What is it built with?</summary>
+            <p>Node.js 22 and nothing else: a <code>node:http</code> server with a small JSON API, a dashboard in plain ES modules and CSS, and tests on the built-in test runner.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. Close: restate the offer -->
+    <section class="band close" id="close" aria-labelledby="close-title" data-sticky-quiet>
+      <div class="inner">
+        <div class="close-box reveal">
+          <h2 id="close-title">Your saved videos, <em>as recipes you can cook from.</em></h2>
+          <p class="lede">Free, MIT licensed and yours to run. Clone it, start it and open the dashboard.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" data-cta="primary" href="https://github.com/axeltoll/recipe-bank">
+              <svg class="i-star" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>
+              <span>Star and run it from GitHub</span>
+            </a>
+            <a class="btn btn-ghost" href="self-hosting.html">Read the self-hosting guide</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" data-sticky-quiet>
+    <div class="inner">
+      <div class="footer-brand">
+        <a class="logo" href="index.html">
+          <svg class="logo-mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect class="m-bg" width="32" height="32" rx="8"/><path class="m-fg" d="M9 20c0-5 3-9 7-9s7 4 7 9z"/><rect class="m-fg" x="7" y="20" width="18" height="3" rx="1.5"/></svg>
+          <span>Recipe Bank</span>
+        </a>
+        <p>Open source under the MIT license. The videos belong to their creators; Recipe Bank only links to and embeds them.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer">
+        <ul>
+          <li><a href="https://github.com/axeltoll/recipe-bank">GitHub</a></li>
+          <li><a href="self-hosting.html">Self-hosting guide</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+          <li><a href="https://github.com/axeltoll/recipe-bank/blob/main/ROADMAP.md">Roadmap</a></li>
+          <li><a href="https://github.com/axeltoll/recipe-bank/blob/main/LICENSE">License</a></li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+
+  <div class="sticky-cta" id="sticky-cta" inert>
+    <a class="btn btn-primary" data-cta="primary" href="https://github.com/axeltoll/recipe-bank">
+      <svg class="i-star" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>
+      <span>Star and run it from GitHub</span>
+    </a>
+  </div>
+</body>
+</html>
