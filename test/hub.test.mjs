@@ -104,6 +104,18 @@ test('routes are registered with a layout type and show up in the navigation whe
   assert.deepEqual(hub.navItems(), []);
 });
 
+test('re-registering a route replaces it, and the old remover leaves the replacement alone', () => {
+  const hub = createHub();
+  const first = () => {};
+  const second = () => {};
+  const offFirst = hub.addRoute('plan', { render: first });
+  const offSecond = hub.addRoute('plan', { render: second });
+  offFirst();
+  assert.equal(hub.route('plan')?.render, second, 'the old remover must not remove the replacement');
+  offSecond();
+  assert.equal(hub.route('plan'), undefined);
+});
+
 test('addRoute rejects reserved names, bad names, a missing render and unknown layouts', () => {
   const hub = createHub();
   const render = () => {};

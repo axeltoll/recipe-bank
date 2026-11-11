@@ -36,12 +36,20 @@ test('fractions: "1 1/2", "1½" and "½"', () => {
   assert.deepEqual(durations('Wait 1/0 hours'), [], 'a broken fraction is no duration');
 });
 
+test('a spaced fraction ("1 ½") is the whole number plus the fraction, not the fraction alone', () => {
+  assert.deepEqual(durations('Braise for 1 ½ hours'), [{ seconds: 5400, label: '1 ½ h' }]);
+  assert.deepEqual(durations('Simmer 2 ½ minutes'), [{ seconds: 150, label: '2 ½ min' }]);
+  assert.deepEqual(durations('Cook 1 ½-2 hours'), [{ seconds: 5400, label: '1 ½–2 h' }]);
+});
+
 test('"1 hour 30 minutes" is one duration, but only when the units go down', () => {
   assert.deepEqual(durations('Bake for 1 hour 30 minutes, then rest 10 minutes'), [
     { seconds: 5400, label: '1 h 30 min' },
     { seconds: 600, label: '10 min' },
   ]);
   assert.deepEqual(durations('Cook 2 minutes, 30 seconds'), [{ seconds: 150, label: '2 min 30 sec' }]);
+  assert.deepEqual(durations('Bake 1 hour, and 30 minutes'), [{ seconds: 5400, label: '1 h 30 min' }]);
+  assert.deepEqual(durations('Bake 1 hour and 30 minutes'), [{ seconds: 5400, label: '1 h 30 min' }]);
   assert.deepEqual(durations('Sear 30 seconds and 2 minutes'), [
     { seconds: 30, label: '30 sec' },
     { seconds: 120, label: '2 min' },
