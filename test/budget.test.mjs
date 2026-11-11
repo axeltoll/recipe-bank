@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { currencyDigits, toMinor, formatMoney, validateBudget, validateShop, periodOf, summary, isDate } from '../lib/budget.mjs';
+import {
+  currencyDigits, toMinor, formatMoney, validateBudget, validateShop, periodOf, summary, isDate, exportShopsCsv, importShopsCsv,
+} from '../lib/budget.mjs';
 import { defaultProfile } from '../lib/household.mjs';
 const budget = { period: 'week', amount: '100.00', currency: 'SEK' };
 const shop = { date: '2026-11-11', total: '10.00', currency: 'SEK' };
@@ -125,4 +127,17 @@ test('summary() without `today` uses the local calendar date, like the dates sho
   const s = summary(monthly, [{ date: '2026-04-01', total: '10.00', currency: 'SEK' }]);
   assert.equal(s.key, '2026-04');
   assert.equal(s.spendMinor, 1000);
+});
+
+test('CSV export keeps notes from being read as spreadsheet formulas, and the import gives them back unchanged', () => {
+  const notes = ['=HYPERLINK("http://example.com")', '+1', '-5% off', '@SUM(A1)', "'=already quoted", "'plain", 'plain', "it's"];
+  const shops = notes.map((note) => ({ ...shop, note }));
+  const csv = exportShopsCsv(shops);
+  for (const cell of csv.trim().split('\r\n').slice(1).map((row) => row.slice(row.indexOf(',"",') + 4))) {
+    assert.doesNotMatch(cell, /^"[=+\-@]/, cell);
+  }
+  assert.match(csv, /"'=HYPERLINK/);
+  assert.match(csv, /"''=already quoted"/);
+  assert.match(csv, /"'plain"/);
+  assert.deepEqual(importShopsCsv(csv).map((s) => s.note), notes);
 });
