@@ -61,7 +61,7 @@ test('the self-hosting page describes the write gate: a wildcard HOST allows no 
   // What the page says about it.
   assert.match(start, /RECIPE_BANK_HOSTS/);
   assert.match(start, /HOST=0\.0\.0\.0 or HOST=:: listens on every interface but allows no name by itself/);
-  assert.match(start, /fail with a 403 until their name is in RECIPE_BANK_HOSTS/);
+  assert.match(start, /answer 403 until their name is in RECIPE_BANK_HOSTS/);
   assert.match(start, /A loopback name only counts for requests from your own machine/);
   assert.match(start, /has no login/);
 });
