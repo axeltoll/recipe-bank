@@ -1,0 +1,46 @@
+.rb-budget {
+  color: var(--rb-text, #202b32);
+  background: var(--rb-surface, #fff);
+  border: 1px solid var(--rb-border, #c7d0d5);
+  border-radius: var(--rb-radius, 0.75rem);
+  padding: var(--rb-space-lg, 1.5rem);
+  font-family: var(--rb-font, system-ui, sans-serif);
+  line-height: 1.5;
+  color-scheme: inherit;
+}
+.rb-budget * { box-sizing: border-box; }
+.rb-budget h2 { margin: var(--rb-space-zero, 0) var(--rb-space-zero, 0) var(--rb-space-sm, 0.5rem); }
+.rb-budget h3, .rb-budget p, .rb-budget fieldset { margin: var(--rb-space-md, 1rem) var(--rb-space-zero, 0); }
+.rb-budget fieldset { border: 1px solid var(--rb-border, #c7d0d5); border-radius: var(--rb-radius, 0.75rem); padding: var(--rb-space-md, 1rem); min-width: 0; }
+.rb-budget-grid, .rb-budget-totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: var(--rb-space-md, 1rem); }
+.rb-budget label { display: grid; gap: var(--rb-space-xs, 0.25rem); }
+.rb-budget input, .rb-budget select, .rb-budget button, .rb-budget textarea {
+  font: inherit;
+  color: var(--rb-text, #202b32);
+  background: var(--rb-input, #fff);
+  border: 1px solid var(--rb-border, #c7d0d5);
+  border-radius: var(--rb-control-radius, 0.375rem);
+  padding: var(--rb-space-sm, 0.5rem) var(--rb-space-md, 1rem);
+  min-height: 2.75rem;
+  min-width: 0;
+  width: 100%;
+}
+.rb-budget button { width: auto; cursor: pointer; color: var(--rb-on-accent, #fff); background: var(--rb-accent, #286449); margin-top: var(--rb-space-md, 1rem); }
+.rb-budget :focus-visible { outline: 3px solid var(--rb-focus, #2873cc); outline-offset: var(--rb-space-xs, 0.25rem); }
+.rb-budget .rb-feature-status, .rb-budget dt { color: var(--rb-muted, #52636e); }
+.rb-budget .rb-feature-errors, .rb-budget [role="alert"], .rb-budget-warning { color: var(--rb-danger, #a62727); }
+.rb-budget dd { margin: var(--rb-space-zero, 0); font-size: 1.3em; font-weight: 650; overflow-wrap: anywhere; }
+.rb-budget-scroll { overflow-x: auto; }
+.rb-budget table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+.rb-budget caption { text-align: left; color: var(--rb-muted, #52636e); padding-bottom: var(--rb-space-sm, 0.5rem); }
+.rb-budget th, .rb-budget td { text-align: left; border-bottom: 1px solid var(--rb-border, #c7d0d5); padding: var(--rb-space-sm, 0.5rem); white-space: nowrap; }
+.rb-budget-shops { list-style: none; padding: var(--rb-space-zero, 0); margin: var(--rb-space-md, 1rem) var(--rb-space-zero, 0); }
+.rb-budget-shops li { display: flex; align-items: center; justify-content: space-between; gap: var(--rb-space-sm, 0.5rem); border-bottom: 1px solid var(--rb-border, #c7d0d5); padding: var(--rb-space-sm, 0.5rem) var(--rb-space-zero, 0); overflow-wrap: anywhere; }
+.rb-budget-shops button { flex-shrink: 0; margin: var(--rb-space-zero, 0); }
+
+.rb-budget details { margin-top: var(--rb-space-lg, 1.5rem); }
+.rb-budget summary { cursor: pointer; color: var(--rb-accent, #286449); }
+.rb-budget textarea { resize: vertical; }
+.rb-budget-chart { display: block; width: 100%; min-width: 38rem; height: auto; margin: var(--rb-space-md, 1rem) var(--rb-space-zero, 0); }
+.rb-budget-chart text { fill: var(--rb-text, #202b32); font: 14px var(--rb-font, system-ui, sans-serif); }
+.rb-budget-chart rect { fill: var(--rb-accent, #286449); }

@@ -12,6 +12,9 @@ Me, first: I save a lot of cooking videos and could never find the one I wanted,
 
 ## What it does
 
+- **Household profile (new).** Anonymous device-local age groups, eating habits and editable portion estimates in the [standalone preview](public/features/household-demo.html).
+- **Food budget (new).** Device-local weekly/monthly budgets, recorded shops and spend per meal/person, with currencies kept separate in the [standalone preview](public/features/household-demo.html).
+
 - **Filter by ingredient.** Pick ingredients and switch between *Has all* and *Has any*, or search by dish or creator.
 - **Cook from the video.** Each recipe embeds the original video. Every step has a "play from here" timestamp, and you can tick off ingredients as you go.
 - **Cook mode.** One step at a time in large type, with the screen kept awake where the browser allows it.
