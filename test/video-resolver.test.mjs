@@ -21,8 +21,8 @@ for (const [source, target] of pairs) {
       assert.equal(options.method, 'HEAD');
       assert.equal(options.redirect, 'manual');
       assert.ok(options.signal instanceof AbortSignal);
-      assert.ok([source, target].includes(url));
-      return url === source ? redirect(target) : new Response(null);
+      assert.ok([video.url, target].includes(url));
+      return url === video.url ? redirect(target) : new Response(null);
     });
     const resolved = await resolveShortVideo(video);
     assert.deepEqual(resolved, parseVideoUrl(target));
