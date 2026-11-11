@@ -9,9 +9,12 @@ Fixes from the review of 0.2.0.
 
 - **Security.** Recipe files may only carry `http(s)` creator and video links (`validateRecipe`), so a pack with a
   `javascript:` link is reported invalid; the dashboard and the website render every link from data through one
-  `safeUrl()` helper. The local server refuses changes that are not JSON or that come from another website
-  (`Origin`, `Sec-Fetch-Site`, a host name that is not this machine; `RECIPE_BANK_HOSTS` adds names). oEmbed answers
-  keep only plain text and an `http(s)` author link.
+  `safeUrl()` helper. The local server refuses a `POST` or `PUT` that is not JSON, and any change with a cross-site
+  `Sec-Fetch-Site` or an `Origin` that is not its own; a request without either header (curl, scripts) is allowed.
+  On every API request, reads included (so a rebinding domain cannot read the collection), it also refuses a `Host`
+  that is not a loopback name, not in `RECIPE_BANK_HOSTS` and not the `HOST` it binds to
+  (a wildcard `HOST` such as `0.0.0.0` or `::` adds no name), and a loopback or missing `Host` from another machine.
+  oEmbed answers keep only plain text and an `http(s)` author link.
 - **Recipe Agent capture.** Each speech-to-text engine gets its own model flag (`--model_directory` for
   whisper-ctranslate2); captions are fetched in the video's own language only, never every automatic translation;
   the capture-folder guard compares folder identity, not spelling; yt-dlp writes through `-P`; video up to 1080p
@@ -23,7 +26,8 @@ Fixes from the review of 0.2.0.
 - **Browser checks.** Chrome is killed and its profile removed on every way out (crash, unhandled rejection,
   `process.exit()`, a second Ctrl-C); CI actions are pinned to commit SHAs and the tests also run on Node 24.
 - **Budget.** Formatters are made once, the currency list works without `Intl.supportedValuesOf` and refuses
-  non-money codes, blank CSV lines are skipped, and "this week" moves on at midnight in an open tab.
+  non-money codes, blank CSV lines are skipped, and "this week" is taken from today's date each time the budget is
+  drawn (opening the page, a save, a shop), so an open tab moves on at its next redraw; there is no midnight timer.
 - `npm run check` runs the tests, the validator and the build; `CONTRIBUTING.md` and `.editorconfig` are new.
 
 ## 0.2.0 (2026-11-11)

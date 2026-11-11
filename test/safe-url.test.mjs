@@ -136,6 +136,31 @@ test('the website renders a hostile link as plain text', () => {
   assert.match(html, /<span class="ts">0:05<\/span>/);
 });
 
+/**
+ * The href/src template expressions that name a URL without passing it through safeUrl or watchUrl. A plain
+ * local (`esc(videoUrl)`) passes only when the same file assigns it from one of them.
+ */
+function rawUrlAttributes(src) {
+  const checked = (name) => new RegExp(`\\b${name}\\s*=\\s*(?:safeUrl|watchUrl)\\(`).test(src);
+  return [...src.matchAll(/\b(?:href|src)\s*=\s*["']?\$\{([^}]*)\}/gi)].map((m) => m[1]).filter((expr) => {
+    if (!/url/i.test(expr) || /\b(?:safeUrl|watchUrl)\(/.test(expr)) return false;
+    const local = expr.match(/^\s*(?:esc\(\s*)?([A-Za-z_$][\w$]*)\s*\)?\s*$/);
+    return !(local && checked(local[1]));
+  });
+}
+
+test('the raw-URL scan catches every quoting and expression form', () => {
+  for (const bad of ['href="${esc(a.url)}"', 'href="${r.video.url}"', "href='${r.creator.url}'", 'src=${x.url}',
+    'href="${esc(a.url || b.url)}"', 'SRC = "${thumbUrl}"']) {
+    assert.equal(rawUrlAttributes(`<a ${bad}>`).length, 1, bad);
+  }
+  assert.deepEqual(rawUrlAttributes('const link = safeUrl(r.url); `<a href="${esc(link)}">` `<a href="${esc(rawUrl)}">`'), ['esc(rawUrl)']);
+  assert.deepEqual(rawUrlAttributes('const videoUrl = safeUrl(x.url); `<a href="${esc(videoUrl)}">`'), []);
+  for (const good of ['href="${esc(safeUrl(r.creator.url))}"', "src='${esc(watchUrl(r.video, t))}'", 'href="#/r/${esc(r.id)}"']) {
+    assert.deepEqual(rawUrlAttributes(`<a ${good}>`), [], good);
+  }
+});
+
 test('no renderer puts a URL from data into href or src without safeUrl', async () => {
   const files = [
     ...['recipe.js', 'queue.js', 'home.js', 'add.js'].map((f) => join(ROOT, 'public', 'ui', f)),
@@ -144,7 +169,6 @@ test('no renderer puts a URL from data into href or src without safeUrl', async 
   ];
   for (const file of files) {
     const src = await readFile(file, 'utf8');
-    // href="${esc(x.url)}" or src="${esc(r.creator.url)}": a raw data URL in an attribute.
-    assert.doesNotMatch(src, /(?:href|src)="\$\{esc\([\w.?]*\burl\)\}"/i, file);
+    assert.deepEqual(rawUrlAttributes(src), [], file);
   }
 });

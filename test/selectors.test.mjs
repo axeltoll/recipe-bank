@@ -29,6 +29,28 @@ function parts(selector) {
   };
 }
 
+// The feature installers, one source each, so a route registration is matched within the file that makes it.
+const FEATURES = join(PUBLIC, 'features');
+const featureFiles = await Promise.all((await readdir(FEATURES)).filter((f) => /\.m?js$/.test(f))
+  .map((f) => readFile(join(FEATURES, f), 'utf8')));
+
+/** True when a file registers `route`: addRoute('route' / "route", or addRoute(ROUTE with const ROUTE = 'route'. */
+function registered(sources, route) {
+  const name = escapeRe(route);
+  return sources.some((src) => new RegExp(`addRoute\\((['"])${name}\\1`).test(src)
+    || (new RegExp(`\\bconst ROUTE = (['"])${name}\\1`).test(src) && /addRoute\(ROUTE\b/.test(src)));
+}
+
+test('the route check needs the named route, not any addRoute(ROUTE', () => {
+  const plan = "const ROUTE = 'plan';\nrb.addRoute(ROUTE, {});";
+  assert.ok(registered([plan], 'plan'));
+  assert.ok(!registered([plan], 'household'), 'another file\'s ROUTE does not register household');
+  assert.ok(registered(["rb.addRoute('new', {})"], 'new'));
+  assert.ok(registered(['rb.addRoute("new", {})'], 'new'));
+  assert.ok(!registered(["rb.addRoute('newer', {})"], 'new'));
+  assert.ok(!registered(["const ROUTE = 'packs';"], 'packs'), 'a ROUTE constant alone does not register it');
+});
+
 const staticSelectors = Object.entries(SELECTORS).filter(([, v]) => typeof v === 'string');
 const sample = { card: SELECTORS.card('gochujang-chicken-thighs'), chip: SELECTORS.chip('chicken'), timestampAt: SELECTORS.timestampAt(17) };
 
@@ -58,8 +80,7 @@ test('parameterised selectors match the hashes and attributes the views write', 
 test('the device check measures home, a recipe and every feature route', () => {
   assert.deepEqual(PAGES.map(([name]) => name), ['home', 'recipe', 'plan', 'household', 'packs', 'editor']);
   assert.equal(PAGES[1][1]('banana-milk'), '#/r/banana-milk');
-  const index = markup; // the feature routes are registered by the installers
   for (const route of ['plan', 'household', 'packs', 'new']) {
-    assert.match(index, new RegExp(`addRoute\\((?:ROUTE|'${route}')`), `#/${route} is registered`);
+    assert.ok(registered(featureFiles, route), `#/${route} is registered`);
   }
 });

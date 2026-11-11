@@ -42,7 +42,7 @@ Event `rb:plan-change`, `detail: { plan, source }`.
 
 A plan is `{ version: 1, items: [{ recipe: '<recipe id>', day: 'mon' … 'sun' | null }] }`; `null` means "this week, any day". The same recipe can be on several days (cook it twice); the shopping list counts that. Recipes that are no longer in the bank are hidden, not deleted from storage.
 
-**"Add to week" from a recipe page.** `addRecipeToWeek(recipeId, day = null)` adds to the stored plan and fires `rb:plan-change` on `document`, so a mounted week plan and shopping list update at once:
+**"Add to week" from a recipe page.** `addRecipeToWeek(recipeId, day = null)` adds to the stored plan and fires `rb:plan-change` on `document`, so a mounted week plan and shopping list update at once. It returns the plan that is stored now; when storage does not keep the change, that is the previous plan and no event fires (a mounted week plan shows a notice instead of a change it could not save):
 
 ```js
 button.addEventListener('click', () => addRecipeToWeek(r.id));

@@ -62,6 +62,6 @@
     { "claim": "The dashboard has layouts for narrow screens", "source": "public/styles.css" },
     { "claim": "The showcase recipes, the static recipe list and the four amount examples", "source": "recipes/cold-pan-chicken.json, recipes/air-fried-chicken-nuggets.json, recipes/banana-milk.json (checked by tests)" },
     { "claim": "This website has no analytics, cookies or web fonts; its one third-party request is three.js from jsDelivr for the hero, skipped under reduced motion, with data saving on, and without WebGL 2", "source": "site/js/hero-boot.js, site/js/hero.js, test/site.test.mjs" },
-    { "claim": "Version 0.1.0", "source": "package.json" }
+    { "claim": "Version 0.2.0", "source": "package.json" }
   ]
 }

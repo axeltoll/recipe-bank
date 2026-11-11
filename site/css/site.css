@@ -682,9 +682,10 @@ body.has-sticky { padding-bottom: calc(var(--s-8) + env(safe-area-inset-bottom))
   color: var(--ink-2); font-weight: 500; text-decoration: none;
 }
 .docs-nav a[aria-current='page'] { background: var(--accent-soft); color: var(--accent-text); font-weight: 600; }
-/* With JavaScript the docs menu is closed until its button opens it (below 1280). Without it, it is a list. */
-.js .docs-nav { display: none; }
-.js .docs-nav.is-open { display: block; }
+/* Once js/main.js has shown the menu button (it adds .is-collapsible in the same turn), the docs list is
+   closed until that button opens it (below 1280). Until then, or if the module never runs, it is a list. */
+.docs-nav.is-collapsible { display: none; }
+.docs-nav.is-collapsible.is-open { display: block; }
 
 .prose { display: grid; gap: var(--s-4); min-width: 0; align-content: start; }
 .prose > * { max-width: var(--measure); }
@@ -744,7 +745,7 @@ body.has-sticky { padding-bottom: calc(var(--s-8) + env(safe-area-inset-bottom))
   .doc { grid-template-columns: var(--side-w) minmax(0, 1fr); grid-template-areas: 'side toc' 'side prose'; column-gap: var(--s-8); align-items: start; }
   .doc-side { position: sticky; top: calc(var(--header-h) + var(--s-5)); }
   .docs-menu-toggle { display: none; }
-  .docs-nav, .js .docs-nav { display: block; }
+  .docs-nav, .docs-nav.is-collapsible { display: block; }
   .docs-nav ul { grid-template-columns: minmax(0, 1fr); }
 }
 @media (min-width: 1920px) {

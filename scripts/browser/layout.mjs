@@ -1,3 +1,5 @@
+import { SELECTORS } from './selectors.mjs';
+
 // Runs in the page. Return measurements only; keep thresholds independently testable.
 export function measureLayout() {
   const visible = (el) => el.getClientRects().length > 0 && el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true });
@@ -52,16 +54,52 @@ export function measureLayout() {
   };
 }
 
-export function layoutIssues(measurements) {
+// The phone and wide rules follow the viewport that was asked for; innerWidth can be a scrollbar narrower.
+const TOLERANCE = 20;
+
+/** `viewport` is the requested width (defaults to the measured one). */
+export function layoutIssues(measurements, viewport = measurements.width) {
   const issues = [];
   if (measurements.scrollWidth > measurements.width) issues.push({ check: 'sideways-scroll', scrollWidth: measurements.scrollWidth, viewport: measurements.width });
-  if (measurements.width === 390) for (const target of measurements.targets) {
+  if (viewport <= 390 + TOLERANCE) for (const target of measurements.targets) {
     if (target.width < 44 || target.height < 44) issues.push({ check: 'tap-target', ...target });
   }
   // Allow small font-metric differences around the 80-character target.
   for (const line of measurements.textLines) if (line.estimatedCharacters > 85) issues.push({ check: 'line-length', ...line });
-  if (measurements.width >= 1920) for (const edge of measurements.edgeSamples) {
+  if (viewport >= 1920 - TOLERANCE) for (const edge of measurements.edgeSamples) {
     if (!edge.painted) issues.push({ check: 'unpainted-edge', ...edge });
   }
   return issues;
+}
+
+/** The recipe the device check measures: the first one with steps, since the recipe page waits for its step list. */
+export function deviceRecipe(recipes) {
+  const recipe = recipes.find((r) => r.components?.some((c) => c.steps?.length));
+  if (!recipe) throw new Error(`No recipe has steps, so the recipe page cannot be measured (checked: ${recipes.map((r) => r.id).join(', ') || 'none'})`);
+  return recipe;
+}
+
+/**
+ * On a phone the filters are a bottom sheet behind the Filters button. Open it and measure it, so small chips
+ * cannot evade the check. A missing button, or a sheet that never opens, is a finding, not a pass.
+ * Returns { issues, opened, close } where close says the check opened the sheet and should close it again.
+ */
+export async function filterSheetIssues(page, baseline, viewport) {
+  const state = await page.evaluate(`(() => {
+    const toggle = document.querySelector(${JSON.stringify(SELECTORS.filterToggle)});
+    if (!toggle) return 'missing';
+    if (toggle.getAttribute('aria-expanded') === 'true') return 'open';
+    toggle.click();
+    return 'clicked';
+  })()`);
+  if (state === 'missing') return { issues: [{ check: 'filter-sheet', text: `${SELECTORS.filterToggle} is missing` }], opened: false, close: false };
+  try {
+    await page.waitFor(SELECTORS.filtersOpen);
+  } catch {
+    return { issues: [{ check: 'filter-sheet', text: `${SELECTORS.filtersOpen} never appeared` }], opened: false, close: state === 'clicked' };
+  }
+  const seen = new Set(baseline.map((issue) => JSON.stringify(issue)));
+  const issues = layoutIssues(await page.evaluate(measureLayout), viewport)
+    .filter((issue) => !seen.has(JSON.stringify(issue))).map((issue) => ({ ...issue, state: 'filters-open' }));
+  return { issues, opened: true, close: state === 'clicked' };
 }
