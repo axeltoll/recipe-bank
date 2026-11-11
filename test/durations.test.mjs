@@ -48,6 +48,8 @@ test('"1 hour 30 minutes" is one duration, but only when the units go down', () 
     { seconds: 600, label: '10 min' },
   ]);
   assert.deepEqual(durations('Cook 2 minutes, 30 seconds'), [{ seconds: 150, label: '2 min 30 sec' }]);
+  assert.deepEqual(durations('Bake 1 hour, and 30 minutes'), [{ seconds: 5400, label: '1 h 30 min' }]);
+  assert.deepEqual(durations('Bake 1 hour and 30 minutes'), [{ seconds: 5400, label: '1 h 30 min' }]);
   assert.deepEqual(durations('Sear 30 seconds and 2 minutes'), [
     { seconds: 30, label: '30 sec' },
     { seconds: 120, label: '2 min' },
