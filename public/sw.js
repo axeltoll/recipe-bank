@@ -3,13 +3,14 @@
 //
 // Strategy:
 //   shell (HTML, CSS, JS under / and /lib/)  cache first, refreshed in the background for the next visit
-//   /api/recipes(.json)                      cache first, refreshed in the background
+//   /api/recipes(.json)                      network first, the cached copy or an empty list when offline (the editor
+//                                            and pack import change it, so a cached copy must never hide a save)
 //   /api/queue(.json)                        network first, the cached copy or an empty queue when offline
 //   everything else (writes, other origins: video embeds, thumbnails, fonts)  left to the network
 //
 // Bump VERSION when the list of shell files changes.
 
-const VERSION = 'v3';
+const VERSION = 'v4';
 const SHELL_CACHE = `recipe-bank-shell-${VERSION}`;
 const DATA_CACHE = `recipe-bank-data-${VERSION}`;
 
@@ -133,7 +134,9 @@ async function cacheFirst(event, cacheName) {
   return refresh;
 }
 
-async function networkFirst(event) {
+const EMPTY = { recipes: '{"recipes":[],"invalid":[]}', queue: '{"queue":[]}' };
+
+async function networkFirst(event, kind) {
   const cache = await caches.open(DATA_CACHE);
   try {
     const res = await fetch(event.request);
@@ -141,15 +144,15 @@ async function networkFirst(event) {
     return res;
   } catch {
     const cached = await cache.match(event.request, { ignoreSearch: true });
-    return cached ?? new Response('{"queue":[]}', { headers: { 'content-type': 'application/json; charset=utf-8' } });
+    return cached ?? new Response(EMPTY[kind], { headers: { 'content-type': 'application/json; charset=utf-8' } });
   }
 }
 
 self.addEventListener('fetch', (event) => {
   const kind = policy(event.request.method, event.request.url, self.location.origin);
   if (kind === 'network') return;
-  if (kind === 'queue') event.respondWith(networkFirst(event));
-  else event.respondWith(cacheFirst(event, kind === 'recipes' ? DATA_CACHE : SHELL_CACHE));
+  if (kind === 'queue' || kind === 'recipes') event.respondWith(networkFirst(event, kind));
+  else event.respondWith(cacheFirst(event, SHELL_CACHE));
 });
 
 // For test/sw.test.mjs, which loads this file in a sandbox.

@@ -3,7 +3,7 @@
 
 import recipes from '../data/showcase.js';
 import {
-  CHIP_LIMIT, filterRecipes, keyCounts, plural, renderCard, renderChips, renderDetail, shoppingList,
+  CHIP_LIMIT, emptyMessage, filterRecipes, keyCounts, plural, renderCard, renderChips, renderDetail, shoppingList,
 } from './showcase-core.js';
 
 export function initShowcase() {
@@ -44,7 +44,7 @@ export function initShowcase() {
     }
     list.innerHTML = found.length
       ? found.map((r) => renderCard(r, { selected: state.keys, active: r.id === state.activeId })).join('')
-      : `<p class="demo-empty">No recipe has ${state.mode === 'all' ? 'all of' : 'any of'} those. Try removing an ingredient or switching to Has any.</p>`;
+      : `<p class="demo-empty">${emptyMessage(filter())}</p>`;
   }
 
   search.addEventListener('input', () => { state.q = search.value; drawList(); });

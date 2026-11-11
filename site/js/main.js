@@ -39,7 +39,8 @@ function initTheme() {
 }
 
 // Docs pages: below the desktop breakpoint the docs list is a menu behind a button. The button is hidden in
-// the HTML and shown here, so without JavaScript the list is simply visible.
+// the HTML and shown here, together with the class that folds the list, so without this module (no
+// JavaScript, or main.js slow, blocked or broken) the list is simply visible.
 function initDocsMenu() {
   const button = document.getElementById('docs-menu-toggle');
   const nav = document.getElementById('docs-nav');
@@ -49,6 +50,7 @@ function initDocsMenu() {
     button.setAttribute('aria-expanded', String(open));
   };
   button.hidden = false;
+  nav.classList.add('is-collapsible');
   button.addEventListener('click', () => set(button.getAttribute('aria-expanded') !== 'true'));
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') { set(false); button.focus(); }

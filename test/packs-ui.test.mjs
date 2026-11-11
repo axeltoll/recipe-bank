@@ -80,3 +80,44 @@ test('packs.css uses custom properties for every colour and spacing value', asyn
     if (m) assert.match(m[2], /^(?:var\(--[\w-]+\)|0|auto)(?:\s+(?:var\(--[\w-]+\)|0|auto))*$/, `spacing via custom properties: ${line.trim()}`);
   }
 });
+
+// Just enough DOM for mount(): every [data-el] is one stub element, and nothing touches a global document.
+function fakePanel() {
+  const els = new Map();
+  const el = (sel) => els.get(sel) ?? els.set(sel, { dataset: {}, value: '', textContent: '', innerHTML: '', hidden: false }).get(sel);
+  const win = Object.assign(new EventTarget(), { location: { hash: '', href: 'http://localhost/' }, fetch: async () => { throw new Error('offline'); } });
+  const element = Object.assign(new EventTarget(), {
+    innerHTML: '',
+    classList: { add() {}, remove() {} },
+    ownerDocument: { defaultView: win, documentElement: { dataset: {} } },
+    querySelector: el,
+    querySelectorAll: () => [],
+    contains: () => true,
+  });
+  return { element, el };
+}
+
+test('the file input is cleared on each pick, so the same file can be opened again', async () => {
+  const { element, el } = fakePanel();
+  const panel = mount(element, { recipes: [], static: false });
+  const input = el('[data-el="file"]');
+  let reads = 0;
+  const file = { size: 20, text: async () => { reads++; return '{ not json'; } };
+  const pick = () => {
+    input.files = [file];
+    input.value = 'C:\\fakepath\\pack.json';
+    const e = new Event('change');
+    Object.defineProperty(e, 'target', { value: input });
+    element.dispatchEvent(e);
+  };
+  pick();
+  assert.equal(input.value, '');
+  await new Promise((r) => setTimeout(r, 0));
+  assert.equal(reads, 1);
+  assert.match(el('[data-el="plan"]').innerHTML, /not a JSON file/);
+  pick();
+  assert.equal(input.value, '');
+  await new Promise((r) => setTimeout(r, 0));
+  assert.equal(reads, 2);
+  panel.destroy();
+});
