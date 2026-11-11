@@ -79,5 +79,6 @@ Rules that matter more than the format:
 ## Conventions
 
 - Keep it dependency-free unless there's a real need; adding a build step is a decision to raise with the owner first.
-- The UI escapes every string from data files and oEmbed (`esc()` in `public/app.js`), because queue titles come from third parties.
+- The UI escapes every string from data files and oEmbed (`esc()` in `lib/format.mjs`), because queue titles come from third parties.
+- Dashboard logic that needs no DOM goes in `lib/` with a test; `public/ui/` only renders. `test/design.test.mjs` checks the stylesheet tokens, contrast, imports and mount points by reading the files. When a module is added to `public/` or `lib/` and imported by the dashboard, add it to `SHELL` in `public/sw.js`.
 - Browser storage only holds conveniences (filters, ingredient checkboxes), each read and write wrapped in try/catch.

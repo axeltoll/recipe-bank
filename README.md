@@ -14,7 +14,8 @@ Me, first: I save a lot of cooking videos and could never find the one I wanted,
 
 - **Filter by ingredient.** Pick ingredients and switch between *Has all* and *Has any*, or search by dish or creator.
 - **Cook from the video.** Each recipe embeds the original video. Every step has a "play from here" timestamp, and you can tick off ingredients as you go.
-- **Shopping list.** Copy a recipe's ingredients as a shopping list.
+- **Cook mode.** One step at a time in large type, with the screen kept awake where the browser allows it.
+- **Shopping list.** Copy a recipe's ingredients as a shopping list, or print the recipe.
 - **Honest amounts.** Amounts are the creator's own words ("1 can", "about 1 cup"). When a video doesn't say, the recipe says "amount not given" instead of guessing, and recipes with a withheld method are marked *partial* with the gaps listed.
 - **Queue new videos.** Paste a video link to add it to the queue for analysis.
 - **Credit.** Every recipe links back to the creator and the original video. Videos are embedded from the platform, never re-hosted.
