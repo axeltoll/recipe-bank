@@ -27,7 +27,7 @@ Work I plan to do on Recipe Bank, roughly in order. Estimates are my own and inc
 
 ## Recipe Agent and self-hosting
 
-Today an AI agent turns a video into a recipe file, but its instructions live outside this repository. The goal is a self-hosted Recipe Agent that anyone can run with the coding agent they already use.
+The self-hosted Recipe Agent can run with the coding agent you already use. See [SELF-HOSTING.md](SELF-HOSTING.md) and [agent/RECIPE-AGENT.md](agent/RECIPE-AGENT.md).
 
 - [ ] **Recipe Agent definition** (~6 h). An `agent/` folder that describes the agent's job (capture a video, write `recipes/<id>.json` by the contract, validate, credit the creator) once, with thin entry files per harness: `CLAUDE.md` for Claude Code, `AGENTS.md` for Codex and other AGENTS.md-aware tools, and `SOUL.md` for agents that use a persona file.
 - [ ] **Analysis skill** (~8 h). Package the video-analysis workflow as a reusable skill: read the platform's captions and description first, fall back to local speech-to-text on the audio, sample keyframes for on-screen text, then write the recipe in its own words with amounts only as the creator gave them.

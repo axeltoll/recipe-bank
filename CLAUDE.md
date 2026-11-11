@@ -88,6 +88,8 @@ A pack is one JSON file, `{ format: "recipe-bank-pack", version: 1, title, expor
 
 ## Analysis pipeline
 
+For Recipe Agent tasks, start with [agent/RECIPE-AGENT.md](agent/RECIPE-AGENT.md), the shared instructions for every harness. Claude Code notes are in [agent/CLAUDE.md](agent/CLAUDE.md).
+
 1. A video comes in through the dashboard's **Add video** (`data/queue.json`, `status: queued`). The static site can't queue, so it copies a request message instead.
 2. An analysis agent captures the video's transcript, captions, description and keyframes into a private research store **outside this repository**. Transcripts, captions and frames are the creators' own content: never commit them here (`evidence/` is git-ignored for that reason).
 3. The agent writes `recipes/<id>.json` from that material (rules above), in its own words with the creator credited, runs `npm run validate`, clears the queue entry, and commits.

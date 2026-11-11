@@ -12,6 +12,7 @@
     "start": "node server.mjs",
     "dev": "node --watch-path=server.mjs --watch-path=lib server.mjs",
     "validate": "node scripts/validate.mjs",
+    "doctor": "node scripts/doctor.mjs",
     "test": "node --test \"test/*.test.mjs\"",
     "build": "node scripts/build-static.mjs",
     "schema": "node scripts/export-schema.mjs",
