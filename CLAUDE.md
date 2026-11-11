@@ -8,7 +8,7 @@ A personal recipe bank. Recipe videos from social media (YouTube Shorts, TikTok,
 npm start          # http://127.0.0.1:4780 (PORT / HOST env to override)
 npm run dev        # same, restarts on server/lib changes
 npm run validate   # checks every recipes/*.json and data/queue.json
-npm test           # node:test: URL parsing + recipe contract
+npm test           # node:test: URL parsing, recipe contract, dashboard logic, design and wiring checks
 ```
 
 No dependencies. Node ≥ 22 (built-in `fetch`, `node:test`, `import.meta.dirname`). `.claude/launch.json` has the `recipe-bank` preview config.
@@ -21,8 +21,13 @@ No dependencies. Node ≥ 22 (built-in `fetch`, `node:test`, `import.meta.dirnam
 | `data/queue.json` | Videos waiting for analysis (`queued` → `analyzing` → removed once the recipe file lands; `failed` if analysis is impossible). |
 | `lib/video.mjs` | URL parsing, embed and thumbnail URLs. Shared by the server, validator and browser (served at `/lib/`). |
 | `lib/recipe.mjs` | Recipe contract (`validateRecipe`). The enforced source of truth for the format below. |
+| `lib/catalog.mjs`, `lib/format.mjs`, `lib/nav.mjs` | DOM-free dashboard logic: matching and counting, text helpers, route parsing and keyboard maths. Tested with `node:test`. |
+| `lib/hub.mjs` | Registry for feature modules: filters, routes, mount-point and event names. |
 | `server.mjs` | `node:http` server: static `public/` and `/lib/`, plus the JSON API. |
-| `public/` | Dashboard (vanilla ES modules + CSS, light/dark). Hash routes: `#/`, `#/r/<id>`, `#/q/<queueId>`. |
+| `public/` | Dashboard (vanilla ES modules + CSS, light/dark). Hash routes: `#/`, `#/r/<id>`, `#/q/<queueId>`. `app.js` is boot and router; views are in `public/ui/`. |
+| `public/features/` | Self-contained feature modules, listed in `features/index.js`. Contract: `docs/design/MOUNT-POINTS.md`. |
+| `public/sw.js` | Offline service worker. Off unless the reader turns on the footer switch. |
+| `docs/design/` | `DESIGN.md` (tokens, layout contract), `AUDIT.md`, `MOUNT-POINTS.md`. Change `public/styles.css` and `DESIGN.md` together. |
 | `scripts/validate.mjs` | CLI validator; exits 1 on any problem. |
 
 API: `GET /api/recipes` → `{recipes, invalid}` · `GET /api/queue` · `POST /api/queue {url, note}` (409 if the video is already a recipe or queued; best-effort oEmbed title) · `DELETE /api/queue/<id>`.
@@ -69,5 +74,6 @@ Rules that matter more than the format:
 ## Conventions
 
 - Keep it dependency-free unless there's a real need; adding a build step is a decision to raise with the owner first.
-- The UI escapes every string from data files and oEmbed (`esc()` in `public/app.js`), because queue titles come from third parties.
+- The UI escapes every string from data files and oEmbed (`esc()` in `lib/format.mjs`), because queue titles come from third parties.
+- Dashboard logic that needs no DOM goes in `lib/` with a test; `public/ui/` only renders. `test/design.test.mjs` checks the stylesheet tokens, contrast, imports and mount points by reading the files. When a module is added to `public/` or `lib/` and imported by the dashboard, add it to `SHELL` in `public/sw.js`.
 - Browser storage only holds conveniences (filters, ingredient checkboxes), each read and write wrapped in try/catch.
