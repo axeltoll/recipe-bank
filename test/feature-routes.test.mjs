@@ -108,3 +108,120 @@ test('"Add to week" says added only when the stored plan gained the recipe', () 
   withStorage(blocked, add);
   assert.equal(rb.toasts.at(-1), 'Could not add it: this browser is not saving the week plan');
 });
+
+// ---------- the editor ----------
+
+/** A view root: innerHTML makes one child "page"; replaceChildren puts a kept one back. */
+function fakeRoot() {
+  let pages = 0;
+  return {
+    children: [],
+    set innerHTML(html) { this.children = html ? [{ page: ++pages, html }] : []; },
+    get innerHTML() { return this.children.map((c) => c.html).join(''); },
+    get firstElementChild() { return this.children[0] ?? null; },
+    querySelector: () => ({}),
+    replaceChildren(...nodes) { this.children = nodes; },
+  };
+}
+
+function editorHarness() {
+  const editors = [];
+  const mountEditor = () => {
+    const ed = { dirty: false, destroyed: false, isDirty: () => ed.dirty, destroy: () => { ed.destroyed = true; } };
+    editors.push(ed);
+    return ed;
+  };
+  let unload = null;
+  globalThis.addEventListener = (type, fn) => { if (type === 'beforeunload') unload = fn; };
+  const rb = fakeRb({ recipes: [alpha] });
+  globalThis.document = freshDocument(); // only this install's listeners
+  try {
+    installEditor(rb, { mountEditor });
+  } finally {
+    delete globalThis.addEventListener;
+  }
+  const root = fakeRoot();
+  const confirms = [];
+  let answer = false;
+  globalThis.confirm = (text) => { confirms.push(text); return answer; };
+  globalThis.location = { hash: '' };
+  /** What the dashboard does on a hash change: clear the view, render the route, then emit rb:view. */
+  const go = (hash) => {
+    location.hash = hash;
+    root.innerHTML = '';
+    const [, name, param] = hash.match(/^#\/([a-z-]+)(?:\/(.+))?$/) ?? [, 'home'];
+    if (rb.routes.has(name)) rb.routes.get(name).render(root, param, rb);
+    else root.innerHTML = `<div>${name}</div>`;
+    rb.emit('view', { name });
+  };
+  return { rb, root, editors, confirms, go, unload: () => unload, answer: (a) => { answer = a; } };
+}
+
+test('editor: leaving with unsaved changes asks; Cancel puts the same editor back', (t) => {
+  t.after(() => { delete globalThis.confirm; delete globalThis.location; });
+  const h = editorHarness();
+  h.go('#/edit/alpha');
+  assert.equal(h.editors.length, 1);
+  const page = h.root.firstElementChild;
+
+  // No changes: leaving does not ask.
+  h.go('#/plan');
+  assert.equal(h.confirms.length, 0);
+  assert.equal(h.editors[0].destroyed, true);
+
+  h.go('#/edit/alpha');
+  const ed = h.editors[1];
+  const editorPage = h.root.firstElementChild;
+  assert.notEqual(editorPage, page);
+  ed.dirty = true;
+
+  // A header link while there are changes: the reader says Cancel.
+  h.answer(false);
+  h.go('#/plan');
+  assert.equal(h.confirms.length, 1);
+  assert.match(h.confirms[0], /Leave without saving\?/);
+  assert.equal(ed.destroyed, false, 'the draft is kept');
+  assert.deepEqual(h.rb.navigated, ['#/edit/alpha'], 'and the route goes back to the editor');
+  h.go('#/edit/alpha'); // the hash change that navigate() causes
+  assert.equal(h.editors.length, 2, 'no new editor');
+  assert.deepEqual(h.root.children, [editorPage], 'the same editor page is back');
+  assert.equal(h.confirms.length, 1, 'coming back does not ask again');
+
+  // Another editor route asks too.
+  h.go('#/new');
+  assert.equal(h.confirms.length, 2);
+  assert.equal(h.editors.length, 2);
+  assert.equal(h.rb.navigated.at(-1), '#/edit/alpha');
+  h.go('#/edit/alpha');
+  assert.deepEqual(h.root.children, [editorPage]);
+
+  // Closing the tab: beforeunload asks while there are changes.
+  const unload = { prevented: false, returnValue: undefined, preventDefault() { this.prevented = true; } };
+  h.unload()(unload);
+  assert.equal(unload.prevented, true);
+  assert.equal(unload.returnValue, '');
+
+  // The reader agrees to leave: the editor goes.
+  h.answer(true);
+  h.go('#/');
+  assert.equal(h.confirms.length, 3);
+  assert.equal(ed.destroyed, true);
+  assert.equal(h.rb.navigated.length, 2, 'no navigation back');
+  const quiet = { prevented: false, preventDefault() { this.prevented = true; } };
+  h.unload()(quiet);
+  assert.equal(quiet.prevented, false, 'nothing to lose: the tab closes without asking');
+});
+
+test('editor: Cancel with changes asks once, not again on the way out', (t) => {
+  t.after(() => { delete globalThis.confirm; delete globalThis.location; });
+  const h = editorHarness();
+  h.go('#/edit/alpha');
+  h.editors[0].dirty = true;
+  h.answer(true);
+  document.dispatchEvent(new CustomEvent('recipe-bank:editor-cancel', { detail: { id: 'alpha', dirty: true } }));
+  assert.deepEqual(h.confirms, ['Discard your changes?']);
+  assert.equal(h.editors[0].destroyed, true);
+  assert.equal(h.rb.navigated.at(-1), '#/r/alpha');
+  h.go('#/r/alpha');
+  assert.equal(h.confirms.length, 1);
+});
