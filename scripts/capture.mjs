@@ -197,8 +197,10 @@ export function buildCapturePlan({ video, captureDir, tools = {}, modelPath = nu
     if (tools.ffmpeg) {
       // Real pixels for OCR: up to 1080p video merged with audio by ffmpeg, not the 360p pre-merged file.
       add('video', 'yt-dlp', [...common, '-f', 'bv*[height<=1080]+ba/b', '-o', 'video.%(ext)s', '--', video.url]);
+      // ffmpeg reads "%" in its output name as a frame number, so the output is a bare name in the capture folder
+      // (the runner's cwd), never the folder path.
       add('frames', 'ffmpeg', ['-nostdin', '-n', '-i', '<downloaded-video>', '-vf', 'fps=1/10,scale=1280:-2',
-        '-frames:v', '60', p(captureDir, 'frame-%03d.jpg')]);
+        '-frames:v', '60', 'frame-%03d.jpg']);
       if (tools.tesseract) {
         add('ocr', 'tesseract', ['<frame.jpg>', '<frame-output-base>', '-l', 'eng'], 'each-frame');
       } else warnings.push('tesseract missing: read the captured frame images manually.');
