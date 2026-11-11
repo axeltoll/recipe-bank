@@ -154,6 +154,36 @@ test('scale renders servings or factors and marks what changed', () => {
   assert.doesNotMatch(scaleUi.renderScale(evil, 2), /<img|<svg|<i>|<b>/);
 });
 
+/** A mount-point stand-in: markup, listeners, and an event whose target answers closest() for `hits`. */
+const fakeEl = () => Object.assign(new EventTarget(), { innerHTML: '', querySelector: () => null });
+function fire(el, type, hits = {}) {
+  const e = new Event(type);
+  Object.defineProperty(e, 'target', { value: { closest: (sel) => hits[sel] ?? null, ...hits.self } });
+  el.dispatchEvent(e);
+}
+
+test('scale − / + step from the target as shown, even when it is not a whole number', () => {
+  const el = fakeEl();
+  const scaler = scaleUi.mount(el, { recipe: alpha, factor: 2.6 / 4, css: false }); // a household of 2.6
+  const target = () => Math.round(scaler.getFactor() * 4 * 1e6) / 1e6;
+  assert.equal(target(), 2.6);
+  assert.match(el.innerHTML, /data-target aria-live="polite">2\.6</);
+  const step = (n) => fire(el, 'click', { '[data-step]': { dataset: { step: String(n) } } });
+  step(1);
+  assert.equal(target(), 3.6, '+ adds one serving, it does not jump to 4');
+  step(-1);
+  step(-1);
+  assert.equal(target(), 1.6);
+  step(-1);
+  assert.equal(target(), 1, 'never below one serving');
+  step(1);
+  assert.equal(target(), 2);
+  scaler.setFactor(0.1 * 3 / 4); // 0.30000000000000004 servings: float noise is absorbed
+  step(1);
+  assert.equal(scaler.getFactor() * 4, 1.3);
+  scaler.destroy();
+});
+
 test('amountHtml for each kind of amount', () => {
   const [chicken, salt, oil] = scaleRecipe(alpha, 2).components[0].ingredients;
   assert.match(scaleUi.amountHtml(chicken, 2), /rbf-scaled/);
