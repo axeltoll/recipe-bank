@@ -1,14 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
+import { mkdir, readFile, readdir, rm, truncate, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
-  PACK_FORMAT, PACK_VERSION, MAX_PACK_CHARS, MAX_PACK_RECIPES, MAX_LINK_CHARS, MAX_TITLE_CHARS, PackError,
+  PACK_FORMAT, PACK_VERSION, MAX_PACK_CHARS, MAX_PACK_BYTES, MAX_PACK_RECIPES, MAX_LINK_CHARS, MAX_TITLE_CHARS, PackError,
   exportPack, serializePack, packFileName, readPack, packFromRead, planImport, applyImport,
   packLink, packFromLink, packParam, hasPackLink, toBase64url, fromBase64url, slugify, uniqueId,
 } from '../lib/pack.mjs';
 import { validateRecipe } from '../lib/recipe.mjs';
-import { makeRecipe, ROOT } from './helpers/bank.mjs';
+import { makeRecipe, videoId, ROOT, tempBank } from './helpers/bank.mjs';
+import { readPackFile } from '../scripts/pack-file.mjs';
 
 const EXPORTED = '2026-11-11T10:00:00.000Z';
 const wrap = (recipes, extra = {}) => ({ format: PACK_FORMAT, version: PACK_VERSION, title: 'T', exported: EXPORTED, recipes, ...extra });
@@ -44,7 +45,27 @@ test('exportPack refuses empty, invalid and doubled recipes', () => {
   assert.equal(code(() => exportPack([{ ...a, status: 'draft' }])), 'invalid-recipe');
   assert.equal(code(() => exportPack([a, a])), 'duplicate');
   assert.equal(code(() => exportPack([a, { ...makeRecipe('other', 1) }])), 'duplicate', 'same video, other id');
-  assert.equal(code(() => exportPack(Array.from({ length: MAX_PACK_RECIPES + 1 }, (_, i) => makeRecipe(`r${i}`, i)))), 'too-many');
+  const tooMany = Array.from({ length: MAX_PACK_RECIPES + 1 }, (_, i) => makeRecipe(`r${i}`, i));
+  assert.deepEqual(tooMany.flatMap((r) => validateRecipe(r)), [], 'every recipe is valid, so only the count is wrong');
+  assert.equal(code(() => exportPack(tooMany)), 'too-many');
+});
+
+test('makeRecipe gives a valid recipe with a distinct 11-character video id for any n', () => {
+  const ns = [0, 1, 9, 10, 99, 100, 101, 999, 1000, 12345, 99_999_999_999];
+  const ids = ns.map((n) => videoId(n));
+  assert.ok(ids.every((id) => id.length === 11), ids.join(' '));
+  assert.equal(new Set(ids).size, ns.length);
+  assert.equal(videoId(1), 'testvideo01');
+  for (const n of ns) assert.deepEqual(validateRecipe(makeRecipe(`r${n}`, n), `r${n}`), [], `n = ${n}`);
+  for (const bad of [-1, 1.5, 1e12, NaN]) assert.throws(() => videoId(bad), RangeError, String(bad));
+});
+
+test('exportPack refuses a pack that would be larger than readPack accepts', () => {
+  const big = Array.from({ length: 20 }, (_, i) => makeRecipe(`r${i}`, i, { notes: ['x'.repeat(110_000)] }));
+  assert.throws(() => exportPack(big), (e) => e instanceof PackError && e.code === 'too-large' && /too large/.test(e.message));
+  const fits = exportPack(big.slice(0, 15));
+  assert.ok(serializePack(fits).length <= MAX_PACK_CHARS);
+  assert.equal(readPack(serializePack(fits)).ok, true, 'what exportPack makes, readPack reads');
 });
 
 test('serializePack and packFileName', () => {
@@ -96,6 +117,36 @@ test('readPack rejects wrappers that are not a usable pack', () => {
     assert.deepEqual(read.entries, []);
   }
   for (const v of [null, undefined, 42, []]) assert.equal(readPack(v).ok, false);
+});
+
+test('readPack applies the size limit to a parsed pack too, and never throws on one', () => {
+  const big = wrap([makeRecipe('alpha', 1, { notes: ['x'.repeat(MAX_PACK_CHARS)] })]);
+  const read = readPack(big);
+  assert.equal(read.ok, false);
+  assert.match(read.errors[0], /too large/);
+  const cyclic = wrap([makeRecipe('alpha', 1)]);
+  cyclic.self = cyclic;
+  assert.equal(readPack(cyclic).ok, false);
+  assert.equal(readPack(wrap([makeRecipe('alpha', 1)])).ok, true);
+});
+
+test('pack files are size-checked before they are read', async () => {
+  const dir = await tempBank([]);
+  try {
+    const huge = join(dir, 'huge.recipe-pack.json');
+    await writeFile(huge, '');
+    await truncate(huge, MAX_PACK_BYTES + 1); // sparse: nothing is written to disk
+    await assert.rejects(readPackFile(huge), /too large/);
+    const folder = join(dir, 'folder.json');
+    await mkdir(folder);
+    await assert.rejects(readPackFile(folder), /not a regular file|EISDIR/);
+    const small = join(dir, 'small.recipe-pack.json');
+    const text = serializePack(exportPack([makeRecipe('alpha', 1)], { exported: EXPORTED }));
+    await writeFile(small, text);
+    assert.equal(await readPackFile(small), text);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
 
 test('hostile packs: prototype-pollution keys are refused, nothing is polluted', () => {
@@ -181,6 +232,24 @@ test('HTML and control characters in titles stay plain text, bounded', () => {
   assert.equal(readPack(wrap([makeRecipe('alpha', 1)], { title: 'é'.repeat(400) })).title.length, MAX_TITLE_CHARS);
   assert.equal(readPack(wrap([makeRecipe('alpha', 1)], { title: 42 })).title, 'Untitled pack');
   assert.equal(readPack(wrap([makeRecipe('alpha', 1)], { exported: 'not a date' })).exported, null);
+});
+
+test('the imported file keeps the title and creator name the preview shows', () => {
+  const rlo = String.fromCodePoint(0x202e);
+  const raw = makeRecipe('alpha', 1, { title: `Safe${rlo} title\n\nline two ${'é'.repeat(200)}` });
+  raw.creator.name = `A${rlo}\tcreator`;
+  const plan = planImport(wrap([raw]));
+  const [item] = plan.items;
+  assert.equal(item.status, 'new');
+  assert.equal(item.recipe.title, item.title, 'file title is the previewed title');
+  assert.equal(item.recipe.creator.name, item.creator, 'file creator is the previewed creator');
+  assert.equal([...item.title].length, MAX_TITLE_CHARS);
+  assert.ok(item.title.startsWith('Safe title line two'));
+  assert.equal(item.creator, 'A creator');
+  const [file] = applyImport(plan).files;
+  assert.equal(JSON.parse(file.contents).title, item.title);
+  assert.ok(!file.contents.includes(rlo));
+  assert.equal(raw.title.includes(rlo), true, 'the input is not changed');
 });
 
 test('packFromRead rebuilds a pack that reads the same', () => {

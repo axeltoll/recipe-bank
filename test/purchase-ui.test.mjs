@@ -56,7 +56,8 @@ test('purchase list renders the household, amounts to buy, creator amounts and f
   assert.match(html, /Reset to salt, black pepper, cooking oil/);
   assert.match(html, /<details class="rbf-pantry-edit">/);
   assert.match(ui.renderPurchaseList(p, new Set(), { pantry: DEFAULT_PANTRY, pantryOpen: true }), /<details class="rbf-pantry-edit" open>/);
-  assert.doesNotMatch(ui.renderPurchaseList(p), /data-untick|rbf-pantry/);
+  assert.doesNotMatch(ui.renderPurchaseList(p), /rbf-pantry/);
+  assert.match(ui.renderPurchaseList(p), /data-untick hidden>Untick all</, 'nothing ticked: the button waits, hidden');
 });
 
 test('purchase list empty state, and an empty pantry', () => {
@@ -190,6 +191,77 @@ test('a fixed profile is not replaced by household events, and persist: false ke
     shop.setPantry(['parsley']);
     assert.equal(mem.getItem('rb:pantry'), null);
     assert.deepEqual(shop.getPurchase().leftOut, ['parsley']);
+    shop.destroy();
+  });
+});
+
+/** A fake element that answers querySelector for the progress text and the Untick all button. */
+function listElement() {
+  const progress = { textContent: '' };
+  const untick = { hidden: true };
+  const el = Object.assign(new EventTarget(), {
+    innerHTML: '', closest: () => null,
+    querySelector: (sel) => ({ '[data-progress]': progress, '[data-untick]': untick })[sel] ?? null,
+  });
+  return { el, progress, untick };
+}
+function tick(el, key, checked) {
+  const e = new Event('change');
+  const box = { checked, dataset: { key }, closest: () => null };
+  Object.defineProperty(e, 'target', { value: { closest: (sel) => (sel === 'input[data-key]' ? box : null) } });
+  el.dispatchEvent(e);
+}
+
+test('Untick all shows as soon as a box is ticked and hides when the last one is unticked', async () => {
+  for (const household of [false, true]) {
+    await withFakeDom(() => {
+      const { el, progress, untick } = listElement();
+      const shop = ui.mount(el, { recipes: [alpha], plan: week, storage: memory(), css: false, household });
+      assert.match(el.innerHTML, /data-untick hidden/);
+      tick(el, 'chicken', true);
+      assert.match(progress.textContent, /^1 of \d+ ticked$/);
+      assert.equal(untick.hidden, false, `shown after the first tick (household: ${household})`);
+      tick(el, 'chicken', false);
+      assert.equal(untick.hidden, true, 'hidden again with nothing ticked');
+      shop.destroy();
+    });
+  }
+});
+
+test('a stored ticked value that is not an array counts as nothing ticked instead of breaking the list', async () => {
+  for (const stored of ['{"chicken":true}', '7', '"chicken"', '[1, "chicken", null]']) {
+    await withFakeDom((doc) => {
+      const mem = memory();
+      mem.setItem(ui.CHECKED_KEY, stored);
+      const el = fakeElement();
+      const shop = ui.mount(el, { recipes: [alpha], plan: week, storage: mem, css: false });
+      assert.match(el.innerHTML, stored.startsWith('[') ? /1 of \d+ ticked/ : /0 of \d+ ticked/, stored);
+      // The same value arriving from another tab.
+      mem.setItem(ui.CHECKED_KEY, '{"x":1}');
+      globalThis.window.dispatchEvent(Object.assign(new Event('storage'), { key: ui.CHECKED_KEY }));
+      assert.match(el.innerHTML, /0 of \d+ ticked/);
+      shop.destroy();
+    });
+  }
+});
+
+test('update({ profile }) keeps that profile, and update({ pantry: [] }) empties the pantry', async () => {
+  await withFakeDom((doc) => {
+    const mem = memory();
+    const el = fakeElement();
+    const shop = ui.mount(el, { recipes: [alpha, beta], plan: week, storage: mem, css: false, household: true });
+    assert.equal(shop.getPurchase().servings, 2);
+    shop.update({ profile: oneAdult });
+    assert.equal(shop.getPurchase().servings, 1);
+    doc.dispatchEvent(new CustomEvent('recipe-bank:household-change', { detail: { profile: family } }));
+    assert.equal(shop.getPurchase().servings, 1, 'a profile given through update() is not replaced by household events');
+    shop.update({ profile: null });
+    doc.dispatchEvent(new CustomEvent('recipe-bank:household-change', { detail: { profile: family } }));
+    assert.equal(shop.getPurchase().servings, 2.6, 'profile: null follows the household again');
+
+    shop.update({ pantry: [] });
+    assert.deepEqual(shop.getPantry(), []);
+    assert.deepEqual(shop.getPurchase().leftOut, []);
     shop.destroy();
   });
 });

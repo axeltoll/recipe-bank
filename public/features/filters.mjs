@@ -17,6 +17,20 @@ export const FILTER_KEY = 'rb:filters-extra';
 export const FILTER_EVENT = 'rb:filter-change';
 export const SECTIONS = ['without', 'tags', 'nutrition'];
 
+/** The filter fields each section owns. */
+const SECTION_FIELDS = { without: ['without'], tags: ['tags'], nutrition: ['minProtein', 'maxCalories'] };
+const ownFields = (sections) => sections.flatMap((s) => SECTION_FIELDS[s] ?? []);
+
+/**
+ * `f` with only the fields of `sections` kept; the others are off. A panel's summary is built from this and
+ * its "Clear these" clears only these fields, so a panel showing one section never reports or clears another's.
+ */
+export function sectionFilter(f, sections = SECTIONS) {
+  const n = extraFilter(f);
+  const own = new Set(ownFields(sections));
+  return extraFilter(Object.fromEntries(Object.entries(n).map(([k, v]) => [k, own.has(k) ? v : null])));
+}
+
 /** Only the fields this module owns: { without, tags, minProtein, maxCalories }. */
 export function extraFilter(f) {
   const n = normalizeFilter(f);
@@ -64,7 +78,7 @@ export function renderFilters(recipes, filter, { sections = SECTIONS, limit = 16
         </div>
       </div>`);
   }
-  const summary = describeFilter(f);
+  const summary = describeFilter(sectionFilter(f, sections));
   return `
     <section class="rbf rbf-filters" aria-label="More filters">
       ${parts.join('')}
@@ -97,7 +111,7 @@ export function mount(el, options = {}) {
     if (opts.persist) store.set(opts.storageKey, filter);
     if (rerender) render();
     else {
-      const summary = describeFilter(filter);
+      const summary = describeFilter(sectionFilter(filter, opts.sections));
       const s = el.querySelector('[data-summary]');
       if (s) s.textContent = summary;
       const clear = el.querySelector('[data-clear]');
@@ -127,7 +141,9 @@ export function mount(el, options = {}) {
       return render();
     }
     if (e.target.closest('[data-clear]')) {
-      filter = extraFilter({});
+      // Only what this panel shows: fields of sections that are not mounted here stay as they are.
+      const off = extraFilter({});
+      filter = { ...filter, ...Object.fromEntries(ownFields(opts.sections).map((k) => [k, off[k]])) };
       return changed({ rerender: true });
     }
   };

@@ -101,7 +101,9 @@ export function mount(el, options = {}) {
     if (step) {
       const serves = parseServes(recipe.serves);
       if (!serves) return;
-      const target = Math.max(1, Math.round(serves.count * factor) + Number(step.dataset.step));
+      // Step from the target as shown (a household target of 2.6 goes to 3.6 or 1.6), not from a
+      // rounded one; the rounding only absorbs float noise.
+      const target = Math.max(1, Math.round((serves.count * factor + Number(step.dataset.step)) * 1e6) / 1e6);
       return set(target / serves.count);
     }
     const f = e.target.closest('[data-factor]');

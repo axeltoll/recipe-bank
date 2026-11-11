@@ -8,12 +8,13 @@
 // import is a dry run unless --write, and only ever creates new recipe files.
 // RECIPE_BANK_DIR points at another data folder (one holding recipes/), e.g. for tests.
 
-import { readFile, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { loadRecipes, dataPaths } from '../server.mjs';
 import {
   exportPack, serializePack, packLink, packFromLink, hasPackLink, readPack, planImport, applyImport, PackError,
 } from '../lib/pack.mjs';
+import { readPackFile } from './pack-file.mjs';
 
 const { recipesDir: RECIPES_DIR } = dataPaths();
 const USAGE = `Usage:
@@ -94,7 +95,7 @@ async function importCommand() {
   } else {
     let text;
     try {
-      text = await readFile(source, 'utf8');
+      text = await readPackFile(source);
     } catch (e) {
       console.error(`Cannot read ${source}: ${e.message}`);
       process.exit(1);
