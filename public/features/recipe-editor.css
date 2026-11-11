@@ -1,0 +1,288 @@
+/* Recipe editor (public/features/recipe-editor.mjs). Loaded by the module itself.
+   Colour and spacing come only from custom properties: the dashboard's tokens when they exist,
+   otherwise the fallbacks below (light, with a dark set for prefers-color-scheme: dark). */
+
+.re {
+  --re-bg: var(--surface, #ffffff);
+  --re-bg-2: var(--surface-2, #f8f4ee);
+  --re-ink: var(--ink, #1f1a16);
+  --re-ink-2: var(--ink-2, #3d342d);
+  --re-muted: var(--muted, #6f645b);
+  --re-line: var(--line, #e6ddd1);
+  --re-accent: var(--accent, #c2410c);
+  --re-accent-ink: var(--accent-ink, #ffffff);
+  --re-accent-soft: var(--accent-soft, #fde8d7);
+  --re-ok: var(--ok, #2f7d4f);
+  --re-ok-soft: var(--ok-soft, #dff1e5);
+  --re-warn: var(--warn, #9a6400);
+  --re-warn-soft: var(--warn-soft, #fbefd2);
+  --re-danger: var(--danger, #b42318);
+  --re-focus: var(--focus, var(--re-accent));
+  --re-radius: var(--radius, 14px);
+  --re-radius-sm: var(--radius-sm, 10px);
+  --re-s1: var(--space-1, 4px);
+  --re-s2: var(--space-2, 8px);
+  --re-s3: var(--space-3, 12px);
+  --re-s4: var(--space-4, 16px);
+  --re-s5: var(--space-5, 24px);
+  --re-s6: var(--space-6, 32px);
+  --re-target: var(--tap-target, 44px);
+
+  color: var(--re-ink);
+  font: inherit;
+  display: grid;
+  gap: var(--re-s5);
+  max-width: var(--re-max, 960px);
+  margin-inline: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  .re {
+    --re-bg: var(--surface, #1e1a16);
+    --re-bg-2: var(--surface-2, #27221d);
+    --re-ink: var(--ink, #f3ede6);
+    --re-ink-2: var(--ink-2, #d4cbc1);
+    --re-muted: var(--muted, #a0958a);
+    --re-line: var(--line, #362f28);
+    --re-accent: var(--accent, #f07a3e);
+    --re-accent-ink: var(--accent-ink, #1a0f08);
+    --re-accent-soft: var(--accent-soft, #3a2316);
+    --re-ok: var(--ok, #7fd09c);
+    --re-ok-soft: var(--ok-soft, #1d3326);
+    --re-warn: var(--warn, #f0c060);
+    --re-warn-soft: var(--warn-soft, #3a2f16);
+    --re-danger: var(--danger, #ff8a7a);
+  }
+}
+
+.re *,
+.re *::before,
+.re *::after { box-sizing: border-box; }
+
+.re-body { display: grid; gap: var(--re-s5); }
+
+.re-head h2 { margin: 0 0 var(--re-s2); }
+.re-lede,
+.re-hint { color: var(--re-muted); margin: 0; }
+.re-hint { font-size: 0.875em; }
+.re-opt { color: var(--re-muted); font-weight: 400; }
+.re code { font-size: 0.9em; }
+
+.re-callout {
+  margin: var(--re-s3) 0 0;
+  padding: var(--re-s3) var(--re-s4);
+  border-radius: var(--re-radius-sm);
+  background: var(--re-warn-soft);
+  color: var(--re-ink);
+}
+
+.re-section {
+  margin: 0;
+  padding: var(--re-s4);
+  border: 1px solid var(--re-line);
+  border-radius: var(--re-radius);
+  background: var(--re-bg);
+  display: grid;
+  gap: var(--re-s3);
+  min-width: 0;
+}
+.re-section > legend,
+.re-section > h3 {
+  margin: 0;
+  padding: 0 var(--re-s1);
+  font-weight: 600;
+  font-size: 1.05em;
+}
+.re-section > h3 { padding: 0; }
+
+.re-field { display: grid; gap: var(--re-s1); min-width: 0; }
+.re-label { font-size: 0.875em; font-weight: 600; color: var(--re-ink-2); }
+
+.re-input {
+  width: 100%;
+  min-height: var(--re-target);
+  padding: var(--re-s2) var(--re-s3);
+  border: 1px solid var(--re-line);
+  border-radius: var(--re-radius-sm);
+  background: var(--re-bg);
+  color: var(--re-ink);
+  font: inherit;
+  font-size: max(16px, 1em); /* stops iOS zooming into the field */
+}
+textarea.re-input { resize: vertical; line-height: 1.45; }
+.re-input[readonly] { background: var(--re-bg-2); color: var(--re-muted); }
+
+.re-grid {
+  display: grid;
+  gap: var(--re-s3);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+
+.re-detect { font-size: 0.875em; color: var(--re-muted); }
+
+.re-player > summary,
+.re-preview > summary {
+  min-height: var(--re-target);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--re-accent);
+  font-weight: 600;
+}
+.re-frame { margin-top: var(--re-s2); }
+.re-frame iframe {
+  display: block;
+  width: min(100%, 360px);
+  aspect-ratio: 9 / 16;
+  max-height: 70vh;
+  border: 0;
+  border-radius: var(--re-radius-sm);
+  background: var(--re-ink);
+}
+
+/* Parts, ingredient and step rows */
+
+.re-part {
+  display: grid;
+  gap: var(--re-s3);
+  padding: var(--re-s4);
+  border: 1px solid var(--re-line);
+  border-radius: var(--re-radius-sm);
+  background: var(--re-bg-2);
+}
+.re-part-head { display: flex; align-items: center; justify-content: space-between; gap: var(--re-s3); flex-wrap: wrap; }
+.re-part h4 { margin: 0; font-size: 1em; }
+.re-part h5 { margin: var(--re-s2) 0 0; font-size: 0.9em; color: var(--re-ink-2); }
+
+.re-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--re-s3); }
+.re-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--re-s2);
+  align-items: end;
+  padding: var(--re-s3);
+  border: 1px solid var(--re-line);
+  border-radius: var(--re-radius-sm);
+  background: var(--re-bg);
+}
+
+.re-ing {
+  display: grid;
+  gap: var(--re-s2);
+  grid-template-columns: minmax(10rem, 2fr) minmax(8rem, 1.2fr) minmax(8rem, 1.4fr) minmax(10rem, 1.4fr);
+}
+.re-ing > .re-field:last-child { grid-column: 1 / -1; }
+
+.re-step { display: grid; gap: var(--re-s2); grid-template-columns: minmax(0, 1fr) auto; align-items: end; }
+.re-time { display: flex; gap: var(--re-s1); align-items: end; }
+.re-time .re-input { width: 6.5rem; }
+
+.re-tools { display: flex; gap: var(--re-s1); align-items: center; }
+
+@media (max-width: 760px) {
+  .re-ing { grid-template-columns: 1fr 1fr; }
+  .re-ing > .re-field:first-child { grid-column: 1 / -1; }
+  .re-step { grid-template-columns: 1fr; }
+  .re-row { grid-template-columns: 1fr; }
+  .re-tools { justify-content: flex-end; }
+}
+@media (max-width: 420px) {
+  .re-ing { grid-template-columns: 1fr; }
+}
+
+/* Buttons: every target is at least 44 px */
+
+.re-btn,
+.re-icon {
+  min-height: var(--re-target);
+  border: 1px solid var(--re-line);
+  border-radius: var(--re-radius-sm);
+  background: var(--re-bg);
+  color: var(--re-ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.re-btn { padding: var(--re-s2) var(--re-s4); }
+.re-icon {
+  min-width: var(--re-target);
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  line-height: 1;
+}
+.re-primary { background: var(--re-accent); border-color: var(--re-accent); color: var(--re-accent-ink); }
+.re-quiet { background: transparent; }
+.re-danger { color: var(--re-danger); }
+.re-add { justify-self: start; }
+.re-btn:hover:not(:disabled),
+.re-icon:hover:not(:disabled) { border-color: var(--re-accent); }
+.re-btn:disabled,
+.re-icon:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.re :focus-visible {
+  outline: 3px solid var(--re-focus);
+  outline-offset: 2px;
+}
+
+/* Problems, preview and the action bar */
+
+.re-footer { display: grid; gap: var(--re-s4); }
+
+.re-problems {
+  padding: var(--re-s3) var(--re-s4);
+  border-radius: var(--re-radius-sm);
+  border: 1px solid var(--re-warn);
+  background: var(--re-warn-soft);
+}
+.re-problems.re-ok { border-color: var(--re-ok); background: var(--re-ok-soft); }
+.re-problems-head { margin: 0; font-size: 1em; }
+.re-problem-list { margin: var(--re-s2) 0 0; padding-left: var(--re-s5); display: grid; gap: var(--re-s1); }
+.re-problem-list:empty { display: none; }
+.re-problem {
+  display: inline;
+  min-height: var(--re-target);
+  padding: var(--re-s2) 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+}
+button.re-problem { cursor: pointer; text-decoration: underline; text-underline-offset: 3px; display: inline-block; }
+
+.re-json {
+  margin: var(--re-s2) 0 0;
+  padding: var(--re-s3);
+  max-height: 24rem;
+  overflow: auto;
+  border-radius: var(--re-radius-sm);
+  background: var(--re-bg-2);
+  border: 1px solid var(--re-line);
+  font-size: 0.8em;
+  white-space: pre;
+}
+
+.re-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--re-s3);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--re-s3) var(--re-s4);
+  padding-bottom: calc(var(--re-s3) + env(safe-area-inset-bottom, 0px));
+  border: 1px solid var(--re-line);
+  border-radius: var(--re-radius);
+  background: var(--re-bg);
+}
+.re-status { margin: 0; color: var(--re-muted); flex: 1 1 14rem; }
+.re-status a { color: var(--re-accent); }
+.re-buttons { display: flex; flex-wrap: wrap; gap: var(--re-s2); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .re-btn,
+  .re-icon { transition: border-color 0.15s ease; }
+}

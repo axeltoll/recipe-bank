@@ -6,7 +6,7 @@
 // oEmbed lookup can be swapped out) and `loadRecipes` / `loadQueue`.
 
 import { createServer } from 'node:http';
-import { readFile, readdir, writeFile, rename, mkdir } from 'node:fs/promises';
+import { readFile, readdir, writeFile, rename, mkdir, unlink } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { parseVideoUrl, videoKey } from './lib/video.mjs';
@@ -20,6 +20,7 @@ const RECIPES_DIR = join(DATA_ROOT, 'recipes');
 const QUEUE_FILE = join(DATA_ROOT, 'data', 'queue.json');
 const PORT = Number(process.env.PORT ?? 4780);
 const HOST = process.env.HOST ?? '127.0.0.1';
+const RECIPE_BODY_LIMIT = 500_000;
 
 const STATIC = { '/': join(ROOT, 'public'), '/lib/': join(ROOT, 'lib') };
 const TYPES = {
@@ -67,6 +68,8 @@ async function saveQueue(queue, file) {
   await writeFile(tmp, JSON.stringify(queue, null, 2) + '\n');
   await rename(tmp, file);
 }
+
+const saveQueue = (queueFile, queue) => writeJsonAtomic(queueFile, queue);
 
 // Best-effort title/creator lookup; the queue entry is still saved if this fails.
 export async function oembed(video) {

@@ -36,6 +36,8 @@ No dependencies. Node ≥ 22 (built-in `fetch`, `node:test`, `import.meta.dirnam
 
 API: `GET /api/recipes` → `{recipes, invalid}` · `GET /api/queue` · `POST /api/queue {url, note}` (409 if the video is already a recipe or queued; best-effort oEmbed title) · `DELETE /api/queue/<id>` · `POST /api/packs/import {pack, include?}` (JSON content type required; creates new recipe files only, never overwrites; duplicates by video are skipped). `RECIPE_BANK_DIR` points the server and scripts at another data folder (tests use a temp one).
 
+Recipe writes (local server only; the static build stays read-only): `POST /api/recipes <recipe>` creates `recipes/<id>.json` → 201 `{recipe, dequeued}` · `PUT /api/recipes/<id> <recipe>` replaces it → 200. Both run `validateRecipe` (400 `{error, problems}`), refuse a duplicate id or video (409 `{error, recipeId}`; PUT answers 404 for an unknown id), write atomically as two-space JSON with a trailing newline, and remove the queue entry for the recipe's video.
+
 ## Recipe file contract (for analysis agents)
 
 ```jsonc
