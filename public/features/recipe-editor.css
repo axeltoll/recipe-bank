@@ -1,0 +1,353 @@
+/* Recipe editor (public/features/recipe-editor.mjs). Loaded by the module itself.
+   Colour and spacing come only from custom properties: the dashboard's tokens when they exist,
+   otherwise the fallbacks below (light, with a dark set for prefers-color-scheme: dark).
+   Mobile-first: one column on a phone, the wider field rows from 768px.
+   test/recipe-editor.test.mjs checks that no rule holds a literal colour or spacing value. */
+
+.re {
+  --re-bg: var(--surface, #ffffff);
+  --re-bg-2: var(--surface-2, #f3ece2);
+  --re-ink: var(--ink, #1f1a16);
+  --re-ink-2: var(--ink-2, #4a423b);
+  --re-muted: var(--muted, #655b53);
+  --re-line: var(--line-strong, #8f8378);
+  --re-rule: var(--line, #e6ddd1);
+  --re-accent: var(--accent, #c2410c);
+  --re-accent-strong: var(--accent-strong, #a83a0b);
+  --re-accent-ink: var(--accent-ink, #ffffff);
+  --re-accent-text: var(--accent-text, #9a3412);
+  --re-accent-soft: var(--accent-soft, #fde8d7);
+  --re-ok: var(--ok, #1f6b3f);
+  --re-ok-soft: var(--ok-soft, #dff1e5);
+  --re-warn: var(--warn, #7a4d00);
+  --re-warn-soft: var(--warn-soft, #fbefd2);
+  --re-danger: var(--danger, #b3261e);
+  --re-focus: var(--focus, var(--re-ink));
+  --re-radius: var(--r-lg, 18px);
+  --re-radius-sm: var(--r-md, 12px);
+  --re-s1: var(--s-1, 4px);
+  --re-s2: var(--s-2, 8px);
+  --re-s3: var(--s-3, 12px);
+  --re-s4: var(--s-4, 16px);
+  --re-s5: var(--s-5, 24px);
+  --re-s6: var(--s-6, 32px);
+  --re-target: var(--tap, 44px);
+  --re-measure: var(--measure-text, 60ch);
+  --re-display: var(--font-display, Georgia, serif);
+
+  color: var(--re-ink);
+  font: inherit;
+  display: grid;
+  gap: var(--re-s5);
+  width: 100%;
+  max-width: var(--re-max, 960px);
+  min-width: 0;
+  margin-inline: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  .re {
+    --re-bg: var(--surface, #1d1915);
+    --re-bg-2: var(--surface-2, #26211c);
+    --re-ink: var(--ink, #f4eee7);
+    --re-ink-2: var(--ink-2, #d6cdc3);
+    --re-muted: var(--muted, #a89d92);
+    --re-line: var(--line-strong, #7d7166);
+    --re-rule: var(--line, #3a322b);
+    --re-accent: var(--accent, #f08a4b);
+    --re-accent-strong: var(--accent-strong, #f5a06a);
+    --re-accent-ink: var(--accent-ink, #1a0f08);
+    --re-accent-text: var(--accent-text, #f5a06a);
+    --re-accent-soft: var(--accent-soft, #3a2416);
+    --re-ok: var(--ok, #7fd09c);
+    --re-ok-soft: var(--ok-soft, #1c3325);
+    --re-warn: var(--warn, #f0c060);
+    --re-warn-soft: var(--warn-soft, #3a2e14);
+    --re-danger: var(--danger, #ff8a80);
+  }
+}
+
+.re *,
+.re *::before,
+.re *::after { box-sizing: border-box; }
+
+/* Nothing in the form may set the page width: an opened JSON preview scrolls inside itself. */
+.re > *,
+.re-body > *,
+.re-footer > * { min-width: 0; }
+
+.re-body { display: grid; gap: var(--re-s5); }
+
+/* The page already has a title; the module's own heading steps down to a section title. */
+.re-head h2 {
+  margin: 0 0 var(--re-s2);
+  font: 650 var(--text-xl, 1.375rem) / 1.2 var(--re-display);
+}
+.re-lede,
+.re-hint {
+  max-width: var(--re-measure);
+  margin: 0;
+  color: var(--re-muted);
+}
+.re-hint { font-size: var(--text-sm, 0.875rem); font-weight: 400; }
+.re-opt { color: var(--re-muted); font-weight: 400; }
+.re code { font-size: 0.9em; }
+
+.re-callout {
+  max-width: var(--re-measure);
+  margin: var(--re-s3) 0 0;
+  padding: var(--re-s3) var(--re-s4);
+  border-left: 4px solid var(--re-warn);
+  border-radius: var(--re-radius-sm);
+  background: var(--re-warn-soft);
+  color: var(--re-ink);
+}
+
+.re-section {
+  margin: 0;
+  padding: var(--re-s4);
+  border: 1px solid var(--re-rule);
+  border-radius: var(--re-radius);
+  background: var(--re-bg);
+  box-shadow: var(--shadow-1, none);
+  display: grid;
+  gap: var(--re-s3);
+  min-width: 0;
+}
+.re-section > legend,
+.re-section > h3 {
+  margin: 0;
+  padding: 0 var(--re-s2);
+  font: 650 var(--text-xl, 1.375rem) / 1.2 var(--re-display);
+}
+.re-section > h3 { padding: 0; }
+
+.re-field { display: grid; gap: var(--re-s1); min-width: 0; }
+.re-label { font-size: var(--text-sm, 0.875rem); font-weight: 600; color: var(--re-ink-2); }
+
+.re-input {
+  width: 100%;
+  min-width: 0;
+  min-height: var(--re-target);
+  padding: var(--re-s2) var(--re-s3);
+  border: 1px solid var(--re-line);
+  border-radius: var(--re-radius-sm);
+  background: var(--re-bg);
+  color: var(--re-ink);
+  font: inherit;
+  font-size: max(16px, 1em); /* stops iOS zooming into the field */
+}
+textarea.re-input { resize: vertical; line-height: 1.45; }
+.re-input[readonly] { background: var(--re-bg-2); color: var(--re-muted); }
+
+.re-grid {
+  display: grid;
+  gap: var(--re-s3);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+
+.re-detect { font-size: var(--text-sm, 0.875rem); color: var(--re-muted); }
+
+.re-player > summary,
+.re-preview > summary {
+  min-height: var(--re-target);
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--re-accent-text);
+  font-weight: 600;
+}
+.re-frame { margin-top: var(--re-s2); }
+.re-frame iframe {
+  display: block;
+  width: min(100%, 360px);
+  aspect-ratio: 9 / 16;
+  max-height: 70vh;
+  border: 0;
+  border-radius: var(--re-radius-sm);
+  background: var(--stage, var(--re-ink));
+}
+
+/* Parts, ingredient and step rows */
+
+.re-part {
+  display: grid;
+  gap: var(--re-s3);
+  min-width: 0;
+  padding: var(--re-s3);
+  border: 1px solid var(--re-rule);
+  border-radius: var(--re-radius-sm);
+  background: var(--re-bg-2);
+}
+.re-part-head { display: flex; align-items: center; justify-content: space-between; gap: var(--re-s3); flex-wrap: wrap; }
+.re-part h4 { margin: 0; font-size: 1em; color: var(--re-accent-text); }
+.re-part h5 {
+  margin: var(--re-s2) 0 0;
+  font-size: var(--text-sm, 0.875rem);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--re-muted);
+}
+
+.re-list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--re-s3); }
+.re-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--re-s2);
+  align-items: end;
+  min-width: 0;
+  padding: var(--re-s3);
+  border: 1px solid var(--re-rule);
+  border-radius: var(--re-radius-sm);
+  background: var(--re-bg);
+}
+
+/* Phone: the item on its own line, amount and key side by side, the note below. */
+.re-ing {
+  display: grid;
+  gap: var(--re-s2);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-width: 0;
+}
+.re-ing > .re-field:first-child,
+.re-ing > .re-field:last-child { grid-column: 1 / -1; }
+
+.re-step { display: grid; gap: var(--re-s2); grid-template-columns: minmax(0, 1fr); align-items: end; min-width: 0; }
+.re-time { display: flex; gap: var(--re-s1); align-items: end; }
+.re-time .re-input { width: 6.5rem; }
+
+.re-tools { display: flex; gap: var(--re-s1); align-items: center; justify-content: flex-end; }
+
+@media (min-width: 768px) {
+  .re-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .re-ing { grid-template-columns: minmax(10rem, 2fr) minmax(8rem, 1.2fr) minmax(8rem, 1.4fr) minmax(10rem, 1.4fr); }
+  .re-ing > .re-field:first-child { grid-column: auto; }
+  .re-step { grid-template-columns: minmax(0, 1fr) auto; }
+  .re-section { padding: var(--re-s5); }
+  .re-part { padding: var(--re-s4); }
+  /* The save bar follows the form on wider screens; on a phone it sits at the end, where it takes no screen. */
+  .re-actions { position: sticky; bottom: var(--re-s3); z-index: 1; box-shadow: var(--shadow-2, none); }
+}
+
+/* Buttons: every target is at least 44 px */
+
+.re-btn,
+.re-icon {
+  min-height: var(--re-target);
+  border: 1px solid var(--re-line);
+  border-radius: var(--re-radius-sm);
+  background: var(--re-bg);
+  color: var(--re-ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.re-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--re-s4);
+  white-space: nowrap;
+}
+.re-icon {
+  min-width: var(--re-target);
+  padding: 0;
+  display: inline-grid;
+  place-items: center;
+  line-height: 1;
+}
+.re-primary { background: var(--re-accent); border-color: var(--re-accent); color: var(--re-accent-ink); }
+.re-quiet { background: transparent; }
+.re-add { justify-self: start; border-style: dashed; }
+.re-danger { color: var(--re-danger); }
+.re-btn:disabled,
+.re-icon:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (hover: hover) {
+  .re-btn:hover:not(:disabled),
+  .re-icon:hover:not(:disabled) { background: var(--re-bg-2); }
+  .re-primary:hover:not(:disabled) { background: var(--re-accent-strong); border-color: var(--re-accent-strong); }
+}
+
+.re :focus-visible {
+  outline: 2px solid var(--re-focus);
+  outline-offset: 2px;
+}
+
+/* Problems, preview and the action bar */
+
+.re-footer { display: grid; gap: var(--re-s4); }
+
+/* Problems use the warn block; "ready to save" the ok one. Both carry a heading, never colour alone. */
+.re-problems {
+  padding: var(--re-s3) var(--re-s4);
+  border-left: 4px solid var(--re-warn);
+  border-radius: var(--re-radius-sm);
+  background: var(--re-warn-soft);
+}
+.re-problems.re-ok { border-left-color: var(--re-ok); background: var(--re-ok-soft); }
+.re-problems-head { margin: 0; font-size: 1em; }
+.re-problem-list {
+  max-width: var(--re-measure);
+  margin: var(--re-s2) 0 0;
+  padding-left: var(--re-s5);
+  display: grid;
+  gap: var(--re-s1);
+}
+.re-problem-list:empty { display: none; }
+.re-problem {
+  display: inline;
+  min-height: var(--re-target);
+  padding: var(--re-s2) 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+}
+button.re-problem { cursor: pointer; text-decoration: underline; text-underline-offset: 3px; display: inline-block; }
+
+.re-json {
+  margin: var(--re-s2) 0 0;
+  padding: var(--re-s3);
+  max-height: 24rem;
+  overflow: auto;
+  border-radius: var(--re-radius-sm);
+  background: var(--re-bg-2);
+  border: 1px solid var(--re-rule);
+  font-size: 0.8em;
+  white-space: pre;
+}
+
+.re-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--re-s3);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--re-s3) var(--re-s4);
+  padding-bottom: calc(var(--re-s3) + env(safe-area-inset-bottom, 0px));
+  border: 1px solid var(--re-rule);
+  border-radius: var(--re-radius);
+  background: var(--re-bg);
+}
+.re-status {
+  flex: 1 1 14rem;
+  max-width: var(--re-measure);
+  margin: 0;
+  color: var(--re-muted);
+  font-size: var(--text-sm, 0.875rem);
+}
+.re-status a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--re-target);
+  color: var(--re-accent-text);
+  font-weight: 600;
+}
+.re-buttons { display: flex; flex-wrap: wrap; gap: var(--re-s2); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .re-btn,
+  .re-icon { transition: background-color 0.15s ease, border-color 0.15s ease; }
+}
