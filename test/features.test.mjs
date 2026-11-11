@@ -126,7 +126,7 @@ test('shopping list renders merged items, ticks and the empty state', () => {
   assert.match(html, /For <a href="#\/r\/alpha">Alpha<\/a>, <a href="#\/r\/beta">Beta<\/a>/);
   assert.match(html, /data-untick/);
   assert.doesNotMatch(shoppingListUi.renderShoppingList(list), /data-untick/);
-  assert.match(shoppingListUi.renderShoppingList(shoppingList([])), /Add recipes to the week plan/);
+  assert.match(shoppingListUi.renderShoppingList(shoppingList([])), /Plan some recipes and their ingredients show up here/);
   const bad = shoppingListUi.renderShoppingList(shoppingList([evil]));
   assert.doesNotMatch(bad, /<img|<svg|<i>Pork|<script/);
 });
