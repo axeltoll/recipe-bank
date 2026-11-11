@@ -136,7 +136,7 @@ export async function launch({ headed = false, executable = findChrome(), graceM
       '--no-first-run', '--no-default-browser-check', '--disable-background-networking',
       '--disable-component-update', '--disable-sync', '--disable-extensions',
       // Also prevent DNS/preconnect traffic before request interception is installed.
-      '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost', 'about:blank',
+      '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost, EXCLUDE 127.0.0.1', 'about:blank',
     ], { stdio: ['ignore', 'ignore', 'pipe'] });
     const url = await new Promise((resolve, reject) => {
       const parser = new StderrParser();

@@ -33,7 +33,7 @@ export function renderShoppingList(list, checked = new Set(), { title = 'Shoppin
     return `
       <section class="rbf rbf-shop" aria-label="${esc(title)}">
         <header class="rbf-head"><h2>${esc(title)}</h2></header>
-        <p class="rbf-empty">Add recipes to the week plan and their ingredients show up here, merged by ingredient.</p>
+        <p class="rbf-empty">Plan some recipes and their ingredients show up here, merged into one list.</p>
       </section>`;
   }
   const done = list.groups.reduce((n, g) => n + g.items.filter((it) => checked.has(it.key)).length, 0);
