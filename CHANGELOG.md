@@ -9,9 +9,11 @@ Fixes from the review of 0.2.0.
 
 - **Security.** Recipe files may only carry `http(s)` creator and video links (`validateRecipe`), so a pack with a
   `javascript:` link is reported invalid; the dashboard and the website render every link from data through one
-  `safeUrl()` helper. The local server refuses changes that are not JSON or that come from another website
-  (`Origin`, `Sec-Fetch-Site`, a host name that is not this machine; `RECIPE_BANK_HOSTS` adds names). oEmbed answers
-  keep only plain text and an `http(s)` author link.
+  `safeUrl()` helper. The local server refuses a `POST` or `PUT` that is not JSON, and any change with a cross-site
+  `Sec-Fetch-Site` or an `Origin` that is not its own; a request without either header (curl, scripts) is allowed.
+  It also refuses a `Host` that is not a loopback name, not in `RECIPE_BANK_HOSTS` and not the `HOST` it binds to
+  (a wildcard `HOST` such as `0.0.0.0` or `::` adds no name), and a loopback or missing `Host` from another machine.
+  oEmbed answers keep only plain text and an `http(s)` author link.
 - **Recipe Agent capture.** Each speech-to-text engine gets its own model flag (`--model_directory` for
   whisper-ctranslate2); captions are fetched in the video's own language only, never every automatic translation;
   the capture-folder guard compares folder identity, not spelling; yt-dlp writes through `-P`; video up to 1080p

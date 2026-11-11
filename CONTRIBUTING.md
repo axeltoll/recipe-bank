@@ -89,7 +89,12 @@ A feature is two files in `public/features/`, plugged in through `public/feature
 
 ## Security
 
-The local server listens on `127.0.0.1` and only accepts changes sent as `application/json` from its own origin.
+The local server listens on `127.0.0.1` unless `HOST` is set, and has no login, so leave `HOST` on `127.0.0.1` unless
+the network is trusted. `writeRefusal` in `server.mjs` checks every change: a `POST` or `PUT` must be sent as
+`application/json` (415), and a change gets 403 when `Sec-Fetch-Site` says another site, when `Origin` is not the
+server's own, when `Host` is not a loopback name, a name in `RECIPE_BANK_HOSTS` or a non-wildcard `HOST`, or when a
+loopback or missing `Host` comes from another machine. A request with no `Origin` and no `Sec-Fetch-Site` (curl,
+scripts) passes those two checks.
 Links from recipe files, packs and oEmbed go through `safeUrl()` (`lib/format.mjs`) before they reach an `href`
 or `src`, and `validateRecipe` only accepts `http(s)` links. Keep both true when you touch rendering or the API.
 Report a security problem privately through the repository's security advisories rather than in a public issue.
