@@ -142,6 +142,22 @@ test('comparePrices: the cheapest shop over the items every shop prices', () => 
   assert.deepEqual(r.skipped, []);
 });
 
+test('comparePrices: shop totals add up the rounded line prices shown, not the raw costs', () => {
+  const tiny = { id: 'tiny', title: 'Tiny', serves: '2', components: [{ name: 'Main', steps: [], ingredients: [
+    ing('Saffron', 'saffron', '1 g'),
+    ing('Vanilla', 'vanilla', '1 g'),
+  ] }] };
+  const list = purchaseList({ items: [{ recipe: 'tiny', day: null }] }, [tiny], defaultProfile());
+  const shop = fakeProvider({ id: 'shop-t', name: 'Shop T', prices: [
+    { key: 'saffron', unit: 'g', per: 5, minor: 3 }, // 0.6 minor units a line
+    { key: 'vanilla', unit: 'g', per: 5, minor: 3 },
+  ] });
+  const [s] = comparePrices(list, [shop], { now: NOW }).shops;
+  assert.deepEqual(s.priced.map((x) => x.minor), [{ lo: 1, hi: 1 }, { lo: 1, hi: 1 }]);
+  assert.deepEqual(s.totalMinor, { lo: 2, hi: 2 });
+  assert.deepEqual(s.commonMinor, { lo: 2, hi: 2 });
+});
+
 test('comparePrices: stale prices, other currencies, broken providers and no common item', () => {
   const old = fakeProvider({ id: 'old', lastUpdated: '2026-01-01', prices: [{ key: 'chicken', unit: 'kg', minor: 1 }] });
   assert.equal(comparePrices(purchase, [old], { now: NOW }).shops[0].stale, true);
