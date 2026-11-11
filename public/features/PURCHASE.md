@@ -22,7 +22,7 @@ shop.update({ household: false });
 
 With `household: true` the module:
 
-- reads the household profile the household module saved (`recipe-bank:household`) and re-renders on its `recipe-bank:household-change` event and on `storage` events from other tabs. Pass `profile` to use a fixed profile instead (then the events are ignored);
+- reads the household profile the household module saved (`recipe-bank:household`) and re-renders on its `recipe-bank:household-change` event and on `storage` events from other tabs. Pass `profile` to use a fixed profile instead (then the events are ignored; the same goes for `update({ profile })`, and `update({ profile: null })` follows the household again);
 - shows "For 2 adults, 1 child aged 6-10 (2.6 servings per meal)" above the list;
 - shows, per ingredient, the amount to buy, a **check** badge when part of it could not be scaled, and under it every creator amount it came from (`800g → 520g`, or the creator's words);
 - lists recipes that were not scaled and why ("Not scaled: Banana milk (servings not stated, shown as written)");

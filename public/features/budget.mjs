@@ -49,13 +49,13 @@ export function renderBudget(budget, shops, { household, today = localToday(), l
     <form data-rb-form="budget"><fieldset><legend>Budget settings</legend><div class="rb-budget-grid">
       <label>Period<select name="period"><option value="week"${selected(budget.period, 'week')}>Week (Monday–Sunday)</option><option value="month"${selected(budget.period, 'month')}>Calendar month</option></select></label>
       <label>Amount<input name="amount" type="number" min="0" step="any" required value="${esc(budget.amount)}"></label>
-      <label>Currency (ISO code)<input name="currency" pattern="[A-Z]{3}" maxlength="3" required value="${esc(budget.currency)}"></label>
+      <label>Currency (ISO code)<input name="currency" pattern="[A-Za-z]{3}" maxlength="3" required value="${esc(budget.currency)}"></label>
       </div><button type="submit">Save budget</button></fieldset></form>
     <div class="rb-budget-summary">${renderBudgetSummary(report, { locale })}</div>
     <form data-rb-form="shop"><fieldset><legend>Record a shop</legend><div class="rb-budget-grid">
       <label>Date<input name="date" type="date" required value="${esc(today)}"></label>
       <label>Total<input name="total" type="number" min="0" step="any" required></label>
-      <label>Currency (ISO code)<input name="currency" pattern="[A-Z]{3}" maxlength="3" required value="${esc(budget.currency)}"></label>
+      <label>Currency (ISO code)<input name="currency" pattern="[A-Za-z]{3}" maxlength="3" required value="${esc(budget.currency)}"></label>
       <label>Meals covered (optional)<input name="meals" type="number" min="1" step="1"></label>
       <label>Short note (optional)<input name="note" maxlength="200"></label>
       </div><button type="submit">Add shop</button></fieldset></form>
