@@ -299,7 +299,9 @@ export function mount(element, options = {}) {
       t.checked ? state.include.add(i) : state.include.delete(i);
       renderImport();
     } else if (t === $('file')) {
-      openFile(t.files?.[0]).catch(() => setStatus('import-status', 'Couldn’t read that file.', 'error'));
+      const file = t.files?.[0];
+      t.value = ''; // so choosing the same file again (fixed on disk, or a retry) fires change again
+      openFile(file).catch(() => setStatus('import-status', 'Couldn’t read that file.', 'error'));
     }
   });
   on(element, 'click', (e) => {

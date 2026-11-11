@@ -114,9 +114,13 @@ export function mount(element, { recipe, video, readOnly = STATIC, recipes } = {
     const datalist = body.querySelector(`#${uid}-keys`);
     if (datalist) datalist.innerHTML = keyOptions();
     if (idAuto) {
+      // A new id that only avoids a recipe already in the bank (foo -> foo-2) is not an edit: when
+      // nothing was typed yet, the form stays clean.
+      const clean = !isDirty();
       draft.id = draft.title.trim() ? slugify(draft.title, bank.ids) : '';
       const idEl = body.querySelector('[data-path="id"]');
       if (idEl) idEl.value = draft.id;
+      if (clean) baseline = formatRecipe(recipeFromDraft(draft));
     }
     refresh();
   }
