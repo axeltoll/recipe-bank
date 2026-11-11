@@ -41,6 +41,7 @@ queue.forEach((q, i) => {
   if (!parsed) fail(at, 'video.url is not a supported link (web pages require platform "web" and HTTPS)');
   if (parsed && q.video.platform !== parsed.platform) fail(at, `video.platform must be "${parsed.platform}"`);
   if (parsed?.id && q.video.id !== parsed.id) fail(at, `video.id must be "${parsed.id}"`);
+  if (parsed && !parsed.id && q.video.id != null) fail(at, 'video.id must be null or omitted for web pages and unresolved short links');
   if (!STATUSES.includes(q.status)) fail(at, `status must be one of ${STATUSES.join(', ')}`);
   if (seen.has(videoKey(q.video))) {
     console.warn(`! ${at}: already analyzed as ${seen.get(videoKey(q.video))}; remove it from the queue`);

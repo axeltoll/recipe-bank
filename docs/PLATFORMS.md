@@ -20,6 +20,9 @@ API requires the explicit JSON property `allowWeb: true` alongside `url` to queu
 a web page. Normal queue requests and the dashboard's existing supported-link
 hint stay strict. `scripts/validate.mjs` opts in only for queue entries explicitly
 saved with `video.platform: "web"`, just as the recipe validator does.
+For web pages and unresolved short links, `video.id` must be null or omitted.
+An invented ID would make unrelated URLs share a `videoKey`; both recipe and
+queue validation reject it.
 
 Web sources are link-only. The parser does not inspect HTML, fetch arbitrary
 pages, discover video files or promise that every HTTPS page contains a video.
@@ -88,8 +91,25 @@ Provider references: [Facebook embedded videos](https://developers.facebook.com/
 [Pinterest widgets](https://developers.pinterest.com/docs/web-features/widgets/),
 [Pinterest widget source](https://github.com/pinterest/widgets), and
 [X oEmbed API](https://docs.x.com/x-for-websites/oembed-api).
+WordPress also documents its [Pinterest oEmbed endpoint registration](https://make.wordpress.org/core/2022/01/04/miscellaneous-core-changes-in-wordpress-5-9/#two-new-oembed-providers-wolfram-notebook-and-pinterest).
 Provider playback and live metadata availability are not verified by offline
 tests; test with public posts during dashboard integration.
+
+## Offline verification
+
+`npm test` covers URL shapes, hostile inputs, embed URLs, opt-in parsing, recipe
+validation and the existing collection's exact parsed values and deduplication
+keys. oEmbed and short-link tests mock `fetch`, including timeout, error-status,
+non-JSON, redirect-loop and hop-limit cases.
+
+`test/platform-queue.test.mjs` exercises the exported `handleRequest` with request
+streams and response objects against a disposable copy of the server and data.
+It checks API-level web opt-in, persisted queue values, alias and recipe
+deduplication, resolution before metadata lookup, and offline fallback. It does
+not bind a socket or call providers. `test/platform-validation.test.mjs` runs the
+CLI against disposable queue entries to check platform and ID consistency.
+`npm run validate` still checks the actual collection. `npm run build` copies the
+shared modules to the static export; parsing there remains offline.
 
 ## Dashboard integration for the PAM
 

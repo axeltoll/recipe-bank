@@ -172,7 +172,7 @@ async function readBody(req) {
   }
 }
 
-const server = createServer(async (req, res) => {
+export async function handleRequest(req, res) {
   const { pathname } = new URL(req.url, 'http://localhost');
   try {
     if (pathname.startsWith('/api/')) return await api(req, res, pathname);
@@ -182,7 +182,9 @@ const server = createServer(async (req, res) => {
     console.error(e);
     json(res, e.status ?? 500, { error: e.status ? e.message : 'Server error' });
   }
-});
+}
+
+const server = createServer(handleRequest);
 
 if (process.argv[1] === import.meta.filename) {
   server.listen(PORT, HOST, () => console.log(`Recipe Bank → http://${HOST}:${PORT}`));

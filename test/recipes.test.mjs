@@ -41,6 +41,11 @@ test('recipe video validation accepts the new platforms and only explicit HTTPS 
     if (video.id) {
       assert.ok(validateRecipe({ ...recipe, video: { ...video, id: 'wrong' } })
         .some((e) => e.includes('video.id')));
+    } else {
+      assert.ok(validateRecipe({ ...recipe, video: { ...video, id: 'invented' } })
+        .some((e) => e.includes('video.id')));
+      const { id, ...withoutId } = video;
+      assert.deepEqual(validateRecipe({ ...recipe, video: withoutId }), []);
     }
   }
   const bad = { ...recipe, video: { platform: 'web', id: null, url: 'http://example.com/video' } };

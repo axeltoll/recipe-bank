@@ -38,6 +38,18 @@ for (const [platform, id, url, inputs] of shapes) {
   });
 }
 
+test('every Facebook host accepts each supported video path', () => {
+  for (const host of ['facebook.com', 'www.facebook.com', 'm.facebook.com', 'web.facebook.com']) {
+    for (const path of ['/watch?v=12345', '/watch/?v=12345', '/reel/12345', '/kitchen/videos/12345']) {
+      for (const suffix of ['', path.includes('?') ? '&si=abc&igsh=abc&t=7#video' : '/?si=abc&igsh=abc&t=7#video']) {
+        assert.deepEqual(parseVideoUrl(`https://${host}${path}${suffix}`), {
+          platform: 'facebook', id: '12345', url: 'https://www.facebook.com/watch/?v=12345',
+        });
+      }
+    }
+  }
+});
+
 test('large numeric platform IDs retain every digit', () => {
   const id = '900719925474099312345';
   for (const [platform, url] of [
@@ -141,6 +153,8 @@ test('new public embeds use fixed platform URLs; link-only sources have no embed
     assert.equal(thumbnailUrl(video), null, url);
   }
   for (const platform of ['facebook', 'pinterest']) {
+    const video = { platform, id: '12345' };
+    assert.equal(embedUrl(video, { start: 62.4, autoplay: true }), embedUrl(video));
     assert.equal(embedUrl({ platform, id: '123&other=value', url: 'https://example.com' }), null);
     assert.equal(thumbnailUrl({ platform, id: '12345' }), null);
   }

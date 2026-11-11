@@ -25,7 +25,7 @@ No dependencies. Node ≥ 22 (built-in `fetch`, `node:test`, `import.meta.dirnam
 | `public/` | Dashboard (vanilla ES modules + CSS, light/dark). Hash routes: `#/`, `#/r/<id>`, `#/q/<queueId>`. |
 | `scripts/validate.mjs` | CLI validator; exits 1 on any problem. |
 
-API: `GET /api/recipes` → `{recipes, invalid}` · `GET /api/queue` · `POST /api/queue {url, note}` (409 if the video is already a recipe or queued; best-effort oEmbed title) · `DELETE /api/queue/<id>`.
+API: `GET /api/recipes` → `{recipes, invalid}` · `GET /api/queue` · `POST /api/queue {url, note, allowWeb?}` (web pages require `allowWeb: true`; 409 if the video is already a recipe or queued; best-effort oEmbed title) · `DELETE /api/queue/<id>`.
 
 ## Recipe file contract (for analysis agents)
 
@@ -51,6 +51,10 @@ API: `GET /api/recipes` → `{recipes, invalid}` · `GET /api/queue` · `POST /a
   "source": { "evidence": "what was checked, e.g. YouTube captions + video description (optional)", "quantity_basis": "…" }
 }
 ```
+
+`video.id` is null or omitted for explicitly declared HTTPS `web` pages and
+unresolved short links. Their full URL is the deduplication key; other sources
+use the parsed platform and string ID. See [PLATFORMS.md](docs/PLATFORMS.md).
 
 Rules that matter more than the format:
 
