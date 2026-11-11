@@ -1,32 +1,72 @@
+/* Household profile (public/features/household.mjs). Loaded by household-feature.js.
+   Themed through the --rb-* properties, which the dashboard maps to its design tokens in the "feature modules"
+   block of public/styles.css. Without that block each one falls back to the module's older property of the
+   nearest meaning (household-demo.html themes only those, in light and dark), then to the dashboard token,
+   then to that token's light value. Fills that could clash with a host's own text colour fall back to none. */
 .rb-household {
-  color: var(--rb-text, #202b32);
-  background: var(--rb-surface, #fff);
-  border: 1px solid var(--rb-border, #c7d0d5);
-  border-radius: var(--rb-radius, 0.75rem);
-  padding: var(--rb-space-lg, 1.5rem);
-  font-family: var(--rb-font, system-ui, sans-serif);
+  --_text: var(--rb-text, var(--ink, #1f1a16));
+  --_text-2: var(--rb-text-2, var(--rb-text, var(--ink-2, #4a423b)));
+  --_muted: var(--rb-muted, var(--muted, #655b53));
+  --_surface: var(--rb-surface, var(--surface, #fff));
+  --_inset: var(--rb-inset, var(--surface-2, transparent));
+  --_input: var(--rb-input, var(--bg, #faf6f0));
+  --_border: var(--rb-border, var(--line-strong, #8f8378));
+  --_rule: var(--rb-rule, var(--rb-border, var(--line, #e6ddd1)));
+  --_accent: var(--rb-accent, var(--accent, #c2410c));
+  --_accent-strong: var(--rb-accent-strong, var(--rb-accent, var(--accent-strong, #a83a0b)));
+  --_accent-text: var(--rb-accent-text, var(--rb-accent, var(--accent-text, #9a3412)));
+  --_on-accent: var(--rb-on-accent, var(--accent-ink, #fff));
+  --_focus: var(--rb-focus, var(--focus, #1f1a16));
+  --_danger: var(--rb-danger, var(--danger, #b3261e));
+  --_danger-soft: var(--rb-danger-soft, var(--danger-soft, transparent));
+  --_radius: var(--rb-radius, var(--r-lg, 18px));
+  --_ctl: var(--rb-control-radius, var(--r-md, 12px));
+  --_xs: var(--rb-space-xs, 4px);
+  --_sm: var(--rb-space-sm, 8px);
+  --_md: var(--rb-space-md, 16px);
+  --_lg: var(--rb-space-lg, 24px);
+  --_tap: var(--tap, 44px);
+  --_measure: var(--measure-text, 60ch);
+  min-width: 0;
+  padding: var(--_md);
+  border: 1px solid var(--_rule);
+  border-radius: var(--_radius);
+  background: var(--_surface);
+  box-shadow: var(--shadow-1, none);
+  color: var(--_text);
+  font-family: var(--rb-font, var(--font-body, system-ui, sans-serif));
   line-height: 1.5;
   color-scheme: inherit;
 }
 .rb-household * { box-sizing: border-box; }
-.rb-household h2 { margin: var(--rb-space-zero, 0) var(--rb-space-zero, 0) var(--rb-space-sm, 0.5rem); }
-.rb-household p, .rb-household details, .rb-household fieldset { margin: var(--rb-space-md, 1rem) var(--rb-space-zero, 0); }
-.rb-household fieldset { border: 1px solid var(--rb-border, #c7d0d5); border-radius: var(--rb-radius, 0.75rem); padding: var(--rb-space-md, 1rem); min-width: 0; }
-.rb-household-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: var(--rb-space-md, 1rem); }
-.rb-household label { display: grid; gap: var(--rb-space-xs, 0.25rem); }
-.rb-household input, .rb-household select, .rb-household button {
-  font: inherit;
-  color: var(--rb-text, #202b32);
-  background: var(--rb-input, #fff);
-  border: 1px solid var(--rb-border, #c7d0d5);
-  border-radius: var(--rb-control-radius, 0.375rem);
-  padding: var(--rb-space-sm, 0.5rem) var(--rb-space-md, 1rem);
-  min-height: 2.75rem;
-  min-width: 0;
-  width: 100%;
+.rb-household h2 { margin: 0 0 var(--_sm); font: 650 var(--text-xl, 1.375rem) / 1.2 var(--font-display, Georgia, serif); }
+.rb-household p, .rb-household details, .rb-household fieldset { margin: var(--_md) 0; }
+.rb-household p { max-width: var(--_measure); }
+.rb-household h2 + p { margin-top: 0; color: var(--_muted); }
+.rb-household fieldset { min-width: 0; padding: var(--_md); border: 1px solid var(--_rule); border-radius: var(--_ctl); }
+.rb-household legend { padding: 0 var(--_sm); color: var(--_accent-text); font-weight: 700; }
+.rb-household-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: var(--_md); align-items: end; }
+.rb-household label { display: grid; gap: var(--_xs); min-width: 0; color: var(--_text-2); font-size: var(--text-sm, 0.875rem); font-weight: 600; }
+.rb-household input, .rb-household select {
+  width: 100%; min-width: 0; min-height: var(--_tap); padding: 0 var(--_md);
+  border: 1px solid var(--_border); border-radius: var(--_ctl);
+  background: var(--_input); color: var(--_text); font: inherit; font-size: max(1rem, 16px); font-weight: 400;
 }
-.rb-household button { width: auto; cursor: pointer; color: var(--rb-on-accent, #fff); background: var(--rb-accent, #286449); margin-top: var(--rb-space-md, 1rem); }
-.rb-household summary { cursor: pointer; color: var(--rb-accent, #286449); }
-.rb-household :focus-visible { outline: 3px solid var(--rb-focus, #2873cc); outline-offset: var(--rb-space-xs, 0.25rem); }
-.rb-household .rb-feature-status { color: var(--rb-muted, #52636e); }
-.rb-household .rb-feature-errors, .rb-household [role="alert"] { color: var(--rb-danger, #a62727); }
+.rb-household button {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: var(--_tap); margin-top: var(--_md); padding: 0 var(--_md);
+  border: 1px solid var(--_accent); border-radius: var(--_ctl);
+  background: var(--_accent); color: var(--_on-accent); font: inherit; font-weight: 600; cursor: pointer;
+}
+.rb-household summary { min-height: var(--_tap); color: var(--_accent-text); font-weight: 600; line-height: var(--_tap); cursor: pointer; }
+.rb-household :focus-visible { outline: 2px solid var(--_focus); outline-offset: 2px; }
+@media (hover: hover) {
+  .rb-household button:hover { background: var(--_accent-strong); border-color: var(--_accent-strong); }
+}
+/* Status and errors: the same two patterns in every feature module. */
+.rb-household .rb-feature-status { margin-top: 0; color: var(--_muted); font-size: var(--text-sm, 0.875rem); }
+.rb-household .rb-feature-status[role="alert"], .rb-household .rb-feature-errors {
+  max-width: var(--_measure); margin: var(--_md) 0; padding: var(--_sm) var(--_md);
+  border-left: 4px solid var(--_danger); border-radius: var(--_ctl);
+  background: var(--_danger-soft); color: var(--_danger); font-size: 1rem; font-weight: 600; list-style: none;
+}

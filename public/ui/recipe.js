@@ -2,7 +2,9 @@
 import { embedUrl } from '/lib/video.mjs';
 import { esc, mmss, formatDate } from '/lib/format.mjs';
 import { ingredientKeys, stepCount, macros, shoppingList } from '/lib/catalog.mjs';
-import { $, $$, view, state, store, STATIC, PLATFORM, emit, icon, copy, isPhone, reducedMotion } from './core.js';
+import {
+  $, $$, view, state, store, STATIC, PLATFORM, emit, icon, copy, isPhone, reducedMotion, timerChips, paintTimers,
+} from './core.js';
 import { renderMissing } from './states.js';
 import { openCook } from './cook.js';
 
@@ -18,7 +20,7 @@ const BASIS_SHORT = { 'on-screen': 'on screen', spoken: 'spoken', description: '
 export function player(video, title = 'Recipe video') {
   const src = embedUrl(video);
   if (!src) {
-    return `<div class="player-fallback"><p>This link can't be embedded.</p><a href="${esc(video.url)}" target="_blank" rel="noopener">Open the video</a></div>`;
+    return `<div class="player-fallback"><p>This link can't be embedded.</p><a class="btn" href="${esc(video.url)}" target="_blank" rel="noopener">${icon('external')}<span>Open the video</span></a></div>`;
   }
   return `<iframe src="${esc(src)}" title="${esc(title)}" loading="lazy"
     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -49,11 +51,21 @@ export function renderRecipe(id) {
   const seekable = r.video.platform === 'youtube';
   const platform = PLATFORM[r.video.platform] ?? 'the platform';
   const hasGaps = Boolean(r.gaps?.length);
+  // Steps are numbered across the parts, as in cook mode, so a timer started here is the same timer there.
+  let counted = 0;
+  const firstStep = r.components.map((c) => {
+    const start = counted;
+    counted += c.steps.length;
+    return start;
+  });
 
   view.innerHTML = `
     <article class="recipe">
       <header class="recipe-head">
-        <a class="back" href="#/">${icon('back')}<span>All recipes</span></a>
+        <div class="recipe-top">
+          <a class="back" href="#/">${icon('back')}<span>All recipes</span></a>
+          <a class="btn btn-quiet recipe-edit" href="#/edit/${esc(encodeURIComponent(r.id))}">${icon('edit')}<span>${STATIC ? 'Edit a copy' : 'Edit'}</span></a>
+        </div>
         <p class="recipe-status"><span class="badge ${partial ? 'badge-warn' : ''}">${partial ? 'Partial recipe: some details are missing' : 'Full recipe from the video'}</span></p>
         <h1>${esc(r.title)}</h1>
         <p class="recipe-by">by ${r.creator.url
@@ -73,10 +85,9 @@ export function renderRecipe(id) {
 
       <div class="recipe-actions">
         ${steps ? `<button class="btn btn-primary" type="button" id="cook-open">${icon('pot')}<span>Start cooking</span></button>` : ''}
-        <button class="btn" type="button" id="copy-list">${icon('copy')}<span>Copy list</span></button>
-        <button class="btn btn-quiet" type="button" id="print">${icon('print')}<span>Print</span></button>
-        <a class="btn btn-quiet recipe-edit" href="#/edit/${esc(encodeURIComponent(r.id))}">${STATIC ? 'Edit a copy' : 'Edit'}</a>
+        <button class="btn" type="button" id="copy-list">${icon('copy')}<span class="label-wide">Copy list</span></button>
         <div class="mount" id="mount-recipe-actions" data-mount="recipe-actions"></div>
+        <button class="btn btn-quiet print-btn" type="button" id="print">${icon('print')}<span>Print</span></button>
       </div>
 
       <div class="recipe-media">
@@ -117,15 +128,15 @@ export function renderRecipe(id) {
 
       <section class="panel recipe-steps" aria-labelledby="steps-h">
         <div class="panel-head"><h2 id="steps-h">Step by step</h2></div>
-        ${steps ? r.components.map((c) => (c.steps.length ? `
+        ${steps ? r.components.map((c, ci) => (c.steps.length ? `
           ${multi ? `<h3>${esc(c.name)}</h3>` : ''}
           <ol class="steps">
-            ${c.steps.map((s) => `
+            ${c.steps.map((s, si) => `
               <li>
                 <p class="step-text">${esc(s.text)}</p>
-                ${s.t == null ? '' : seekable
+                <div class="step-tools">${s.t == null ? '' : seekable
                   ? `<button type="button" class="ts" data-t="${Number(s.t)}" aria-label="Play from ${mmss(s.t)}">${icon('play')}<span>${mmss(s.t)}</span></button>`
-                  : `<span class="ts ts-static">at ${mmss(s.t)} in the video</span>`}
+                  : `<span class="ts ts-static">at ${mmss(s.t)} in the video</span>`}${timerChips(`${r.id}:${firstStep[ci] + si + 1}`, s.text, `${multi ? `${c.name}, ` : ''}step ${si + 1}`)}</div>
               </li>`).join('')}
           </ol>` : '')).join('') : '<p class="muted">The video gives no method to follow.</p>'}
       </section>
@@ -206,5 +217,6 @@ export function renderRecipe(id) {
     }));
 
   progress();
+  paintTimers(); // a timer started earlier, or in cook mode, shows its time left here too
   return { name: 'recipe', layout: 'detail', id: r.id, recipe: r };
 }

@@ -1,12 +1,16 @@
-// Cook mode: one step at a time in large type, in a full-window <dialog>, with the screen kept awake.
+// Cook mode: one step at a time in large type, in a full-window <dialog>, laid out for a phone held in one hand.
+// Everything pressed while cooking (ingredients, watch this step, timers, Back, Next) is at the bottom; the top
+// bar holds the two things pressed once: the "Keep screen on" switch and Exit.
 import { flattenSteps } from '/lib/catalog.mjs';
 import { clampIndex } from '/lib/nav.mjs';
 import { esc, mmss } from '/lib/format.mjs';
-import { $, $$, store, emit, icon } from './core.js';
+import { $, $$, store, emit, icon, timerChips, paintTimers } from './core.js';
 
+const WAKE_KEY = 'rb:wake'; // false = the reader switched "Keep screen on" off; anything else = on
 const dlg = $('#cook');
 let session = null; // { recipe, steps, index, checked, onCheck, onWatch, canWatch, returnFocus, pendingWatch }
 let wakeLock = null;
+let wakeWanted = store.get(WAKE_KEY, true) !== false;
 
 /**
  * Open cook mode for a recipe.
@@ -57,9 +61,13 @@ function renderShell() {
   dlg.innerHTML = `
     <div class="cook-bar">
       <p class="cook-recipe">${esc(recipe.title)}</p>
-      <button class="btn" type="button" id="cook-ing-toggle" aria-expanded="false" aria-controls="cook-ings">${icon('list')}<span>Ingredients</span></button>
-      <button class="btn" type="button" id="cook-close">${icon('close')}<span>Exit</span></button>
+      <label class="switch" for="cook-wake-on">
+        <input type="checkbox" role="switch" id="cook-wake-on"${wakeWanted ? ' checked' : ''}>
+        <span>Keep screen on</span>
+      </label>
+      <button class="btn btn-quiet icon-btn" type="button" id="cook-close" aria-label="Exit cook mode">${icon('close')}</button>
     </div>
+    <p class="cook-note" id="cook-wake" role="status"></p>
     <div class="cook-body">
       <aside class="cook-ings" id="cook-ings" aria-label="Ingredients" data-open="false">${groups || '<p class="muted">No ingredients are listed.</p>'}</aside>
       <section class="cook-stage" aria-label="Current step">
@@ -67,12 +75,17 @@ function renderShell() {
           <p class="cook-where" id="cook-where"></p>
           <p class="cook-text" id="cook-text"></p>
         </div>
-        <button class="btn" type="button" id="cook-watch" hidden></button>
+        <div class="cook-timers" id="cook-timers"></div>
       </section>
     </div>
     <div class="cook-foot">
-      <p class="cook-wake" id="cook-wake"></p>
       <progress class="cook-progress" id="cook-progress" max="${steps.length}" value="1" aria-label="Steps done"></progress>
+      <div class="timer-tray" data-timer-tray></div>
+      <p class="sr-only" role="status" data-timer-live></p>
+      <div class="cook-tools">
+        <button class="btn ing-toggle" type="button" id="cook-ing-toggle" aria-expanded="false" aria-controls="cook-ings">${icon('list')}<span>Ingredients</span></button>
+        <button class="btn" type="button" id="cook-watch" hidden></button>
+      </div>
       <div class="cook-nav">
         <button class="btn btn-lg" type="button" id="cook-prev">${icon('back')}<span>Back</span></button>
         <button class="btn btn-primary btn-lg" type="button" id="cook-next"></button>
@@ -87,10 +100,20 @@ function renderStep() {
   $('#cook-where').textContent = `${multi ? `${s.component} · ` : ''}Step ${s.n} of ${s.of}`;
   $('#cook-text').textContent = s.text;
 
+  // The same keys as the recipe page (recipe id, step number across the parts): one timer, shown in both.
+  $('#cook-timers').innerHTML = timerChips(`${recipe.id}:${s.n}`, s.text, `Step ${s.n}`);
+  paintTimers();
+
   const watch = $('#cook-watch');
   const can = canWatch && s.t != null;
   watch.hidden = !can;
-  watch.innerHTML = can ? `${icon('play')}<span>Watch this step in the video (${mmss(s.t)})</span>` : '';
+  if (can) {
+    watch.innerHTML = `${icon('play')}<span>Watch step (${mmss(s.t)})</span>`;
+    watch.setAttribute('aria-label', `Watch this step in the video, from ${mmss(s.t)}`);
+  } else {
+    watch.innerHTML = '';
+    watch.removeAttribute('aria-label');
+  }
 
   $('#cook-progress').value = s.n;
   $('#cook-prev').setAttribute('aria-disabled', String(index === 0));
@@ -106,6 +129,7 @@ function go(delta) {
   const next = clampIndex(session.index + delta, session.steps.length);
   if (next === session.index) return;
   session.index = next;
+  toggleIngredients(false); // a new step is shown, not hidden under the ingredient list
   renderStep();
   $('.cook-stage', dlg).scrollTop = 0;
 }
@@ -139,8 +163,13 @@ if (dlg) {
   });
 
   dlg.addEventListener('change', (e) => {
+    if (!session) return;
+    if (e.target.id === 'cook-wake-on') {
+      setWake(e.target.checked);
+      return;
+    }
     const key = e.target.dataset?.check;
-    if (!session || key == null) return;
+    if (key == null) return;
     if (e.target.checked) session.checked.add(key);
     else session.checked.delete(key);
     session.onCheck?.(key, e.target.checked);
@@ -170,25 +199,53 @@ if (dlg) {
   });
 }
 
+// ---------- keeping the screen on ----------
+// The switch in the top bar is the state: on means a wake lock is held. When the browser has no Wake Lock
+// API, or refuses the lock, the switch goes off and a line under the bar says why.
+
+function sayWake(text) {
+  const note = $('#cook-wake');
+  if (note && session) note.textContent = text;
+}
+
+/** The reader's choice, remembered for the next time cook mode opens. */
+function setWake(on) {
+  wakeWanted = on;
+  store.set(WAKE_KEY, on);
+  if (on) {
+    requestWake();
+  } else {
+    releaseWake();
+    sayWake('');
+  }
+}
+
 async function requestWake() {
-  const say = (text) => {
-    const note = $('#cook-wake');
-    if (note && session) note.textContent = text;
-  };
+  const box = $('#cook-wake-on');
   if (!('wakeLock' in navigator)) {
-    say("This browser can't keep the screen on. Set a longer screen timeout while you cook.");
+    if (box) {
+      box.checked = false;
+      box.disabled = true;
+    }
+    sayWake("This browser can't keep the screen on. Set a longer screen timeout while you cook.");
     return;
   }
+  if (!wakeWanted) return;
   try {
     const lock = await navigator.wakeLock.request('screen');
-    if (!session) {
+    if (!session || !wakeWanted) {
       lock.release().catch(() => {});
       return;
     }
+    releaseWake();
     wakeLock = lock;
-    say('The screen stays on while you cook.');
+    const current = $('#cook-wake-on');
+    if (current) current.checked = true;
+    sayWake('');
   } catch {
-    say("Couldn't keep the screen on. Battery saver may be blocking it.");
+    const current = $('#cook-wake-on');
+    if (current) current.checked = false;
+    sayWake("Couldn't keep the screen on. Battery saver may be blocking it.");
   }
 }
 

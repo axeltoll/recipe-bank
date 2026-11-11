@@ -1,4 +1,5 @@
-/* Recipe Bank dashboard. The contract for everything in this file is docs/design/DESIGN.md.
+/* Recipe Bank dashboard. The contract for everything in this file is docs/design/DESIGN.md
+   (round 2 findings: docs/design/ROUND2.md).
    Mobile-first: the base rules are the phone design; tablet starts at 768px, desktop at 1280px, wide at 1920px.
    Components use tokens only. */
 
@@ -14,6 +15,7 @@
   --line: #e6ddd1;
   --line-strong: #8f8378;
   --accent: #c2410c;
+  --accent-strong: #a83a0b;
   --accent-ink: #ffffff;
   --accent-text: #9a3412;
   --accent-soft: #fde8d7;
@@ -43,11 +45,14 @@
   --text-xl: 1.375rem;
   --text-2xl: 1.75rem;
   --text-3xl: clamp(2rem, 1.5rem + 2.2vw, 3rem);
-  --text-cook: clamp(1.5rem, 1rem + 2.4vw, 2.75rem);
+  --text-cook: clamp(1.625rem, 1.1rem + 2.6vw, 3rem);
   --lh-tight: 1.15;
   --lh-snug: 1.35;
   --lh-body: 1.6;
+  /* --measure is the outer cap named by the contract; running text uses --measure-text, because 1ch is the
+     width of "0" and 72 of those hold about 87 average characters in Inter (ROUND2.md, A1). */
   --measure: 72ch;
+  --measure-text: 60ch;
 
   --s-1: 4px;
   --s-2: 8px;
@@ -66,6 +71,7 @@
   --dur-1: 120ms;
   --dur-2: 200ms;
   --dur-3: 320ms;
+  --stagger: 30ms;
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 
   --z-bar: 20;
@@ -73,13 +79,17 @@
   --z-toast: 60;
 
   --tap: 44px;
+  --tap-lg: 56px;
   --gutter: 16px;
   --content-max: 1760px;
   --bar-h: 56px;
+  --nav-h: 48px;
+  /* --head-h is the part of the header that stays on screen (the nav row below desktop, the whole bar from desktop). */
+  --head-h: 48px;
   --media-w: 280px;
 }
 
-/* The dark palette appears twice (system preference, and the header toggle). test/design.test.mjs
+/* The dark palette appears twice (system preference, and the header theme button). test/design.test.mjs
    fails if the two lists differ. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
@@ -93,6 +103,7 @@
     --line: #3a322b;
     --line-strong: #7d7166;
     --accent: #f08a4b;
+    --accent-strong: #f5a06a;
     --accent-ink: #1a0f08;
     --accent-text: #f5a06a;
     --accent-soft: #3a2416;
@@ -124,6 +135,7 @@
   --line: #3a322b;
   --line-strong: #7d7166;
   --accent: #f08a4b;
+  --accent-strong: #f5a06a;
   --accent-ink: #1a0f08;
   --accent-text: #f5a06a;
   --accent-soft: #3a2416;
@@ -148,7 +160,7 @@
   :root { --gutter: 24px; --bar-h: 64px; }
 }
 @media (min-width: 1280px) {
-  :root { --gutter: 32px; --media-w: 340px; }
+  :root { --gutter: 32px; --media-w: 300px; --head-h: 64px; }
 }
 @media (min-width: 1920px) {
   :root { --gutter: 48px; --media-w: 400px; }
@@ -162,7 +174,7 @@ html {
   color: var(--ink);
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  scroll-padding-top: calc(var(--bar-h) + var(--s-4));
+  scroll-padding-top: calc(var(--head-h) + var(--s-4));
 }
 html.sheet-open { overflow: hidden; }
 body {
@@ -174,12 +186,14 @@ body {
   background: transparent;
   font: 400 var(--text-md) / var(--lh-body) var(--font-body);
 }
-a { color: inherit; }
+a { color: inherit; text-decoration-color: var(--line-strong); text-underline-offset: 3px; }
 button, input, textarea, select { font: inherit; color: inherit; }
 button { touch-action: manipulation; }
 img { display: block; max-width: 100%; }
 h1, h2, h3 { text-wrap: balance; }
 code { font-size: 0.9em; padding: 1px 5px; border-radius: 4px; background: var(--surface-2); }
+::placeholder { color: var(--muted); opacity: 1; }
+input[type='checkbox'] { accent-color: var(--accent); }
 
 :focus-visible {
   outline: 2px solid var(--focus);
@@ -190,6 +204,11 @@ main:focus-visible { outline: none; box-shadow: none; }
 
 .muted { color: var(--muted); }
 .sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+  clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+/* A button label that is read out everywhere but only drawn from tablet up (phones show the icon alone). */
+.label-wide {
   position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
   clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
 }
@@ -209,27 +228,35 @@ main:focus-visible { outline: none; box-shadow: none; }
 }
 .skip:focus { top: var(--s-2); }
 
+/* A text link inside a sentence still gets a 44px box on touch screens (ROUND2.md, P3). */
+.recipe-by a, .feature-head p a, .feature-note a, .scale-household a {
+  display: inline-flex; align-items: center; min-width: var(--tap); min-height: var(--tap);
+}
+
 /* ---------- buttons ---------- */
 .btn {
+  position: relative;
   display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
   min-height: var(--tap); padding: 0 var(--s-4);
   border: 1px solid var(--line-strong); border-radius: var(--r-md);
   background: var(--surface); color: var(--ink);
   font-size: var(--text-md); font-weight: 600; line-height: 1.2; text-decoration: none; white-space: nowrap;
   cursor: pointer;
-  transition: transform var(--dur-1) var(--ease), background-color var(--dur-2) var(--ease), filter var(--dur-2) var(--ease);
+  transition: transform var(--dur-1) var(--ease), background-color var(--dur-2) var(--ease), border-color var(--dur-2) var(--ease);
 }
 .btn:active { transform: scale(0.98); }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .btn-quiet { border-color: transparent; background: transparent; color: var(--ink-2); }
 .btn-danger { color: var(--danger); }
-.btn-lg { min-height: 56px; padding: 0 var(--s-5); font-size: var(--text-lg); }
+.btn-lg { min-height: var(--tap-lg); padding: 0 var(--s-5); font-size: var(--text-lg); }
 .btn:disabled, .btn[aria-disabled='true'] { opacity: 0.5; cursor: not-allowed; }
+.btn[aria-pressed='true'] { background: var(--accent-soft); border-color: var(--accent-text); color: var(--accent-text); }
 .icon-btn { width: var(--tap); min-width: var(--tap); padding: 0; }
 @media (hover: hover) {
   .btn:hover { background: var(--surface-2); }
-  .btn-primary:hover { background: var(--accent); filter: brightness(1.08); }
+  .btn-primary:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
   .btn-quiet:hover { background: var(--surface-2); color: var(--ink); }
+  .btn[aria-pressed='true']:hover { background: var(--accent-soft); }
 }
 
 .badge {
@@ -246,8 +273,9 @@ main:focus-visible { outline: none; box-shadow: none; }
 @keyframes pulse { 50% { opacity: 0.3; } }
 
 /* ---------- shell ---------- */
+/* Below desktop the header is two rows and collapses: the brand row scrolls away, the nav row stays (P1, T1). */
 .topbar {
-  position: sticky; top: 0; z-index: var(--z-bar);
+  position: sticky; top: calc(-1 * var(--bar-h)); z-index: var(--z-bar);
   padding-top: env(safe-area-inset-top);
   padding-inline: max(var(--gutter), env(safe-area-inset-left), env(safe-area-inset-right), calc((100% - var(--content-max)) / 2));
   background: var(--surface);
@@ -256,9 +284,9 @@ main:focus-visible { outline: none; box-shadow: none; }
 @supports (backdrop-filter: blur(1px)) {
   .topbar { background: color-mix(in srgb, var(--surface) 86%, transparent); backdrop-filter: blur(12px); }
 }
-.topbar-row { display: flex; flex-wrap: wrap; align-items: center; column-gap: var(--s-3); min-height: var(--bar-h); }
+.topbar-row { display: flex; flex-wrap: wrap; align-items: center; align-content: flex-start; column-gap: var(--s-3); }
 .brand {
-  display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--tap);
+  display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--bar-h);
   font: 650 var(--text-xl) / 1 var(--font-display); letter-spacing: -0.01em; text-decoration: none;
 }
 .brand-mark { width: 30px; height: 30px; flex: none; }
@@ -266,16 +294,23 @@ main:focus-visible { outline: none; box-shadow: none; }
 .brand-mark .mark-fg { fill: var(--accent-ink); }
 .nav {
   order: 10; flex: 1 0 100%;
-  display: flex; gap: var(--s-1); overflow-x: auto; overscroll-behavior-x: contain;
+  display: flex; gap: var(--s-1); min-height: var(--nav-h); overflow-x: auto; overscroll-behavior-x: contain;
   margin-inline: calc(-1 * var(--s-2)); padding-bottom: var(--s-1);
+  scrollbar-width: none;
 }
 .nav a {
   display: inline-flex; align-items: center; min-height: var(--tap); padding: 0 var(--s-3);
   border-radius: var(--r-md); color: var(--ink-2); font-weight: 600; text-decoration: none; white-space: nowrap;
+  transition: background-color var(--dur-2) var(--ease), color var(--dur-2) var(--ease);
 }
 .nav a[aria-current='page'] { background: var(--accent-soft); color: var(--accent-text); }
+@media (hover: hover) {
+  .nav a:hover { background: var(--surface-2); color: var(--ink); }
+  .nav a[aria-current='page']:hover { background: var(--accent-soft); color: var(--accent-text); }
+}
 .stats { display: none; margin: 0; color: var(--muted); font-size: var(--text-sm); }
 .topbar-actions { display: flex; align-items: center; gap: var(--s-2); margin-left: auto; }
+.topbar-actions .btn-primary { width: var(--tap); padding: 0; }
 
 main {
   flex: 1;
@@ -295,10 +330,10 @@ main {
   color: var(--muted); font-size: var(--text-sm);
 }
 .footer p { margin: 0; }
-.footer-note { flex-basis: 100%; }
+.footer-note { flex-basis: 100%; max-width: var(--measure-text); }
 .footer-note:empty { display: none; }
 .switch { display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--tap); color: var(--ink-2); cursor: pointer; }
-.switch input { width: 22px; height: 22px; margin: 0; accent-color: var(--accent); }
+.switch input { width: 22px; height: 22px; margin: 0; flex: none; }
 
 /* ---------- states ---------- */
 .state {
@@ -312,12 +347,20 @@ main {
 .state p { margin: 0; max-width: 48ch; }
 .state-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s-2); margin-top: var(--s-2); }
 .grid > .state { grid-column: 1 / -1; }
-main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto; }
+main[data-layout='message'] > .state, main[data-layout='detail'] > .state { max-width: 640px; margin: var(--s-7) auto; }
 
+/* Skeletons: the shape of what is coming, never a spinner. index.html carries one for the list and one for a
+   detail page; a two-line script there picks which by the address. */
 .skel { pointer-events: none; }
-.skel .card-media, .skel-line { background: var(--surface-3); animation: pulse 1.4s ease-in-out infinite; }
+.skel .card-media, .skel-line, .skel-block { background: var(--surface-3); animation: pulse 1.4s ease-in-out infinite; }
 .skel-line { display: block; height: 14px; border-radius: var(--r-sm); margin-top: var(--s-2); }
 .skel-line.short { width: 55%; }
+.skel-line.title { height: 32px; width: 80%; }
+.skel-block { display: block; border-radius: var(--r-lg); }
+.skel-player { width: min(100%, 280px); aspect-ratio: 9 / 16; margin-inline: auto; }
+.skel-panel { height: 220px; }
+:root:not([data-boot='detail']) .skel-detail { display: none; }
+[data-boot='detail'] .skel-list { display: none; }
 
 /* ---------- list layout: home ---------- */
 .home { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-5); }
@@ -325,6 +368,8 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
 .home-title h1 { margin: 0; font: 650 var(--text-3xl) / var(--lh-tight) var(--font-display); letter-spacing: -0.02em; }
 .home-sub { margin: var(--s-1) 0 0; color: var(--muted); }
 .home-tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.home-tools .mount { display: contents; }
+.home-tools .mount:empty { display: none; }
 .search { position: relative; flex: 1 1 200px; min-width: 0; }
 .search input {
   width: 100%; min-height: var(--tap); padding: 0 var(--s-3) 0 44px;
@@ -356,8 +401,8 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
 .chip-on { background: var(--accent-soft); border-color: var(--accent-text); color: var(--accent-text); font-weight: 600; }
 @media (hover: hover) {
   .chip:hover { background: var(--surface-2); }
-  .chip[aria-pressed='true']:hover { background: var(--accent); filter: brightness(1.08); }
-  .chip-on:hover { background: var(--accent-soft); filter: brightness(0.97); }
+  .chip[aria-pressed='true']:hover { background: var(--accent-strong); border-color: var(--accent-strong); }
+  .chip-on:hover { background: var(--accent-soft); border-color: var(--ink); }
 }
 
 .segmented {
@@ -390,6 +435,7 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
 }
 .filters-head h2 { margin: 0; font: 650 var(--text-xl) / 1.2 var(--font-display); }
 .filters-body { display: grid; align-content: start; gap: var(--s-5); padding: var(--s-4); overflow-y: auto; overscroll-behavior: contain; }
+.filter-group { min-width: 0; }
 .filter-group h3 {
   margin: 0 0 var(--s-2); color: var(--muted);
   font: 700 var(--text-sm) / 1.2 var(--font-body); letter-spacing: 0.06em; text-transform: uppercase;
@@ -406,6 +452,7 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
   background: var(--surface); box-shadow: var(--shadow-1); overflow: hidden;
   transition: transform var(--dur-2) var(--ease), box-shadow var(--dur-2) var(--ease);
 }
+.card:active { transform: scale(0.99); }
 .card-media { position: relative; min-height: 112px; background: var(--surface-2); overflow: hidden; }
 .card-media img, .q-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .card-ph {
@@ -415,8 +462,9 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
 .card-ph .icon { width: 28px; height: 28px; }
 .card-media .badge { position: absolute; left: var(--s-2); top: var(--s-2); }
 .card-body { display: flex; flex-direction: column; gap: var(--s-1); min-width: 0; padding: var(--s-3) var(--s-4); }
-.card-title { margin: 0; font: 600 var(--text-lg) / var(--lh-snug) var(--font-display); letter-spacing: -0.01em; }
-.card-link { text-decoration: none; }
+.card-title { margin: 0; font: 600 var(--text-lg) / var(--lh-snug) var(--font-display); letter-spacing: -0.01em; overflow-wrap: anywhere; }
+/* The link's own box is 44px tall (padding cancelled by the margin), whatever the title's length (P3). */
+.card-link { display: block; margin-block: -10px; padding-block: 10px; text-decoration: none; }
 .card-link::after { content: ''; position: absolute; inset: 0; border-radius: var(--r-lg); }
 .card-link:focus-visible { outline: none; box-shadow: none; }
 .card-link:focus-visible::after { outline: 3px solid var(--focus); outline-offset: -3px; }
@@ -429,11 +477,43 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
   background: var(--surface-2); color: var(--ink-2); font-size: var(--text-xs); line-height: 1.5;
 }
 .hit { background: var(--accent-soft); color: var(--accent-text); font-weight: 700; }
-.card-meta { margin-top: auto; padding-top: var(--s-1); }
-.card-slot { position: relative; z-index: 1; }
+.card-partial { display: none; }
+/* The meta line and the card's action share the last row (P5). */
+.card-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); margin-top: auto; padding-top: var(--s-1); }
+.card-slot { position: relative; z-index: 1; flex: none; margin: 0 calc(-1 * var(--s-2)) calc(-1 * var(--s-1)) 0; }
+.card-slot .btn { width: var(--tap); padding: 0; }
 @media (hover: hover) {
   .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }
 }
+/* The first draw of the grid on a view: cards arrive one after another. Filter changes redraw without it. */
+@keyframes card-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.grid-enter > .card { animation: card-in var(--dur-3) var(--ease) both; animation-delay: calc(var(--i, 8) * var(--stagger)); }
+.grid-enter > .card:nth-child(1) { --i: 0; }
+.grid-enter > .card:nth-child(2) { --i: 1; }
+.grid-enter > .card:nth-child(3) { --i: 2; }
+.grid-enter > .card:nth-child(4) { --i: 3; }
+.grid-enter > .card:nth-child(5) { --i: 4; }
+.grid-enter > .card:nth-child(6) { --i: 5; }
+.grid-enter > .card:nth-child(7) { --i: 6; }
+.grid-enter > .card:nth-child(8) { --i: 7; }
+
+/* Compact list view (the toggle in the home tools): one dense row per recipe at every width. */
+.grid[data-mode='list'] { gap: var(--s-2); }
+.grid[data-mode='list'] .card { grid-template-columns: 64px minmax(0, 1fr); border-radius: var(--r-md); }
+.grid[data-mode='list'] .card-link::after { border-radius: var(--r-md); }
+.grid[data-mode='list'] .card-media { min-height: 64px; }
+.grid[data-mode='list'] .card-ph span, .grid[data-mode='list'] .card-media .badge { display: none; }
+.grid[data-mode='list'] .card-body {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-auto-rows: min-content; align-content: center;
+  column-gap: var(--s-3); row-gap: 0; padding: var(--s-2) var(--s-3);
+}
+.grid[data-mode='list'] .card-body > * { grid-column: 1; min-width: 0; }
+.grid[data-mode='list'] .card-title { font-size: var(--text-md); }
+.grid[data-mode='list'] .card-tags, .grid[data-mode='list'] .card-macros, .grid[data-mode='list'] .card-meta { display: none; }
+/* The badge on the thumbnail does not fit a 64px square; the same word moves into the creator line. */
+.grid[data-mode='list'] .card-partial { display: inline; color: var(--warn); font-weight: 700; }
+.grid[data-mode='list'] .card-body > .card-foot { grid-column: 2; grid-row: 1 / span 3; align-self: center; margin: 0; padding: 0; }
+.grid[data-mode='list'] .card-slot { margin: 0 calc(-1 * var(--s-1)) 0 0; }
 
 /* Queue */
 .queue-section { margin-top: var(--s-7); }
@@ -447,12 +527,12 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
 }
 .q-thumb { position: relative; aspect-ratio: 3 / 4; border-radius: var(--r-sm); background: var(--surface-2); overflow: hidden; }
 .q-title { margin: 0; font: 600 var(--text-md) / var(--lh-snug) var(--font-body); overflow-wrap: anywhere; }
-.q-title a { text-decoration: none; }
+.q-title a { display: block; margin-block: -11px; padding-block: 11px; text-decoration: none; }
 .q-title a::after { content: ''; position: absolute; inset: 0; border-radius: var(--r-lg); }
 .q-title a:focus-visible { outline: none; box-shadow: none; }
 .q-title a:focus-visible::after { outline: 3px solid var(--focus); outline-offset: -3px; }
 .q-sub { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin: var(--s-1) 0 0; color: var(--muted); font-size: var(--text-sm); }
-.q-note { margin: var(--s-2) 0 0; color: var(--ink-2); font-size: var(--text-sm); }
+.q-note { margin: var(--s-2) 0 0; color: var(--ink-2); font-size: var(--text-sm); overflow-wrap: anywhere; }
 .q-actions { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: var(--s-2); margin-top: var(--s-2); }
 
 /* ---------- detail layout: recipe and queued video ---------- */
@@ -462,17 +542,20 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
 .recipe-media { grid-area: media; min-width: 0; }
 .recipe-ingredients { grid-area: ingredients; }
 .recipe-steps { grid-area: steps; }
-.recipe-more { grid-area: more; display: grid; gap: var(--s-5); align-content: start; }
+.recipe-more { grid-area: more; display: grid; gap: var(--s-5); align-content: start; min-width: 0; }
 .queue-panel { grid-area: panel; }
 
+.recipe-top { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); margin-bottom: var(--s-1); }
 .back {
   display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--tap); margin-bottom: var(--s-1);
   color: var(--ink-2); font-weight: 600; text-decoration: none;
 }
+.recipe-top .back { margin-bottom: 0; }
 .recipe-status { margin: 0; }
+.recipe-status .badge { white-space: normal; }
 .recipe-head h1 { margin: var(--s-2) 0; font: 650 var(--text-3xl) / var(--lh-tight) var(--font-display); letter-spacing: -0.02em; overflow-wrap: anywhere; }
 .recipe-by { margin: 0; color: var(--muted); }
-.recipe-summary { max-width: var(--measure); margin: var(--s-3) 0 var(--s-4); color: var(--ink-2); font-size: var(--text-lg); }
+.recipe-summary { max-width: var(--measure-text); margin: var(--s-3) 0 var(--s-4); color: var(--ink-2); font-size: var(--text-lg); }
 .tags { display: flex; flex-wrap: wrap; gap: var(--s-2); margin: 0 0 var(--s-4); padding: 0; list-style: none; }
 .tags li { padding: 3px var(--s-3); border: 1px solid var(--line); border-radius: var(--r-pill); color: var(--ink-2); font-size: var(--text-sm); }
 .facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-2); margin: 0; }
@@ -489,25 +572,28 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
   border-radius: var(--r-lg); background: var(--stage); box-shadow: var(--shadow-2); overflow: hidden;
 }
 .player iframe { display: block; width: 100%; height: 100%; border: 0; }
-.player-fallback { display: grid; place-content: center; gap: var(--s-2); height: 100%; padding: var(--s-4); color: var(--stage-ink); text-align: center; }
+.player-fallback { display: grid; place-content: center; justify-items: center; gap: var(--s-3); height: 100%; padding: var(--s-4); color: var(--stage-ink); text-align: center; }
+.player-fallback p { margin: 0; }
 .player-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 0 var(--s-4); margin: var(--s-1) 0 0; font-size: var(--text-sm); }
 .player-links a { display: inline-flex; align-items: center; gap: var(--s-1); min-height: var(--tap); color: var(--ink-2); }
 .player-links .icon { width: 16px; height: 16px; }
 
+/* Phone: one row. The primary action takes the width; the others are icon buttons (P2). */
 .recipe-actions {
   order: 9;
   position: sticky; bottom: 0; z-index: var(--z-bar);
-  display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2);
+  display: flex; align-items: center; gap: var(--s-2);
   margin-inline: calc(-1 * var(--gutter));
   padding: var(--s-3) var(--gutter) max(var(--s-3), env(safe-area-inset-bottom));
   border-top: 1px solid var(--line); background: var(--surface);
 }
 .recipe-actions .btn-primary { flex: 1 1 auto; }
+.recipe-actions .btn:not(.btn-primary) { flex: none; width: var(--tap); padding: 0; }
 .recipe-actions .mount { display: contents; }
 .recipe-actions .mount:empty { display: none; }
-#print { display: none; }
+.recipe-actions .print-btn { display: none; }
 
-.panel { padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-1); }
+.panel { padding: var(--s-4); border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); box-shadow: var(--shadow-1); min-width: 0; }
 .panel-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s-2) var(--s-3); margin-bottom: var(--s-2); }
 .panel h2 { margin: 0; font: 650 var(--text-xl) / 1.2 var(--font-display); }
 .panel h2 .per { color: var(--muted); font: 400 var(--text-md) / 1.2 var(--font-body); }
@@ -521,7 +607,8 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
   display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: var(--s-3); align-items: start;
   min-height: var(--tap); padding: var(--s-3) 0; cursor: pointer;
 }
-.ing input { width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--accent); }
+.ing input { width: 22px; height: 22px; margin: 1px 0 0; }
+.ing-text { min-width: 0; overflow-wrap: anywhere; }
 .ing-name { font-weight: 500; }
 .ing-note { display: block; color: var(--muted); font-size: var(--text-sm); }
 .ing-amt { max-width: 16ch; font-weight: 700; text-align: right; overflow-wrap: anywhere; }
@@ -529,6 +616,7 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
 .ing-amt[data-scaled] .ing-amt-text { color: var(--accent-text); }
 .ing-basis { display: block; color: var(--muted); font-size: var(--text-xs); font-weight: 400; }
 .ing input:checked ~ .ing-text .ing-name { color: var(--muted); text-decoration: line-through; }
+.ing input:checked ~ .ing-amt { color: var(--muted); }
 
 .steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
 .steps li { display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: var(--s-3); padding: var(--s-3) 0; counter-increment: step; }
@@ -538,26 +626,45 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
   display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
   background: var(--accent-soft); color: var(--accent-text); font-size: var(--text-sm); font-weight: 700;
 }
-.step-text { grid-column: 2; max-width: var(--measure); margin: 2px 0 0; font-size: var(--text-lg); }
+.step-text { grid-column: 2; max-width: var(--measure-text); margin: 2px 0 0; font-size: var(--text-lg); overflow-wrap: anywhere; }
+.step-tools { grid-column: 2; display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin-top: var(--s-2); }
+.step-tools:empty { display: none; }
 .ts {
-  grid-column: 2; justify-self: start;
   display: inline-flex; align-items: center; gap: 6px;
-  min-height: var(--tap); margin-top: var(--s-2); padding: 0 var(--s-3);
+  min-height: var(--tap); padding: 0 var(--s-3);
   border: 1px solid var(--line-strong); border-radius: var(--r-pill); background: var(--surface);
   color: var(--ink-2); font-size: var(--text-sm); font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer;
+  transition: border-color var(--dur-2) var(--ease), color var(--dur-2) var(--ease);
 }
 .ts .icon { width: 14px; height: 14px; }
-.ts-static { min-height: 0; margin-top: var(--s-1); padding: 0; border: 0; background: none; color: var(--muted); font-weight: 400; cursor: default; }
+.ts-static { min-height: 0; padding: 0; border: 0; background: none; color: var(--muted); font-weight: 400; cursor: default; }
 @media (hover: hover) {
   .ts:not(.ts-static):hover { border-color: var(--accent-text); color: var(--accent-text); }
 }
 
+/* Kitchen timer on a step that states a duration. Idle shows the duration, running the time left, done says so. */
+.timer {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: var(--tap); padding: 0 var(--s-3);
+  border: 1px dashed var(--line-strong); border-radius: var(--r-pill); background: var(--surface);
+  color: var(--ink-2); font-size: var(--text-sm); font-weight: 600; font-variant-numeric: tabular-nums; cursor: pointer;
+  transition: border-color var(--dur-2) var(--ease), background-color var(--dur-2) var(--ease), color var(--dur-2) var(--ease);
+}
+.timer .icon { width: 16px; height: 16px; }
+.timer[data-state='running'] { border-style: solid; border-color: var(--accent-text); background: var(--accent-soft); color: var(--accent-text); }
+.timer[data-state='done'] { border-style: solid; border-color: var(--ok); background: var(--ok-soft); color: var(--ok); animation: pulse 1.4s ease-in-out 4; }
+@media (hover: hover) {
+  .timer:hover { border-color: var(--accent-text); color: var(--accent-text); }
+}
+.timer-tray { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.timer-tray:empty { display: none; }
+
 .callout { padding: var(--s-4); border-radius: var(--r-md); }
 .callout + .callout { margin-top: var(--s-3); }
 .callout h2, .callout h3 { margin: 0 0 var(--s-2); color: inherit; font: 700 var(--text-md) / var(--lh-snug) var(--font-body); }
-.callout ul { max-width: var(--measure); margin: 0; padding-left: 1.2em; }
+.callout ul { max-width: var(--measure-text); margin: 0; padding-left: 1.2em; }
 .callout li + li { margin-top: var(--s-1); }
-.callout p { max-width: var(--measure); margin: 0; }
+.callout p { max-width: var(--measure-text); margin: 0; }
 .callout-gaps { border-left: 4px solid var(--warn); background: var(--warn-soft); }
 .callout-gaps h2, .callout-gaps h3 { color: var(--warn); }
 .callout-notes { background: var(--surface-2); }
@@ -567,17 +674,18 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
 .nutrition dt { color: var(--muted); font-size: var(--text-sm); }
 .nutrition dd { margin: 0; font: 650 var(--text-2xl) / 1.1 var(--font-display); }
 .nutrition dd span { color: var(--muted); font: 400 var(--text-sm) / 1 var(--font-body); }
-.source { max-width: var(--measure); margin: var(--s-4) 0 0; color: var(--muted); font-size: var(--text-sm); overflow-wrap: anywhere; }
+.source { max-width: var(--measure-text); margin: var(--s-4) 0 0; color: var(--muted); font-size: var(--text-sm); overflow-wrap: anywhere; }
 
 .progress { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s-2); margin: var(--s-4) 0; padding: 0; list-style: none; }
 .progress li { padding-top: var(--s-2); border-top: 4px solid var(--line); color: var(--muted); font-size: var(--text-sm); }
 .progress li[data-state='done'] { border-color: var(--ok); color: var(--ink); }
 .progress li[data-state='current'] { border-color: var(--info); color: var(--ink); font-weight: 700; }
 .progress li[data-state='failed'] { border-color: var(--danger); color: var(--danger); font-weight: 700; }
-.queue-panel p { max-width: var(--measure); }
+.queue-panel p { max-width: var(--measure-text); }
 .queue-panel .q-actions { margin-top: var(--s-4); }
 
 /* ---------- cook mode ---------- */
+/* A phone in one hand: everything you press while cooking is in the bottom third (P6). */
 .cook {
   width: 100vw; max-width: none; height: 100vh; height: 100dvh; max-height: none;
   margin: 0; padding: 0; border: 0;
@@ -586,32 +694,44 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
 .cook[open] { display: flex; flex-direction: column; }
 .cook::backdrop { background: var(--bg); }
 .cook-bar {
-  display: flex; align-items: center; gap: var(--s-2);
-  padding: max(var(--s-2), env(safe-area-inset-top)) var(--gutter) var(--s-2);
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: max(var(--s-2), env(safe-area-inset-top)) max(var(--gutter), env(safe-area-inset-right)) var(--s-2) max(var(--gutter), env(safe-area-inset-left));
   border-bottom: 1px solid var(--line); background: var(--surface);
 }
-.cook-recipe { min-width: 0; margin: 0 auto 0 0; font: 600 var(--text-md) / var(--lh-snug) var(--font-display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cook-recipe { flex: 1; min-width: 0; margin: 0; font: 600 var(--text-md) / var(--lh-snug) var(--font-display); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cook-bar .switch { flex: none; font-size: var(--text-sm); font-weight: 600; white-space: nowrap; }
+.cook-note { margin: 0; padding: var(--s-2) var(--gutter); background: var(--warn-soft); color: var(--ink); font-size: var(--text-sm); }
+.cook-note:empty { display: none; }
 .cook-body { position: relative; flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); }
-.cook-stage { display: grid; align-content: center; justify-items: start; gap: var(--s-4); padding: var(--s-5) var(--gutter); overflow-y: auto; }
-.cook-where { margin: 0; color: var(--accent-text); font-weight: 700; }
-.cook-text { max-width: 32ch; margin: 0; font: 500 var(--text-cook) / 1.3 var(--font-display); letter-spacing: -0.01em; }
+.cook-stage { display: grid; align-content: center; justify-items: start; gap: var(--s-4); padding: var(--s-5) var(--gutter); overflow-y: auto; overscroll-behavior: contain; }
+.cook-where { margin: 0 0 var(--s-2); color: var(--accent-text); font-weight: 700; }
+.cook-text { max-width: 30ch; margin: 0; font: 500 var(--text-cook) / 1.3 var(--font-display); letter-spacing: -0.01em; overflow-wrap: anywhere; }
 .cook-text:focus-visible { outline: none; box-shadow: none; }
-.cook-ings { position: absolute; inset: 0; z-index: 1; display: none; padding: var(--s-4) var(--gutter); background: var(--surface); overflow-y: auto; }
+.cook-timers { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.cook-timers:empty { display: none; }
+.cook-timers .timer { min-height: var(--tap-lg); padding: 0 var(--s-4); font-size: var(--text-lg); }
+.cook-timers .timer .icon { width: 20px; height: 20px; }
+.cook-ings { position: absolute; inset: 0; z-index: 1; display: none; padding: var(--s-4) var(--gutter); background: var(--surface); overflow-y: auto; overscroll-behavior: contain; }
 .cook-ings[data-open='true'] { display: block; }
+.cook-ings .ing { font-size: var(--text-lg); }
 .cook-group h3 { margin: var(--s-4) 0 var(--s-1); color: var(--muted); font: 700 var(--text-md) / var(--lh-snug) var(--font-body); }
 .cook-group:first-child h3 { margin-top: 0; }
 .cook-group.is-current h3 { color: var(--accent-text); }
 .cook-foot {
   display: grid; gap: var(--s-2);
-  padding: var(--s-3) var(--gutter) max(var(--s-3), env(safe-area-inset-bottom));
+  padding: var(--s-3) max(var(--gutter), env(safe-area-inset-right)) max(var(--s-3), env(safe-area-inset-bottom)) max(var(--gutter), env(safe-area-inset-left));
   border-top: 1px solid var(--line); background: var(--surface);
 }
-.cook-wake { margin: 0; color: var(--muted); font-size: var(--text-sm); text-align: center; }
 .cook-progress { display: block; width: 100%; height: 6px; border: 0; border-radius: var(--r-pill); background: var(--surface-3); overflow: hidden; appearance: none; -webkit-appearance: none; }
 .cook-progress::-webkit-progress-bar { background: var(--surface-3); }
 .cook-progress::-webkit-progress-value { background: var(--accent); }
 .cook-progress::-moz-progress-bar { background: var(--accent); }
+.cook-tools { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.cook-tools .btn { flex: 1 1 0; min-width: 0; padding: 0 var(--s-3); }
+.cook-tools .btn span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.cook-tools .ing-toggle[aria-expanded='true'] { background: var(--accent-soft); border-color: var(--accent-text); color: var(--accent-text); }
 .cook-nav { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: var(--s-2); }
+.cook-nav .btn { min-width: 0; padding: 0 var(--s-3); }
 
 /* ---------- dialog and toast ---------- */
 .modal {
@@ -619,6 +739,7 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
   border: 1px solid var(--line); border-radius: var(--r-lg);
   background: var(--surface); color: var(--ink); box-shadow: var(--shadow-3);
 }
+.modal[open] { animation: view-in var(--dur-3) var(--ease); }
 .modal::backdrop { background: var(--scrim); }
 .modal form { display: flex; flex-direction: column; gap: var(--s-2); padding: var(--s-5); }
 .modal h2 { margin: 0; font: 650 var(--text-xl) / 1.2 var(--font-display); }
@@ -643,26 +764,40 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
    the stylesheets load in, so both themes and every token change reach the modules from here. */
 :root .rbf-week, :root .rbf-shop, :root .rbf-scale, :root .rbf-filters {
   --rbf-fg: var(--ink);
+  --rbf-fg-2: var(--ink-2);
   --rbf-muted: var(--muted);
   --rbf-line: var(--line-strong);
+  --rbf-rule: var(--line);
   --rbf-surface: var(--surface);
+  --rbf-inset: var(--surface-2);
   --rbf-accent: var(--accent);
+  --rbf-accent-strong: var(--accent-strong);
   --rbf-accent-ink: var(--accent-ink);
+  --rbf-accent-text: var(--accent-text);
   --rbf-accent-soft: var(--accent-soft);
   --rbf-warn: var(--warn);
-  --rbf-radius: var(--r-md);
+  --rbf-warn-soft: var(--warn-soft);
+  --rbf-focus: var(--focus);
+  --rbf-radius: var(--r-lg);
+  --rbf-control-radius: var(--r-md);
   --rbf-gap: var(--s-3);
 }
 :root .rb-household, :root .rb-budget {
   --rb-text: var(--ink);
+  --rb-text-2: var(--ink-2);
   --rb-surface: var(--surface);
+  --rb-inset: var(--surface-2);
   --rb-input: var(--bg);
   --rb-border: var(--line-strong);
+  --rb-rule: var(--line);
   --rb-muted: var(--muted);
   --rb-accent: var(--accent);
+  --rb-accent-strong: var(--accent-strong);
+  --rb-accent-text: var(--accent-text);
   --rb-on-accent: var(--accent-ink);
   --rb-focus: var(--focus);
   --rb-danger: var(--danger);
+  --rb-danger-soft: var(--danger-soft);
   --rb-radius: var(--r-lg);
   --rb-control-radius: var(--r-md);
   --rb-space-zero: 0;
@@ -679,8 +814,11 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
   --re-ink-2: var(--ink-2);
   --re-muted: var(--muted);
   --re-line: var(--line-strong);
+  --re-rule: var(--line);
   --re-accent: var(--accent);
+  --re-accent-strong: var(--accent-strong);
   --re-accent-ink: var(--accent-ink);
+  --re-accent-text: var(--accent-text);
   --re-accent-soft: var(--accent-soft);
   --re-ok: var(--ok);
   --re-ok-soft: var(--ok-soft);
@@ -704,7 +842,9 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
   --pk-ink: var(--ink);
   --pk-muted: var(--muted);
   --pk-line: var(--line-strong);
+  --pk-rule: var(--line);
   --pk-accent: var(--accent);
+  --pk-accent-strong: var(--accent-strong);
   --pk-accent-ink: var(--accent-ink);
   --pk-ok: var(--ok);
   --pk-ok-soft: var(--ok-soft);
@@ -712,7 +852,10 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
   --pk-warn-soft: var(--warn-soft);
   --pk-info: var(--info);
   --pk-info-soft: var(--info-soft);
-  --pk-radius: var(--r-md);
+  --pk-danger: var(--danger);
+  --pk-danger-soft: var(--danger-soft);
+  --pk-focus: var(--focus);
+  --pk-radius: var(--r-lg);
   --pk-s1: var(--s-1);
   --pk-s2: var(--s-2);
   --pk-s3: var(--s-3);
@@ -722,14 +865,19 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
 
 /* Feature routes (#/plan, #/household, #/packs, #/new, #/edit) share one page frame. */
 .feature-page { display: grid; gap: var(--s-5); min-width: 0; }
-.feature-head h1 { margin: 0; font: 650 var(--text-2xl) / var(--lh-tight) var(--font-display); }
-.feature-head p { margin: var(--s-2) 0 0; max-width: var(--measure); color: var(--muted); }
+.feature-page > * { min-width: 0; }
+.feature-head h1 { margin: 0; font: 650 var(--text-3xl) / var(--lh-tight) var(--font-display); letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.feature-note { margin: 0; max-width: var(--measure-text); color: var(--ink-2); }
+.feature-head p { margin: var(--s-2) 0 0; max-width: var(--measure-text); color: var(--muted); }
+.feature-head .feature-note { color: var(--ink-2); }
 .feature-cols { display: grid; gap: var(--s-5); align-items: start; min-width: 0; }
 .feature-cols > * { min-width: 0; }
-.feature-note { margin: 0; color: var(--ink-2); }
+/* The editor is a form: the whole page is capped and centred together (D3). */
+main[data-view='new'] .feature-page, main[data-view='edit'] .feature-page { width: 100%; max-width: 960px; margin-inline: auto; }
 /* The filter mounts sit inside the dashboard's filter panel, whose "Clear all" and chips already cover clearing. */
 .filter-group .rbf-foot { display: none; }
 .scale-household { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin: var(--s-2) 0 0; color: var(--muted); font-size: var(--text-sm); }
+.mount > [data-scale] { margin-bottom: var(--s-3); }
 
 .toast {
   position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); z-index: var(--z-toast);
@@ -743,12 +891,10 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
 
 /* ---------- tablet: 768px ---------- */
 @media (min-width: 768px) {
-  .nav { order: 0; flex: 0 1 auto; margin-inline: var(--s-2) 0; padding-bottom: 0; }
+  .label-wide { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; clip-path: none; }
   .stats { display: block; }
+  .topbar-actions .btn-primary { width: auto; padding: 0 var(--s-4); }
   .toast { bottom: calc(var(--s-5) + env(safe-area-inset-bottom)); }
-
-  .home-head { grid-template-columns: minmax(0, 1fr) minmax(320px, 480px); align-items: end; }
-  .active-filters { grid-column: 1 / -1; }
 
   /* The filter sheet becomes an inline panel above the grid. */
   .scrim { display: none; }
@@ -757,7 +903,7 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
     border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-1); animation: none;
   }
   .filters-head { padding: var(--s-3) var(--s-5); }
-  #filter-close, #filter-done { display: none; }
+  .filters-head .icon-btn, .filters-foot .btn-primary { display: none; }
   .filters-body { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: var(--s-5); overflow: visible; }
   .filters-foot { padding: var(--s-3) var(--s-5); }
 
@@ -767,6 +913,12 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
   .card-media { aspect-ratio: 4 / 3; min-height: 0; }
   .card-body { flex: 1; padding: var(--s-4); }
   .card-hits, .card-tags { flex-wrap: wrap; }
+  .grid[data-mode='list'] { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: var(--s-3); }
+  .grid[data-mode='list'] .card { display: grid; }
+  .grid[data-mode='list'] .card-media { aspect-ratio: auto; min-height: 64px; }
+  .grid[data-mode='list'] .card-body { padding: var(--s-2) var(--s-3); }
+  .grid[data-mode='list'] .card-meta { display: block; }
+  .grid[data-mode='list'] .card-body > .card-foot { gap: var(--s-3); }
   .queue { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   /* Detail: sticky player column, content beside it. */
@@ -778,61 +930,73 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
   }
   .recipe.recipe-queued { grid-template-rows: auto 1fr; grid-template-areas: 'media head' 'media panel'; }
   .recipe-media { align-self: stretch; }
-  .media-stick { position: sticky; top: calc(var(--bar-h) + var(--s-4)); }
-  .player { width: 100%; width: min(100%, calc((100dvh - var(--bar-h) - 96px) * 9 / 16)); }
+  .media-stick { position: sticky; top: calc(var(--head-h) + var(--s-4)); }
+  .player { width: 100%; width: min(100%, calc((100dvh - var(--head-h) - 96px) * 9 / 16)); }
   .recipe-actions {
-    grid-area: actions; position: static; z-index: auto;
+    grid-area: actions; position: static; z-index: auto; flex-wrap: wrap;
     margin-inline: 0; padding: 0; border-top: 0; background: none;
   }
   .recipe-actions .btn-primary { flex: 0 0 auto; }
-  #print { display: inline-flex; }
+  .recipe-actions .btn:not(.btn-primary) { width: auto; padding: 0 var(--s-4); }
+  .recipe-actions .print-btn { display: inline-flex; }
   .facts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .nutrition { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .panel { padding: var(--s-5); }
   .queue-panel { max-width: 760px; }
-  .cook-nav { grid-template-columns: minmax(0, 200px) minmax(0, 1fr); max-width: 720px; width: 100%; margin-inline: auto; }
+  .skel-player { width: 100%; }
+
+  .cook-stage { padding: var(--s-6) var(--s-7); }
+  .cook-tools, .cook-nav { width: 100%; max-width: 720px; margin-inline: auto; }
+  .cook-tools .btn { flex: 0 1 auto; padding: 0 var(--s-4); }
+  .cook-nav { grid-template-columns: minmax(0, 200px) minmax(0, 1fr); }
 }
 
 /* ---------- desktop: 1280px ---------- */
 @media (min-width: 1280px) {
+  /* The header is one row and stays whole. */
+  .topbar { top: 0; }
+  .nav { order: 0; flex: 0 1 auto; min-height: 0; margin-inline: var(--s-2) 0; padding-bottom: 0; }
+
   /* Feature pages with two parts (week plan + shopping list, household + budget) go side by side. */
   .feature-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 
   /* Filter rail beside the grid. */
   .home { grid-template-columns: 300px minmax(0, 1fr); column-gap: var(--s-6); align-items: start; }
-  .home-head { grid-column: 1 / -1; }
+  .home-head { grid-column: 1 / -1; grid-template-columns: minmax(0, 1fr) minmax(320px, 560px); align-items: end; }
+  .active-filters { grid-column: 1 / -1; }
   .home-main { grid-column: 2; }
-  #filter-toggle { display: none; }
+  .home-tools .filter-toggle { display: none; }
   .filters, .filters[data-open='false'] {
     grid-column: 1; display: flex;
-    position: sticky; top: calc(var(--bar-h) + var(--s-4));
-    max-height: calc(100vh - var(--bar-h) - var(--s-6)); max-height: calc(100dvh - var(--bar-h) - var(--s-6));
+    position: sticky; top: calc(var(--head-h) + var(--s-4));
+    max-height: calc(100vh - var(--head-h) - var(--s-6)); max-height: calc(100dvh - var(--head-h) - var(--s-6));
   }
   .filters-head, .filters-foot { padding-inline: var(--s-4); }
   .filters-body { grid-template-columns: minmax(0, 1fr); padding: var(--s-4); overflow-y: auto; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--s-5); }
 
-  /* Detail: ingredients stay beside the steps. */
+  /* Detail: ingredients stay beside the steps, and the steps get the widest column (D1). */
   .recipe {
-    grid-template-columns: var(--media-w) minmax(320px, 400px) minmax(0, 1fr);
+    grid-template-columns: var(--media-w) minmax(300px, 360px) minmax(0, 1fr);
     grid-template-rows: auto auto auto 1fr;
     grid-template-areas: 'media head head' 'media actions actions' 'media ingredients steps' 'media more more';
   }
   .recipe.recipe-queued { grid-template-columns: var(--media-w) minmax(0, 1fr); }
   .recipe-ingredients {
-    position: sticky; top: calc(var(--bar-h) + var(--s-4));
-    max-height: calc(100vh - var(--bar-h) - var(--s-6)); max-height: calc(100dvh - var(--bar-h) - var(--s-6));
+    position: sticky; top: calc(var(--head-h) + var(--s-4));
+    max-height: calc(100vh - var(--head-h) - var(--s-6)); max-height: calc(100dvh - var(--head-h) - var(--s-6));
     overflow-y: auto;
   }
 
   /* Cook mode: ingredients as a side pane. */
   .cook-body { grid-template-columns: 380px minmax(0, 1fr); }
   .cook-ings, .cook-ings[data-open='false'] { position: static; display: block; border-right: 1px solid var(--line); }
-  #cook-ing-toggle { display: none; }
+  .cook-tools .ing-toggle { display: none; }
   .cook-stage { padding: var(--s-7); }
 }
 @media (min-width: 1280px) and (pointer: fine) {
   .chip { min-height: 36px; }
+  .recipe-by a, .feature-head p a, .feature-note a, .scale-household a { display: inline; min-width: 0; min-height: 0; }
 }
 
 /* ---------- wide: 1920px ---------- */
@@ -844,15 +1008,25 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
   .cook-body { grid-template-columns: 460px minmax(0, 1fr); }
 }
 
-/* ---------- reduced motion ---------- */
+/* ---------- reduced motion, more contrast, forced colours ---------- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
-    animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important; scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important;
+    transition-duration: 0.01ms !important; transition-delay: 0s !important; scroll-behavior: auto !important;
   }
 }
+/* Doubling the selector outranks the theme rules above without repeating a palette. */
+@media (prefers-contrast: more) {
+  :root:root { --muted: var(--ink-2); --line: var(--line-strong); --accent-text: var(--ink); }
+}
+@media (forced-colors: active) {
+  .btn, .chip, .ts, .timer, .card, .panel, .q-item { border-color: ButtonText; }
+  .chip[aria-pressed='true'], .btn[aria-pressed='true'], .segmented button[aria-pressed='true'] { border: 2px solid Highlight; }
+  .badge::before, .cook-progress { forced-color-adjust: none; }
+}
 
-/* ---------- print: one recipe as a clean sheet ---------- */
+/* ---------- print: one recipe (or the shopping list) as a clean sheet ---------- */
+@page { margin: 16mm; }
 @media print {
   :root, :root[data-theme], :root:not([data-theme='light']) {
     --bg: #ffffff; --surface: #ffffff; --surface-2: #ffffff; --surface-3: #ffffff;
@@ -860,22 +1034,35 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
     --line: #bbbbbb; --line-strong: #666666;
     --accent-text: #000000; --accent-soft: #ffffff;
     --warn: #000000; --warn-soft: #ffffff; --ok: #000000; --ok-soft: #ffffff;
+    --info: #000000; --info-soft: #ffffff; --danger: #000000; --danger-soft: #ffffff;
     --shadow-1: none; --shadow-2: none; --shadow-3: none;
     color-scheme: light;
   }
-  .topbar, .footer, .skip, .toast, .back, .recipe-media, .recipe-actions, .mount, .panel-tools, .cook, .modal, button.ts { display: none !important; }
+  .topbar, .footer, .skip, .toast, .recipe-top, .back, .recipe-media, .recipe-actions, .mount, .panel-tools, .cook, .modal,
+  .step-tools button, .tags, .scrim { display: none !important; }
   .print-only { display: block; }
   body { display: block; font-size: 11pt; }
   main { padding: 0; }
-  .view-enter > * { animation: none; }
+  .view-enter > *, .grid-enter > .card { animation: none; }
   .recipe { display: block; }
   .recipe > * + * { margin-top: 14pt; }
+  .recipe-head h1 { font-size: 22pt; }
   .recipe-ingredients { position: static; max-height: none; overflow: visible; }
   .panel { padding: 0; border: 0; }
+  .panel h2 { margin-bottom: 6pt; padding-bottom: 4pt; border-bottom: 1px solid var(--line-strong); }
+  .panel h2, .panel h3 { break-after: avoid; }
+  .facts { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .facts div, .nutrition div { border: 1px solid var(--line); }
   .ing-list { columns: 2; column-gap: 24pt; }
   .ing-list li, .steps li, .callout { break-inside: avoid; }
+  .ing { min-height: 0; padding: 4pt 0; }
+  .ing input { appearance: none; -webkit-appearance: none; border: 1px solid var(--line-strong); border-radius: 2px; }
+  .ing input:checked ~ .ing-text .ing-name { color: inherit; text-decoration: none; }
   .steps li::before { border: 1px solid var(--line-strong); }
+  .step-text { max-width: none; font-size: 11pt; }
   .callout { border: 1px solid var(--line-strong); }
+  /* The week-plan page prints as the shopping list alone. */
+  .feature-head p, .feature-cols > [data-part='week'] { display: none; }
+  .feature-cols { display: block; }
   a { text-decoration: none; }
 }

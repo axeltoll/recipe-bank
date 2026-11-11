@@ -1,46 +1,65 @@
-/* Extra filters (public/features/filters.mjs). Theme it with the --rbf-* properties. */
+/* Extra filters (public/features/filters.mjs): Without, Tags, Nutrition. Themed through the --rbf-* properties;
+   see week-plan.css for how they fall back to the dashboard tokens. The chips and headings are drawn exactly
+   like the dashboard's own ingredient chips, so the three groups read as part of one filter panel. */
 .rbf-filters {
   --_fg: var(--rbf-fg, var(--ink, #1f1a16));
-  --_muted: var(--rbf-muted, var(--muted, #7a6f66));
-  --_line: var(--rbf-line, var(--line, #e6ddd1));
+  --_fg-2: var(--rbf-fg-2, var(--rbf-fg, var(--ink-2, #4a423b)));
+  --_muted: var(--rbf-muted, var(--muted, #655b53));
+  --_line: var(--rbf-line, var(--line-strong, #8f8378));
   --_surface: var(--rbf-surface, var(--surface, #fff));
+  --_inset: var(--rbf-inset, var(--surface-2, transparent));
   --_accent: var(--rbf-accent, var(--accent, #c2410c));
+  --_accent-strong: var(--rbf-accent-strong, var(--rbf-accent, var(--accent-strong, #a83a0b)));
   --_accent-ink: var(--rbf-accent-ink, var(--accent-ink, #fff));
-  --_radius: var(--rbf-radius, var(--radius, 14px));
-  --_gap: var(--rbf-gap, 12px);
+  --_focus: var(--rbf-focus, var(--rbf-fg, var(--focus, #1f1a16)));
+  --_ctl: var(--rbf-control-radius, var(--r-md, 12px));
+  --_gap: var(--rbf-gap, var(--s-3, 12px));
+  --_tap: var(--tap, 44px);
   --_font: var(--rbf-font, inherit);
   color: var(--_fg);
   font: var(--_font);
   display: grid;
   gap: var(--_gap);
+  min-width: 0;
 }
-.rbf-filters h3 { margin: 0 0 6px; font-size: 0.8125em; text-transform: uppercase; letter-spacing: 0.06em; color: var(--_muted); }
-.rbf-filters .rbf-hint { margin: 0 0 8px; color: var(--_muted); font-size: 0.875em; }
-.rbf-filters .rbf-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.rbf-filters h3 {
+  margin: 0 0 8px; color: var(--_muted);
+  font: 700 var(--text-sm, 0.875rem) / 1.2 var(--font-body, inherit); letter-spacing: 0.06em; text-transform: uppercase;
+}
+.rbf-filters .rbf-hint { margin: 0 0 8px; color: var(--_muted); font-size: var(--text-sm, 0.875rem); }
+.rbf-filters .rbf-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .rbf-filters .rbf-chip {
-  font: inherit; font-size: 0.875em; cursor: pointer; min-height: 36px; padding: 4px 10px;
-  display: inline-flex; align-items: center; gap: 6px;
-  border-radius: 999px; border: 1px solid var(--_line); background: var(--_surface); color: var(--_fg);
+  display: inline-flex; align-items: center; gap: 8px; min-height: var(--_tap); padding: 0 12px;
+  border: 1px solid var(--_line); border-radius: 999px; background: var(--_surface); color: var(--_fg);
+  font: inherit; font-size: var(--text-sm, 0.875rem); font-weight: 500; cursor: pointer;
 }
-.rbf-filters .rbf-chip[aria-pressed="true"] { background: var(--_accent); border-color: var(--_accent); color: var(--_accent-ink); }
+.rbf-filters .rbf-chip[aria-pressed="true"] { background: var(--_accent); border-color: var(--_accent); color: var(--_accent-ink); font-weight: 600; }
 .rbf-filters [data-group="without"] .rbf-chip[aria-pressed="true"] { text-decoration: line-through; }
-.rbf-filters .rbf-chip-count { opacity: 0.7; font-size: 0.875em; }
+.rbf-filters .rbf-chip-count { color: var(--_muted); font-size: var(--text-xs, 0.75rem); }
+.rbf-filters .rbf-chip[aria-pressed="true"] .rbf-chip-count { color: inherit; }
 .rbf-filters .rbf-btn {
-  font: inherit; cursor: pointer; min-height: 36px; padding: 4px 12px;
-  border-radius: calc(var(--_radius) / 2); border: 1px solid var(--_line); background: var(--_surface); color: var(--_fg);
+  display: inline-flex; align-items: center; justify-content: center; min-height: var(--_tap); padding: 0 16px;
+  border: 1px solid var(--_line); border-radius: var(--_ctl);
+  background: var(--_surface); color: var(--_fg); font: inherit; font-weight: 600; white-space: nowrap; cursor: pointer;
 }
-.rbf-filters .rbf-btn-quiet { background: transparent; }
-.rbf-filters :focus-visible { outline: 2px solid var(--_accent); outline-offset: 2px; }
+.rbf-filters .rbf-btn-quiet { border-color: transparent; background: transparent; color: var(--_fg-2); }
+.rbf-filters :focus-visible { outline: 2px solid var(--_focus); outline-offset: 2px; }
+@media (hover: hover) {
+  .rbf-filters .rbf-chip:hover, .rbf-filters .rbf-btn:hover { background: var(--_inset); }
+  .rbf-filters .rbf-chip[aria-pressed="true"]:hover { background: var(--_accent-strong); border-color: var(--_accent-strong); }
+}
 
 .rbf-filters .rbf-numbers { display: flex; flex-wrap: wrap; gap: var(--_gap); }
-.rbf-filters .rbf-numbers label { display: grid; gap: 4px; font-size: 0.875em; color: var(--_muted); flex: 1 1 9rem; }
+.rbf-filters .rbf-numbers label { display: grid; gap: 4px; flex: 1 1 9rem; min-width: 0; color: var(--_fg-2); font-size: var(--text-sm, 0.875rem); font-weight: 600; }
 .rbf-filters input[type="number"] {
-  font: inherit; font-size: 16px; color: var(--_fg); background: var(--_surface);
-  border: 1px solid var(--_line); border-radius: calc(var(--_radius) / 2); padding: 8px 10px; min-height: 44px;
+  width: 100%; min-width: 0; min-height: var(--_tap); padding: 0 12px;
+  border: 1px solid var(--_line); border-radius: var(--_ctl);
+  background: var(--_surface); color: var(--_fg); font: inherit; font-size: max(1em, 16px); font-weight: 400;
 }
-.rbf-filters .rbf-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--_gap); min-height: 36px; }
-.rbf-filters .rbf-summary { color: var(--_muted); font-size: 0.875em; }
+.rbf-filters .rbf-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--_gap); min-height: var(--_tap); }
+.rbf-filters .rbf-summary { color: var(--_muted); font-size: var(--text-sm, 0.875rem); }
 
-@media (pointer: coarse) {
-  .rbf-filters .rbf-chip, .rbf-filters .rbf-btn { min-height: 44px; }
+/* With a mouse on a desktop the chips match the dashboard's 36px chips; everywhere else they are 44px. */
+@media (min-width: 1280px) and (pointer: fine) {
+  .rbf-filters .rbf-chip { min-height: 36px; }
 }

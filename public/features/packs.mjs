@@ -133,7 +133,7 @@ export function mount(element, options = {}) {
         <button type="button" class="pk-btn" data-act="all">Select shown</button>
         <button type="button" class="pk-btn" data-act="none">Clear</button>
       </div>
-      <ul class="pk-list" data-el="pick" aria-label="Recipes"><li class="pk-empty">Loading recipes…</li></ul>
+      <ul class="pk-list" data-el="pick" aria-label="Recipes"><li class="pk-empty pk-loading">Loading recipes…</li></ul>
       <div class="pk-actions">
         <button type="button" class="pk-btn pk-primary" data-act="download">Download pack</button>
         <button type="button" class="pk-btn" data-act="link">Copy link</button>

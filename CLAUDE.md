@@ -43,7 +43,7 @@ No dependencies. Node ≥ 22 (built-in `fetch`, `node:test`, `import.meta.dirnam
 | `public/` | Dashboard (vanilla ES modules + CSS, light/dark). `app.js` is boot and router; views are in `public/ui/`. Hash routes: `#/`, `#/r/<id>`, `#/q/<queueId>`, plus the feature routes `#/plan`, `#/household`, `#/packs`, `#/new[/<queueId>]`, `#/edit/<id>`. |
 | `public/features/` | Self-contained feature modules (`*.mjs`, `mount(el, options)`) and their installers (`*-feature.js`), listed in `features/index.js`. Contract: `docs/design/MOUNT-POINTS.md`; module docs: `INTEGRATION.md`, `HOUSEHOLD.md`, `EDITOR.md`, `PACKS.md`. |
 | `public/sw.js` | Offline service worker. Off unless the reader turns on the footer switch. |
-| `docs/design/` | `DESIGN.md` (tokens, layout contract), `AUDIT.md`, `MOUNT-POINTS.md`. Change `public/styles.css` and `DESIGN.md` together. |
+| `docs/design/` | `DESIGN.md` (tokens, layout contract, states, cook mode, timers), `AUDIT.md` (round 1), `ROUND2.md` (round 2), `MOUNT-POINTS.md`. Change `public/styles.css` and `DESIGN.md` together. |
 | `docs/ARCHITECTURE.md` | One page: modules, data flow, routes, API. |
 | `scripts/validate.mjs` | CLI validator; exits 1 on any problem. Warns about ingredient keys with no shopping-list aisle. |
 | `scripts/smoke.mjs`, `scripts/device-check.mjs`, `scripts/browser/` | Browser checks; their selectors are in `scripts/browser/selectors.mjs`. |
@@ -114,5 +114,5 @@ For Recipe Agent tasks, start with [agent/RECIPE-AGENT.md](agent/RECIPE-AGENT.md
 - Keep it dependency-free unless there's a real need; adding a build step is a decision to raise with the owner first.
 - The UI escapes every string from data files and oEmbed (`esc()` in `lib/format.mjs` for the dashboard, `public/features/shared.mjs` for feature modules), because queue titles and packs come from third parties.
 - Dashboard logic that needs no DOM goes in `lib/` with a test; `public/ui/` only renders. `test/design.test.mjs` checks the stylesheet tokens, contrast, imports and mount points by reading the files. When a module is added to `public/` or `lib/` and loaded by the dashboard (directly or by a feature), add it to `SHELL` in `public/sw.js`; `test/sw.test.mjs` follows the imports and fails otherwise.
-- A feature plugs in through `public/features/index.js` and the `rb` API, never by editing `app.js`. Its CSS custom properties are mapped to the design tokens in the one "feature modules" block of `public/styles.css`.
+- A feature plugs in through `public/features/index.js` and the `rb` API, never by editing `app.js`. Its CSS custom properties are mapped to the design tokens in the one "feature modules" block of `public/styles.css`. A feature stylesheet holds no colour of its own (a literal only as the last `var()` fallback), never dims text with `opacity`, caps paragraphs with `--measure-text`, and is mobile-first on the contract breakpoints; `test/design-round2.test.mjs` checks this.
 - Browser storage only holds conveniences (filters, ingredient checkboxes, week plan, household, budget), each read and write wrapped in try/catch.

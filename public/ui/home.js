@@ -11,11 +11,15 @@ import {
 import { stateBlock } from './states.js';
 
 const CHIP_LIMIT = 16;
+const VIEW_KEY = 'rb:view'; // 'list' = the compact list; anything else = cards
 let filtersOpen = false;
+let listMode = store.get(VIEW_KEY, 'grid') === 'list';
+let enterGrid = false; // the first draw of the grid on a view animates in; filter redraws do not
 
 export function renderHome() {
   document.title = 'Recipe Bank';
   filtersOpen = false;
+  enterGrid = true;
 
   view.innerHTML = `
     <div class="home">
@@ -30,9 +34,10 @@ export function renderHome() {
             <input id="search" type="search" placeholder="Dish, creator, ingredient…" aria-label="Search recipes"
                    autocomplete="off" enterkeyhint="search" value="${esc(state.q)}">
           </div>
-          <button class="btn" type="button" id="filter-toggle" aria-expanded="false" aria-controls="filters">
+          <button class="btn filter-toggle" type="button" id="filter-toggle" aria-expanded="false" aria-controls="filters">
             ${icon('filter')}<span>Filters</span><span class="count-dot" id="filter-count" hidden></span>
           </button>
+          <button class="btn icon-btn" type="button" id="view-toggle" aria-pressed="${listMode}" aria-label="Compact list">${icon('rows')}</button>
           <div class="mount" id="mount-home-tools" data-mount="home-tools"></div>
         </div>
         <div class="active-filters" id="active-filters"></div>
@@ -67,7 +72,7 @@ export function renderHome() {
         <div class="mount" id="mount-home-top" data-mount="home-top"></div>
         <section aria-labelledby="recipes-h">
           <h2 class="sr-only" id="recipes-h">Recipes</h2>
-          <div class="grid" id="grid"></div>
+          <div class="grid" id="grid" data-mode="${listMode ? 'list' : 'grid'}"></div>
         </section>
         <section class="queue-section" id="queue-section" aria-labelledby="queue-h" hidden>
           <div class="section-head"><h2 id="queue-h">In the queue</h2><p>Waiting for the research agent</p></div>
@@ -81,6 +86,12 @@ export function renderHome() {
     filtersChanged();
   });
   $('#filter-toggle').addEventListener('click', () => setFiltersOpen(!filtersOpen));
+  $('#view-toggle').addEventListener('click', (e) => {
+    listMode = !listMode;
+    store.set(VIEW_KEY, listMode ? 'list' : 'grid');
+    e.currentTarget.setAttribute('aria-pressed', String(listMode));
+    $('#grid').dataset.mode = listMode ? 'list' : 'grid';
+  });
   $('#filter-close').addEventListener('click', () => setFiltersOpen(false));
   $('#filter-done').addEventListener('click', () => setFiltersOpen(false));
   $('#filter-scrim').addEventListener('click', () => setFiltersOpen(false));
@@ -276,6 +287,8 @@ export function refresh() {
   } else {
     grid.innerHTML = list.map(card).join('');
   }
+  grid.classList.toggle('grid-enter', enterGrid);
+  enterGrid = false;
   emit('grid', { recipes: list, total, root: grid });
 }
 
@@ -307,12 +320,14 @@ function card(r) {
       </div>
       <div class="card-body">
         <h3 class="card-title"><a class="card-link" href="${esc(recipeHash(r.id))}">${esc(r.title)}</a></h3>
-        <p class="card-by">${esc(r.creator.name)}</p>
+        <p class="card-by">${esc(r.creator.name)}${r.status === 'partial' ? ' <span class="card-partial">· partial</span>' : ''}</p>
         ${m ? `<p class="card-macros"><strong>${esc(m.text)}</strong>${m.per ? ` per ${esc(m.per)}` : ''}</p>` : ''}
         ${hits.length ? `<p class="card-hits"><span class="sr-only">Has </span>${hits.map((k) => `<span class="hit">${esc(k)}</span>`).join(' ')}</p>` : ''}
         ${tags.length ? `<ul class="card-tags" aria-label="Tags">${tags.map((t) => `<li>${esc(t)}</li>`).join('')}${moreTags > 0 ? `<li>+${moreTags}</li>` : ''}</ul>` : ''}
-        <p class="card-meta">${time}${plural(keys.length, 'ingredient')} · ${plural(stepCount(r), 'step')}</p>
-        <div class="mount card-slot" data-mount="card-actions" data-recipe-id="${esc(r.id)}"></div>
+        <div class="card-foot">
+          <p class="card-meta">${time}${plural(keys.length, 'ingredient')} · ${plural(stepCount(r), 'step')}</p>
+          <div class="mount card-slot" data-mount="card-actions" data-recipe-id="${esc(r.id)}"></div>
+        </div>
       </div>
     </article>`;
 }

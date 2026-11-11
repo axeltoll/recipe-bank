@@ -63,7 +63,7 @@ Get one with `rb.mount(name)`; it returns the element, or `null` when the curren
 | `filter-exclude` | `#mount-filter-exclude` | home | In the filter panel, right under the ingredient chips | The "Without" ingredient filter |
 | `filter-tags` | `#mount-filter-tags` | home | In the filter panel, after `filter-exclude` | Tag chips |
 | `filter-nutrition` | `#mount-filter-nutrition` | home | In the filter panel, last group | Minimum protein, maximum calories |
-| `recipe-actions` | `#mount-recipe-actions` | recipe | In the action row after Start cooking, Copy list and Print. On a phone this row is the sticky bottom bar, so keep it to one short button | "Add to week", "Add to list" |
+| `recipe-actions` | `#mount-recipe-actions` | recipe | In the action row after Start cooking and Copy list, before Print. On a phone this row is the sticky bottom bar and holds one row: keep it to one button, made of an icon and a `<span class="label-wide">` label, which phones do not draw | "Add to week", "Add to list" |
 | `recipe-scaling` | `#mount-recipe-scaling` | recipe | Top of the Ingredients panel, above the legend | The servings control |
 | `recipe-aside` | `#mount-recipe-aside` | recipe | Bottom of the Ingredients panel | Anything that follows the list, e.g. "3 of these are on your shopping list" |
 
@@ -80,15 +80,15 @@ The three filter mounts carry the class `filter-group`. Start the content with a
 
 | Name | Selector | View | Where it is |
 |---|---|---|---|
-| `card-actions` | `[data-mount="card-actions"]`, with `data-recipe-id="<id>"` | home | Bottom of each recipe card, above the card's stretched link, so buttons in it are clickable |
+| `card-actions` | `[data-mount="card-actions"]`, with `data-recipe-id="<id>"` | home | At the right of each card's last row, beside the ingredient and step counts, above the card's stretched link, so buttons in it are clickable |
 
-`rb.mounts('card-actions')` returns all of them. The grid is redrawn on every filter change, so fill these from `rb:grid`:
+`rb.mounts('card-actions')` returns all of them. The grid is redrawn on every filter change, so fill these from `rb:grid`. The slot is 44 px wide: one icon button, with its name in an `sr-only` span that says which recipe it acts on.
 
 ```js
 rb.on('grid', ({ root }) => {
   for (const slot of rb.mounts('card-actions', root)) {
     const id = slot.dataset.recipeId;
-    slot.innerHTML = `<button type="button" class="btn btn-quiet" data-plan="${rb.esc(id)}">Add to week</button>`;
+    slot.innerHTML = `<button type="button" class="btn btn-quiet" data-plan="${rb.esc(id)}">${rb.icon('week')}<span class="sr-only">Add to week: ${rb.esc(rb.recipe(id).title)}</span></button>`;
   }
 });
 ```
@@ -149,7 +149,7 @@ On the home view the order is `rb:grid`, then `rb:view`. A feature that filters 
 | `rb.toast(text)` | Short confirmation. |
 | `rb.copy(text, doneMessage)` | Copy to the clipboard with a toast. |
 | `rb.esc(value)` | HTML-escape. |
-| `rb.icon(name)` | Inline SVG markup. Names: `search`, `filter`, `close`, `plus`, `play`, `back`, `next`, `check`, `sun`, `moon`, `copy`, `print`, `pot`, `external`, `alert`, `list`. |
+| `rb.icon(name)` | Inline SVG markup (24 px grid, 2 px stroke, `currentColor`, `aria-hidden`). Names: `search`, `filter`, `close`, `plus`, `play`, `back`, `next`, `check`, `sun`, `moon`, `auto`, `copy`, `print`, `pot`, `external`, `alert`, `list`, `grid`, `rows`, `edit`, `week`, `timer`, `stop`. An unknown name gives an empty icon. |
 
 ### Filters
 
@@ -202,7 +202,17 @@ self-contained module (`*.mjs`, documented in `INTEGRATION.md`, `HOUSEHOLD.md`, 
 | `editor-feature.js` | `recipe-editor.mjs` | `addRoute('new', …)` (`#/new`, `#/new/<queueId>`), `addRoute('edit', …)` (`#/edit/<id>`), a "New recipe" button in `home-tools`; `rb.reload()` after a save |
 
 The modules' own custom properties (`--rbf-*`, `--rb-*`, `--re-*`, `--pk-*`) are mapped to the design tokens in one
-block of `public/styles.css` ("feature modules"), so the modules follow both themes without CSS of their own.
+block of `public/styles.css` ("feature modules"), so the modules follow both themes and every token change. Each
+module's stylesheet draws its buttons, chips, sections, headings, focus ring and its empty, loading and error states
+the way DESIGN.md describes them ("Components", "States"), reading only those properties. A stylesheet holds no colour
+of its own: a literal appears only as the last fallback inside `var()`, for a page that is not the dashboard.
+`test/design-round2.test.mjs` checks that, and that no module dims text with `opacity`, uses a `max-width` media query
+or a breakpoint outside the contract.
+
+A new module should do the same: text in `--ink`, `--ink-2` or `--muted`; accent-coloured text in `--accent-text`
+(never `--accent`, which is a fill); every paragraph capped with `--measure-text`; every control at least `--tap`
+tall, links inside sentences included; `width: 100%` and `min-width: 0` on selects and inputs, so nothing in a
+module can make the page scroll sideways.
 
 On the static build (`rb.isStatic`) the editor is read-only and offers "Download JSON", and the packs panel shows what a
 pack holds without an Import button: nothing in `dist/` writes.

@@ -59,14 +59,16 @@ export function install(rb) {
     if (name === 'recipe' && recipe) {
       const slot = rb.mount('recipe-actions');
       slot?.insertAdjacentHTML('beforeend',
-        `<button type="button" class="btn" data-plan-add="${rb.esc(recipe.id)}">${rb.icon('plus')}<span>Add to week</span></button>`);
+        `<button type="button" class="btn" data-plan-add="${rb.esc(recipe.id)}">${rb.icon('week')}<span class="label-wide">Add to week</span></button>`);
     }
   });
 
   rb.on('grid', ({ root }) => {
+    // On a card the button is the icon alone (the card is small); its name carries the recipe's title.
     for (const slot of rb.mounts('card-actions', root)) {
+      const title = rb.recipe(slot.dataset.recipeId)?.title;
       slot.insertAdjacentHTML('beforeend',
-        `<button type="button" class="btn btn-quiet" data-plan-add="${rb.esc(slot.dataset.recipeId)}">Add to week</button>`);
+        `<button type="button" class="btn btn-quiet" data-plan-add="${rb.esc(slot.dataset.recipeId)}">${rb.icon('week')}<span class="sr-only">Add to week${title ? `: ${rb.esc(title)}` : ''}</span></button>`);
     }
   });
 
