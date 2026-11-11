@@ -125,7 +125,9 @@ test('shopping list renders merged items, ticks and the empty state', () => {
   assert.match(html, />2 per person</);
   assert.match(html, /For <a href="#\/r\/alpha">Alpha<\/a>, <a href="#\/r\/beta">Beta<\/a>/);
   assert.match(html, /data-untick/);
-  assert.doesNotMatch(shoppingListUi.renderShoppingList(list), /data-untick/);
+  assert.doesNotMatch(html, /data-untick hidden/);
+  // With nothing ticked the button is there but hidden, so ticking a box can show it without a re-render.
+  assert.match(shoppingListUi.renderShoppingList(list), /data-untick hidden>Untick all</);
   assert.match(shoppingListUi.renderShoppingList(shoppingList([])), /Plan some recipes and their ingredients show up here/);
   const bad = shoppingListUi.renderShoppingList(shoppingList([evil]));
   assert.doesNotMatch(bad, /<img|<svg|<i>Pork|<script/);
@@ -152,6 +154,36 @@ test('scale renders servings or factors and marks what changed', () => {
   assert.doesNotMatch(scaleUi.renderScale(alpha, 1, { list: false }), /rbf-scale-list/);
   assert.match(scaleUi.renderScale({ ...alpha, serves: '1' }, 1), /data-step="-1" aria-label="Fewer" disabled/);
   assert.doesNotMatch(scaleUi.renderScale(evil, 2), /<img|<svg|<i>|<b>/);
+});
+
+/** A mount-point stand-in: markup, listeners, and an event whose target answers closest() for `hits`. */
+const fakeEl = () => Object.assign(new EventTarget(), { innerHTML: '', querySelector: () => null });
+function fire(el, type, hits = {}) {
+  const e = new Event(type);
+  Object.defineProperty(e, 'target', { value: { closest: (sel) => hits[sel] ?? null, ...hits.self } });
+  el.dispatchEvent(e);
+}
+
+test('scale − / + step from the target as shown, even when it is not a whole number', () => {
+  const el = fakeEl();
+  const scaler = scaleUi.mount(el, { recipe: alpha, factor: 2.6 / 4, css: false }); // a household of 2.6
+  const target = () => Math.round(scaler.getFactor() * 4 * 1e6) / 1e6;
+  assert.equal(target(), 2.6);
+  assert.match(el.innerHTML, /data-target aria-live="polite">2\.6</);
+  const step = (n) => fire(el, 'click', { '[data-step]': { dataset: { step: String(n) } } });
+  step(1);
+  assert.equal(target(), 3.6, '+ adds one serving, it does not jump to 4');
+  step(-1);
+  step(-1);
+  assert.equal(target(), 1.6);
+  step(-1);
+  assert.equal(target(), 1, 'never below one serving');
+  step(1);
+  assert.equal(target(), 2);
+  scaler.setFactor(0.1 * 3 / 4); // 0.30000000000000004 servings: float noise is absorbed
+  step(1);
+  assert.equal(scaler.getFactor() * 4, 1.3);
+  scaler.destroy();
 });
 
 test('amountHtml for each kind of amount', () => {
@@ -182,4 +214,21 @@ test('filters render chips, numbers and a summary', () => {
   assert.deepEqual(filtersUi.extraFilter({ q: 'x', keys: ['a'], without: ['Pork'], maxCalories: '600' }), {
     without: ['pork'], tags: [], minProtein: null, maxCalories: 600,
   });
+});
+
+test('a panel with some sections only reports and clears its own fields', () => {
+  const recipes = [alpha, beta];
+  const all = { without: ['pork'], tags: ['quick'], minProtein: 40 };
+  assert.deepEqual(filtersUi.sectionFilter(all, ['tags']), { without: [], tags: ['quick'], minProtein: null, maxCalories: null });
+  assert.match(filtersUi.renderFilters(recipes, all, { sections: ['without'] }), /data-summary aria-live="polite">without pork</);
+  // A tag or protein floor from another panel is not this panel's to show or clear.
+  assert.match(filtersUi.renderFilters(recipes, { tags: ['quick'], minProtein: 40 }, { sections: ['without'] }), /data-clear hidden/);
+
+  const el = fakeEl();
+  const changes = [];
+  const panel = filtersUi.mount(el, { recipes, filter: all, persist: false, css: false, sections: ['without'], onChange: (f) => changes.push(f) });
+  fire(el, 'click', { '[data-clear]': {} });
+  assert.deepEqual(panel.getFilter(), { without: [], tags: ['quick'], minProtein: 40, maxCalories: null });
+  assert.deepEqual(changes.at(-1).without, []);
+  panel.destroy();
 });

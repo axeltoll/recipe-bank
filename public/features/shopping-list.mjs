@@ -44,7 +44,7 @@ export function renderShoppingList(list, checked = new Set(), { title = 'Shoppin
         <p class="rbf-muted" data-progress>${done} of ${list.itemCount} ticked</p>
         <span class="rbf-actions">
           <button type="button" class="rbf-btn" data-copy>Copy list</button>
-          ${done ? '<button type="button" class="rbf-btn rbf-btn-quiet" data-untick>Untick all</button>' : ''}
+          <button type="button" class="rbf-btn rbf-btn-quiet" data-untick${done ? '' : ' hidden'}>Untick all</button>
         </span>
       </header>
       <p class="rbf-for">For ${list.recipes.map((r) => `<a href="${esc(href(r.id))}">${esc(r.title)}</a>${r.times > 1 ? ` <span class="rbf-times">×${r.times}</span>` : ''}`).join(', ')}</p>
@@ -154,7 +154,7 @@ export function renderPurchaseList(purchase, checked = new Set(), {
         <span class="rbf-actions">
           <button type="button" class="rbf-btn" data-copy>Copy list</button>
           <button type="button" class="rbf-btn rbf-btn-quiet" data-print>Print</button>
-          ${done ? '<button type="button" class="rbf-btn rbf-btn-quiet" data-untick>Untick all</button>' : ''}
+          <button type="button" class="rbf-btn rbf-btn-quiet" data-untick${done ? '' : ' hidden'}>Untick all</button>
         </span>
       </header>
       <p class="rbf-for rbf-household">${esc(householdLine(purchase))}</p>
@@ -211,11 +211,16 @@ export function mount(el, options = {}) {
   const follow = !opts.plan;
   let recipes = opts.recipes ?? [];
   let plan = normalizePlan(opts.plan ?? readPlan({ key: opts.planKey, storage: opts.storage }));
-  let checked = new Set(opts.persist ? store.get(opts.checkedKey, []) : []);
+  // A stored value that is not an array (edited by hand, or another app's data) counts as nothing ticked.
+  const storedChecked = () => {
+    const raw = opts.persist ? store.get(opts.checkedKey, []) : [];
+    return new Set(Array.isArray(raw) ? raw.filter((k) => typeof k === 'string') : []);
+  };
+  let checked = storedChecked();
   let list;
 
   // ---- purchase option: state is only read when opts.household is on ----
-  const followHousehold = !options.profile;
+  let followHousehold = !options.profile; // a profile passed in (at mount or through update) is kept
   let purchase = null;
   let profile = null;
   let pantry = null;
@@ -259,6 +264,8 @@ export function mount(el, options = {}) {
     const done = shown.groups.reduce((n, g) => n + g.items.filter((it) => checked.has(it.key)).length, 0);
     const progress = el.querySelector('[data-progress]');
     if (progress) progress.textContent = `${done} of ${shown.itemCount} ticked`;
+    const untick = el.querySelector('[data-untick]');
+    if (untick) untick.hidden = !done;
     saveChecked();
   };
   // purchase option: the plain text of whatever is shown
@@ -315,7 +322,7 @@ export function mount(el, options = {}) {
       plan = readPlan({ key: opts.planKey, storage: opts.storage });
       render();
     } else if (e.key === opts.checkedKey && opts.persist) {
-      checked = new Set(store.get(opts.checkedKey, []));
+      checked = storedChecked();
       render();
     } else if (opts.household && e.key === opts.householdKey && followHousehold) { // purchase option
       profile = null;
@@ -361,7 +368,12 @@ export function mount(el, options = {}) {
       opts = { ...opts, ...next };
       if (next.recipes) recipes = next.recipes;
       if (next.plan) plan = normalizePlan(next.plan);
-      if (next.profile) profile = normalizeProfile(next.profile); // purchase option
+      // purchase option: a profile given here is kept (household events no longer replace it);
+      // profile: null follows the stored household again.
+      if (Object.hasOwn(next, 'profile')) {
+        followHousehold = !next.profile;
+        profile = next.profile ? normalizeProfile(next.profile) : null;
+      }
       if (next.pantry) pantry = normalizePantry(next.pantry); // purchase option
       render();
     },

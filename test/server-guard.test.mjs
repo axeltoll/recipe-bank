@@ -4,9 +4,10 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { request as httpRequest } from 'node:http';
+import { Readable } from 'node:stream';
 import { readFile, readdir, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { createApp, writeRefusal, allowedHosts, defaultDataDir } from '../server.mjs';
+import { createApp, createHandler, writeRefusal, allowedHosts, defaultDataDir } from '../server.mjs';
 import { exportPack } from '../lib/pack.mjs';
 import { makeRecipe, tempBank, ROOT } from './helpers/bank.mjs';
 
@@ -30,6 +31,32 @@ test('writeRefusal: anything but JSON is 415', () => {
     const refused = writeRefusal(type === undefined ? {} : { 'content-type': type });
     assert.equal(refused?.status, 415, String(type));
     assert.match(refused.error, /application\/json/);
+  }
+});
+
+test('writeRefusal: DELETE needs no content type, but the origin checks still apply', () => {
+  const del = { method: 'DELETE' };
+  assert.equal(writeRefusal({}, del), null, 'no body, no content type');
+  assert.equal(writeRefusal({ host: '127.0.0.1:4780', origin: 'http://127.0.0.1:4780', 'sec-fetch-site': 'same-origin' }, del), null);
+  assert.equal(writeRefusal({ 'sec-fetch-site': 'cross-site' }, del)?.status, 403);
+  assert.equal(writeRefusal({ host: '127.0.0.1:4780', origin: 'https://evil.example' }, del)?.status, 403);
+  assert.equal(writeRefusal({ host: 'evil.example:4780' }, del)?.status, 403);
+  for (const method of ['POST', 'PUT', 'post']) assert.equal(writeRefusal({}, { method })?.status, 415, method);
+});
+
+test('writeRefusal: a loopback Host, or none, counts only when the socket peer is loopback too', () => {
+  for (const peer of ['127.0.0.1', '127.8.9.10', '::1', '::ffff:127.0.0.1']) {
+    assert.equal(writeRefusal({ ...JSON_TYPE, host: '127.0.0.1:4780' }, { peer }), null, peer);
+    assert.equal(writeRefusal({ ...JSON_TYPE }, { peer }), null, `${peer} without Host`);
+  }
+  for (const peer of ['192.168.1.30', '10.0.0.5', '::ffff:192.168.1.30', 'fe80::1']) {
+    for (const host of ['127.0.0.1:4780', 'localhost:4780', '[::1]:4780']) {
+      assert.equal(writeRefusal({ ...JSON_TYPE, host }, { peer, hosts: ['127.0.0.1', 'localhost'] })?.status, 403, `${peer} -> ${host}`);
+    }
+    assert.equal(writeRefusal({ ...JSON_TYPE }, { peer })?.status, 403, `${peer} without Host`);
+    assert.equal(writeRefusal({}, { peer, method: 'DELETE' })?.status, 403, `${peer} DELETE without Host`);
+    // A name the owner listed is still reachable from the network.
+    assert.equal(writeRefusal({ ...JSON_TYPE, host: 'kitchen.lan:4780' }, { peer, hosts: ['kitchen.lan'] }), null);
   }
 });
 
@@ -155,10 +182,18 @@ test("the dashboard's own requests still work: queue, delete, create, replace, i
   const id = added.json.entry.id;
   assert.deepEqual((await queue()).map((q) => q.id), [id]);
 
-  assert.equal((await send({ method: 'DELETE', path: `/api/queue/${id}`, headers: { origin: 'https://evil.example', ...JSON_TYPE } })).status, 403);
-  assert.equal((await send({ method: 'DELETE', path: `/api/queue/${id}`, headers: {} })).status, 415);
+  // The dashboard's Remove button sends DELETE with no body and no content type.
+  const crossDelete = [
+    { origin: 'https://evil.example' },
+    { origin: 'https://evil.example', 'sec-fetch-site': 'cross-site' },
+    { 'sec-fetch-site': 'cross-site' },
+    { host: `rebound.example:${port}`, origin: `http://rebound.example:${port}` },
+  ];
+  for (const headers of crossDelete) {
+    assert.equal((await send({ method: 'DELETE', path: `/api/queue/${id}`, headers })).status, 403, JSON.stringify(headers));
+  }
   assert.equal((await queue()).length, 1, 'still queued');
-  const removed = await send({ method: 'DELETE', path: `/api/queue/${id}`, headers: own() });
+  const removed = await send({ method: 'DELETE', path: `/api/queue/${id}`, headers: { origin: `http://127.0.0.1:${port}`, 'sec-fetch-site': 'same-origin' } });
   assert.equal(removed.status, 200);
   assert.deepEqual(await queue(), []);
 
@@ -170,6 +205,21 @@ test("the dashboard's own requests still work: queue, delete, create, replace, i
   // localhost is the same machine.
   const local = await send({ headers: { host: `localhost:${port}`, origin: `http://localhost:${port}`, ...JSON_TYPE }, body: { url: 'https://youtu.be/BBBBBBBBBBB' } });
   assert.equal(local.status, 201);
+});
+
+test('the handler checks the socket peer: another machine cannot write by sending Host: 127.0.0.1', async () => {
+  const handle = createHandler({ dataDir: dir, oembed: null, resolve: async (video) => video, hosts: [] });
+  const call = (remoteAddress) => new Promise((ok) => {
+    const req = Object.assign(Readable.from([JSON.stringify({ url: 'https://youtu.be/CCCCCCCCCCC' })]), {
+      method: 'POST', url: '/api/queue', headers: { host: '127.0.0.1:4780', ...JSON_TYPE }, socket: { remoteAddress },
+    });
+    let status;
+    handle(req, { writeHead(code) { status = code; }, end() { ok(status); }, setHeader() {} });
+  });
+  const before = (await queue()).length;
+  assert.equal(await call('192.168.1.30'), 403);
+  assert.equal((await queue()).length, before, 'nothing queued');
+  assert.equal(await call('127.0.0.1'), 201);
 });
 
 test('reads are not affected', async () => {
