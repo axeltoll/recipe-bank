@@ -65,7 +65,10 @@ test('household mount saves, emits exact serving interface, validates, reloads a
   assert.equal(submit(root, 'household', values).defaultPrevented, true);
   assert.equal(detail.servingsPerMeal, 2.6); assert.equal(detail.profile.people.child6to10, 1);
   assert.equal(JSON.parse(storage.getItem(HOUSEHOLD_KEY)).people.child6to10, 1);
-  detail.profile.people.adult = 90; // Event consumers cannot mutate the internal profile.
+  // What a listener changes in the event detail does not reach storage, nor a panel mounted from it. (The mounted
+  // panel itself never re-renders its internal profile after an event: the next render follows the next submit.)
+  detail.profile.people.adult = 90;
+  assert.equal(JSON.parse(storage.getItem(HOUSEHOLD_KEY)).people.adult, 2);
   const fresh = new Element(); mountHousehold(fresh, { storage }); assert.match(fresh.innerHTML, /2 adults/);
   submit(root, 'household', { ...values, 'people.adult': '' }); assert.match(root.status.textContent, /people.adult/);
   mounted.destroy(); assert.equal(root.innerHTML, '');

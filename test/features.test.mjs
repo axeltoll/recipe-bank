@@ -98,7 +98,59 @@ test('week plan: read, write and add from anywhere, with storage that may fail',
 
   assert.deepEqual(weekPlan.readPlan({ storage: blocked }).items, []);
   assert.equal(weekPlan.writePlan(plan, { storage: blocked }), false);
-  assert.deepEqual(weekPlan.addRecipeToWeek('alpha', null, { storage: blocked, target: null }).items, [{ recipe: 'alpha', day: null }]);
+  assert.deepEqual(weekPlan.addRecipeToWeek('alpha', null, { storage: blocked, target: null }).items, []);
+});
+
+// Storage that reads but refuses writes (full quota): a write that fails must not look saved.
+const readOnly = (seed) => {
+  const mem = memory();
+  for (const [k, v] of Object.entries(seed)) mem.setItem(k, JSON.stringify(v));
+  return { getItem: mem.getItem, setItem() { throw new Error('quota'); }, m: mem.m };
+};
+
+test('week plan: addRecipeToWeek emits nothing and returns the stored plan when the write fails', () => {
+  const storage = readOnly({ 'rb:week-plan': { version: 1, items: [{ recipe: 'alpha', day: 'mon' }] } });
+  const target = new EventTarget();
+  let events = 0;
+  target.addEventListener('rb:plan-change', () => { events++; });
+  const plan = weekPlan.addRecipeToWeek('beta', 'fri', { storage, target });
+  assert.equal(events, 0);
+  assert.deepEqual(plan.items, [{ recipe: 'alpha', day: 'mon' }]);
+  assert.deepEqual(weekPlan.readPlan({ storage }), plan);
+});
+
+test('week plan mount: a change storage did not keep stays off screen, unemitted, with a notice', () => {
+  const saved = { document: globalThis.document, window: globalThis.window };
+  globalThis.document = new EventTarget();
+  globalThis.window = new EventTarget();
+  try {
+    const el = Object.assign(new EventTarget(), { innerHTML: '' });
+    const storage = readOnly({ 'rb:week-plan': { version: 1, items: [{ recipe: 'alpha', day: 'mon' }] } });
+    let events = 0, changes = 0;
+    globalThis.document.addEventListener('rb:plan-change', () => { events++; });
+    el.addEventListener('rb:plan-change', () => { events++; });
+    const week = weekPlan.mount(el, { recipes: [alpha, beta], storage, css: false, onChange: () => { changes++; } });
+    week.add('beta', 'fri');
+    assert.deepEqual(week.getPlan().items, [{ recipe: 'alpha', day: 'mon' }]);
+    assert.equal(events, 0);
+    assert.equal(changes, 0);
+    assert.match(el.innerHTML, /1 meal planned/);
+    assert.doesNotMatch(el.innerHTML, /href="#\/r\/beta"/);
+    assert.match(el.innerHTML, /class="rb-feature-status" role="status">Storage unavailable or unreadable/);
+    week.destroy();
+
+    // Storage that works: the change is applied and emitted, with no notice.
+    const mem = memory();
+    const ok = weekPlan.mount(el, { recipes: [alpha, beta], storage: mem, css: false });
+    ok.add('beta', 'fri');
+    assert.deepEqual(ok.getPlan().items, [{ recipe: 'beta', day: 'fri' }]);
+    assert.equal(events, 1);
+    assert.doesNotMatch(el.innerHTML, /rb-feature-status/);
+    ok.destroy();
+  } finally {
+    globalThis.document = saved.document;
+    globalThis.window = saved.window;
+  }
 });
 
 test('week plan renders days, links and escapes titles', () => {

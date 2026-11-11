@@ -28,7 +28,7 @@
 }
 .rbf-week .rbf-head { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--_gap) / 2) var(--_gap); min-height: var(--_tap); }
 .rbf-week .rbf-head h2 { margin: 0; font: 650 var(--text-xl, 1.375rem) / 1.2 var(--font-display, Georgia, serif); }
-.rbf-week .rbf-muted, .rbf-week .rbf-empty { margin: 0; color: var(--_muted); font-size: var(--text-sm, 0.875rem); }
+.rbf-week .rbf-muted, .rbf-week .rbf-empty, .rbf-week .rb-feature-status { margin: 0; color: var(--_muted); font-size: var(--text-sm, 0.875rem); }
 .rbf-week .rbf-head [data-clear] { margin-left: auto; }
 
 .rbf-week .rbf-add {

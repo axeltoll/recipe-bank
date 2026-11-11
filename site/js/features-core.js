@@ -85,3 +85,12 @@ export function renderStatusNote(f) {
   const group = GROUPS[f.status];
   return `<p class="status-note" data-feature-status="${esc(f.id)}"><span class="badge badge-${esc(f.status)}">${esc(group.label)}</span> ${esc(group.note)}</p>`;
 }
+
+/** Markup without comments (the gen: markers) and with layout whitespace collapsed, so the static page compares equal. */
+const normalise = (html) => String(html).replace(/<!--[\s\S]*?-->/g, '').replace(/>\s+</g, '><').replace(/\s+/g, ' ').trim();
+
+/**
+ * True when two pieces of serialised markup differ in anything but layout whitespace: words, but also an href
+ * or a badge class that leaves the visible text as it was.
+ */
+export const markupDiffers = (current, next) => normalise(current) !== normalise(next);

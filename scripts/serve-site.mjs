@@ -5,6 +5,7 @@
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, resolve, sep } from 'node:path';
+import { isMain } from './is-main.mjs';
 
 export const SITE_ROOT = resolve(import.meta.dirname, '..', 'site');
 const PORT = Number(process.env.SITE_PORT ?? 4790);
@@ -71,6 +72,6 @@ export const server = createServer(async (req, res) => {
   }
 });
 
-if (process.argv[1] === import.meta.filename) {
+if (isMain(import.meta.url)) {
   server.listen(PORT, HOST, () => console.log(`Recipe Bank site → http://${HOST}:${PORT}`));
 }

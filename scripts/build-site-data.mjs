@@ -5,6 +5,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { validateRecipe } from '../lib/recipe.mjs';
+import { isMain } from './is-main.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 
@@ -66,7 +67,7 @@ export function renderModule(data) {
   ].join('\n');
 }
 
-if (process.argv[1] === import.meta.filename) {
+if (isMain(import.meta.url)) {
   const data = await buildShowcase();
   await writeFile(OUT_FILE, renderModule(data));
   console.log(`site/data/showcase.js: ${data.length} recipes (${data.map((r) => r.id).join(', ')})`);

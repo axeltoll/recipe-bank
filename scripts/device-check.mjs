@@ -4,7 +4,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { loadRecipes } from '../server.mjs';
-import { measureLayout, layoutIssues } from './browser/layout.mjs';
+import { measureLayout, layoutIssues, deviceRecipe, filterSheetIssues } from './browser/layout.mjs';
 import { ROOT, options, browserAvailable, withBrowser } from './browser/support.mjs';
 import { SELECTORS, PAGES } from './browser/selectors.mjs';
 
@@ -20,6 +20,7 @@ try {
   if (browserAvailable()) {
     const { recipes, invalid } = await loadRecipes();
     if (invalid.length || !recipes.length) throw new Error('Valid recipes are required for the device check');
+    const recipe = deviceRecipe(recipes);
     const report = { date: new Date().toISOString(), notes: [
       'External images, video embeds and fonts are fulfilled locally; screenshots show layout with fallback fonts and placeholder images.',
       'Tap targets include rendered content below the fold and checkbox labels. Line length is an approximate glyph-width measurement with an 85-character tolerance.',
@@ -33,31 +34,21 @@ try {
         await page.setViewport(width, height, width === 390);
         for (const [name, hash, ready] of PAGES) {
           if (opts.only && names.includes(opts.only) && opts.only !== name) continue;
-          const route = typeof hash === 'function' ? hash(recipes[0].id) : hash;
+          const route = typeof hash === 'function' ? hash(recipe.id) : hash;
           const consoleStart = page.console.length, exceptionStart = page.exceptions.length;
           await page.goto(`${origin}/${route}`);
           await page.waitFor(ready);
           await page.evaluate(async () => { await document.fonts.ready; await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))); });
           const measurements = await page.evaluate(measureLayout);
-          const issues = layoutIssues(measurements);
+          const issues = layoutIssues(measurements, width);
           const screenshot = `${name}-${width}x${height}.png`;
           await page.screenshot(join(output, screenshot));
           // On a phone the filters are a bottom sheet behind the Filters button; open it so small chips cannot evade the baseline.
           if (name === 'home' && width === 390) {
-            const opened = await page.evaluate(`(() => {
-              const toggle = document.querySelector(${JSON.stringify(SELECTORS.filterToggle)});
-              if (!toggle || toggle.getAttribute('aria-expanded') === 'true') return false;
-              toggle.click();
-              return true;
-            })()`);
-            if (opened) {
-              await page.waitFor(SELECTORS.filtersOpen);
-              const filters = await page.evaluate(measureLayout);
-              const extra = layoutIssues(filters).filter((issue) => !issues.some((old) => JSON.stringify(old) === JSON.stringify(issue)));
-              issues.push(...extra.map((issue) => ({ ...issue, state: 'filters-open' })));
-              await page.screenshot(join(output, `home-${width}x${height}-filters.png`));
-              await page.evaluate(`document.querySelector(${JSON.stringify(SELECTORS.filterToggle)})?.click()`);
-            }
+            const sheet = await filterSheetIssues(page, issues, width);
+            issues.push(...sheet.issues);
+            if (sheet.opened) await page.screenshot(join(output, `home-${width}x${height}-filters.png`));
+            if (sheet.close) await page.evaluate(`document.querySelector(${JSON.stringify(SELECTORS.filterToggle)})?.click()`);
           }
           const consoleErrors = page.console.slice(consoleStart).filter((entry) => entry.type === 'error');
           issues.push(...consoleErrors.map((entry) => ({ check: 'console-error', text: entry.text })),

@@ -51,3 +51,38 @@ test('the editor documentation exists and names the events', async () => {
     assert.ok(md.includes(s), s);
   }
 });
+
+// Just enough DOM for mount(): the editor's own root answers every selector with a stub element,
+// the form body has no fields (so in-place updates are skipped), and the stylesheet link "exists".
+function fakeDom() {
+  const stub = () => ({
+    innerHTML: '', textContent: '', hidden: false, disabled: false, value: '',
+    classList: { toggle() {} }, querySelector: () => null, addEventListener() {}, focus() {},
+  });
+  const root = () => {
+    const cache = new Map();
+    return Object.assign(new EventTarget(), {
+      className: '', innerHTML: '',
+      querySelector: (sel) => cache.get(sel) ?? cache.set(sel, stub()).get(sel),
+      contains: () => true, remove() {},
+    });
+  };
+  return {
+    documentElement: { dataset: {} },
+    querySelector: () => ({}),
+    createElement: root,
+    head: { append() {} },
+  };
+}
+
+test('a new recipe whose slug is already taken is not dirty before anyone types', async () => {
+  globalThis.document ??= fakeDom();
+  const { mount } = await import('../public/features/recipe-editor.mjs');
+  const host = { append() {} };
+  const entry = { title: 'Foo', video: { platform: 'youtube', id: 'abcdefghijk', url: 'https://www.youtube.com/shorts/abcdefghijk' } };
+  const editor = mount(host, { video: entry, recipes: [{ id: 'foo', title: 'Foo', video: { platform: 'youtube', id: 'zyxwvutsrqp' }, components: [] }] });
+  await Promise.resolve(); // the bank is applied in a microtask
+  assert.equal(editor.getRecipe().id, 'foo-2');
+  assert.equal(editor.isDirty(), false);
+  editor.destroy();
+});
