@@ -544,7 +544,9 @@ main[data-layout='message'] > .state, main[data-layout='detail'] > .state { max-
 .recipe-head { grid-area: head; min-width: 0; }
 .recipe-media { grid-area: media; min-width: 0; }
 .recipe-ingredients { grid-area: ingredients; }
-.recipe-steps { grid-area: steps; }
+/* One step counter for the page: each part is its own ol.steps, and the circles count across the parts, as cook
+   mode does ("Step 4 of 9"). */
+.recipe-steps { grid-area: steps; counter-reset: step; }
 .recipe-more { grid-area: more; display: grid; gap: var(--s-5); align-content: start; min-width: 0; }
 .queue-panel { grid-area: panel; }
 
@@ -621,7 +623,7 @@ main[data-layout='message'] > .state, main[data-layout='detail'] > .state { max-
 .ing input:checked ~ .ing-text .ing-name { color: var(--muted); text-decoration: line-through; }
 .ing input:checked ~ .ing-amt { color: var(--muted); }
 
-.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+.steps { margin: 0; padding: 0; list-style: none; }
 .steps li { display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: var(--s-3); padding: var(--s-3) 0; counter-increment: step; }
 .steps li + li { border-top: 1px solid var(--line); }
 .steps li::before {

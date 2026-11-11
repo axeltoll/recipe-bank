@@ -134,13 +134,13 @@ export function renderRecipe(id) {
         <div class="panel-head"><h2 id="steps-h">Step by step</h2></div>
         ${steps ? r.components.map((c, ci) => (c.steps.length ? `
           ${multi ? `<h3>${esc(c.name)}</h3>` : ''}
-          <ol class="steps">
+          <ol class="steps" start="${firstStep[ci] + 1}">
             ${c.steps.map((s, si) => `
               <li>
                 <p class="step-text">${esc(s.text)}</p>
                 <div class="step-tools">${s.t == null ? '' : seekable
                   ? `<button type="button" class="ts" data-t="${Number(s.t)}" aria-label="Play from ${mmss(s.t)}">${icon('play')}<span>${mmss(s.t)}</span></button>`
-                  : `<span class="ts ts-static">at ${mmss(s.t)} in the video</span>`}${timerChips(`${r.id}:${firstStep[ci] + si + 1}`, s.text, `${multi ? `${c.name}, ` : ''}step ${si + 1}`)}</div>
+                  : `<span class="ts ts-static">at ${mmss(s.t)} in the video</span>`}${timerChips(`${r.id}:${firstStep[ci] + si + 1}`, s.text, `${multi ? `${c.name}, ` : ''}step ${firstStep[ci] + si + 1}`)}</div>
               </li>`).join('')}
           </ol>` : '')).join('') : '<p class="muted">The video gives no method to follow.</p>'}
       </section>

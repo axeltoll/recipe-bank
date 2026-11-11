@@ -98,3 +98,18 @@ test('after a scale, Copy list and cook mode use the amounts the page shows', as
     assert.ok(cook.includes(hook), `cook mode lacks ${hook}`);
   }
 });
+
+test('steps are numbered across the parts on the recipe page, as in cook mode', async () => {
+  const recipe = await read('public', 'ui', 'recipe.js');
+  assert.doesNotMatch(block(css, '.steps'), /counter-reset/, 'a part does not restart the count at 1');
+  assert.match(block(css, '.recipe-steps'), /counter-reset:\s*step/, 'one counter for the whole steps panel');
+  assert.match(block(css, '.steps li'), /counter-increment:\s*step/);
+  // The list itself and the timer labels use the same running number as the circles.
+  assert.match(recipe, /<ol class="steps" start="\$\{firstStep\[ci\] \+ 1\}">/);
+  assert.match(recipe, /step \$\{firstStep\[ci\] \+ si \+ 1\}`\)/);
+  assert.doesNotMatch(recipe, /step \$\{si \+ 1\}/);
+  // Cook mode counts across the parts too: flattenSteps numbers from 1 over every component.
+  const { flattenSteps } = await import('../lib/catalog.mjs');
+  const steps = flattenSteps({ components: [{ name: 'A', steps: [{ text: 'a1' }, { text: 'a2' }] }, { name: 'B', steps: [{ text: 'b1' }] }] });
+  assert.deepEqual(steps.map((s) => s.n), [1, 2, 3]);
+});
