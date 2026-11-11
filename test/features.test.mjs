@@ -125,7 +125,9 @@ test('shopping list renders merged items, ticks and the empty state', () => {
   assert.match(html, />2 per person</);
   assert.match(html, /For <a href="#\/r\/alpha">Alpha<\/a>, <a href="#\/r\/beta">Beta<\/a>/);
   assert.match(html, /data-untick/);
-  assert.doesNotMatch(shoppingListUi.renderShoppingList(list), /data-untick/);
+  assert.doesNotMatch(html, /data-untick hidden/);
+  // With nothing ticked the button is there but hidden, so ticking a box can show it without a re-render.
+  assert.match(shoppingListUi.renderShoppingList(list), /data-untick hidden>Untick all</);
   assert.match(shoppingListUi.renderShoppingList(shoppingList([])), /Plan some recipes and their ingredients show up here/);
   const bad = shoppingListUi.renderShoppingList(shoppingList([evil]));
   assert.doesNotMatch(bad, /<img|<svg|<i>Pork|<script/);

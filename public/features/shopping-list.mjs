@@ -44,7 +44,7 @@ export function renderShoppingList(list, checked = new Set(), { title = 'Shoppin
         <p class="rbf-muted" data-progress>${done} of ${list.itemCount} ticked</p>
         <span class="rbf-actions">
           <button type="button" class="rbf-btn" data-copy>Copy list</button>
-          ${done ? '<button type="button" class="rbf-btn rbf-btn-quiet" data-untick>Untick all</button>' : ''}
+          <button type="button" class="rbf-btn rbf-btn-quiet" data-untick${done ? '' : ' hidden'}>Untick all</button>
         </span>
       </header>
       <p class="rbf-for">For ${list.recipes.map((r) => `<a href="${esc(href(r.id))}">${esc(r.title)}</a>${r.times > 1 ? ` <span class="rbf-times">×${r.times}</span>` : ''}`).join(', ')}</p>
@@ -154,7 +154,7 @@ export function renderPurchaseList(purchase, checked = new Set(), {
         <span class="rbf-actions">
           <button type="button" class="rbf-btn" data-copy>Copy list</button>
           <button type="button" class="rbf-btn rbf-btn-quiet" data-print>Print</button>
-          ${done ? '<button type="button" class="rbf-btn rbf-btn-quiet" data-untick>Untick all</button>' : ''}
+          <button type="button" class="rbf-btn rbf-btn-quiet" data-untick${done ? '' : ' hidden'}>Untick all</button>
         </span>
       </header>
       <p class="rbf-for rbf-household">${esc(householdLine(purchase))}</p>
@@ -259,6 +259,8 @@ export function mount(el, options = {}) {
     const done = shown.groups.reduce((n, g) => n + g.items.filter((it) => checked.has(it.key)).length, 0);
     const progress = el.querySelector('[data-progress]');
     if (progress) progress.textContent = `${done} of ${shown.itemCount} ticked`;
+    const untick = el.querySelector('[data-untick]');
+    if (untick) untick.hidden = !done;
     saveChecked();
   };
   // purchase option: the plain text of whatever is shown
