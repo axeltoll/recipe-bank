@@ -176,7 +176,7 @@ async function boot() {
 }
 
 setupTheme();
-setupAdd({ rerender: () => booted && route() });
+setupAdd({ rerender: () => booted && route(), reload });
 setupOffline();
 $('#skip').addEventListener('click', (e) => {
   e.preventDefault();

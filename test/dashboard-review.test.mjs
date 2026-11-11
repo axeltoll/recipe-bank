@@ -124,3 +124,12 @@ test('cook mode: a refused wake lock turns the switch off for the session, so re
   // Without the Wake Lock API the switch is rendered off, not checked and then snapped off.
   assert.match(cook, /id="cook-wake-on"\$\{wakeWanted && 'wakeLock' in navigator \? ' checked' : ''\}/);
 });
+
+test('add: a 409 for a recipe this page has not loaded yet reloads before opening it', async () => {
+  const add = await read('public', 'ui', 'add.js');
+  const app = await read('public', 'app.js');
+  const conflict = add.slice(add.indexOf('if (res.status === 409 && body.recipeId)'), add.indexOf("toast('That one is already in the bank')"));
+  assert.ok(conflict.indexOf('await reload') >= 0 && conflict.indexOf('await reload') < conflict.indexOf('location.hash ='),
+    'reload() runs before the hash changes');
+  assert.match(app, /setupAdd\(\{ rerender: [^}]*\}?, reload \}\)/, 'the dashboard hands reload to the dialog');
+});
