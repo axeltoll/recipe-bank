@@ -10,13 +10,13 @@
 // RECIPE_BANK_DIR points the server and the scripts at another folder holding recipes/ and data/.
 
 import { createServer } from 'node:http';
-import { readFile, readdir, writeFile, rename, mkdir, unlink } from 'node:fs/promises';
+import { readFile, readdir, writeFile, rename, mkdir, unlink, link } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { parseVideoUrl, videoKey, PLATFORMS } from './lib/video.mjs';
 import { validateRecipe, isWebLink, SLUG } from './lib/recipe.mjs';
 import { resolveShortVideo } from './lib/video-resolver.mjs';
-import { readPack, planImport, applyImport, MAX_PACK_CHARS } from './lib/pack.mjs';
+import { readPack, planImport, applyImport, MAX_PACK_BYTES } from './lib/pack.mjs';
 
 const ROOT = resolve(import.meta.dirname);
 
@@ -96,6 +96,24 @@ async function writeJsonAtomic(file, value) {
 
 const saveQueue = (queueFile, queue) => writeJsonAtomic(queueFile, queue);
 
+// Creates `file` only if it does not exist, never leaving half a file: like writeJsonAtomic it writes a temp file
+// first, but then hard-links it into place, and link() fails with EEXIST instead of replacing an existing file. On a
+// file system without hard links it falls back to an exclusive create. `write` is for tests.
+export async function createFileOnce(file, text, { write = writeFile } = {}) {
+  const tmp = `${file}.${process.pid}.${randomUUID().slice(0, 8)}.tmp`;
+  try {
+    await write(tmp, text, { flag: 'wx' });
+    try {
+      await link(tmp, file);
+    } catch (e) {
+      if (!['EPERM', 'ENOTSUP', 'ENOSYS', 'EOPNOTSUPP'].includes(e.code)) throw e;
+      await writeFile(file, text, { flag: 'wx' });
+    }
+  } finally {
+    await unlink(tmp).catch(() => {});
+  }
+}
+
 // Best-effort title/creator lookup from public, key-free oEmbed endpoints; the queue entry is
 // still saved if this fails. Facebook, Instagram and web pages are never looked up.
 export async function oembed(video) {
@@ -132,11 +150,17 @@ function json(res, status, body) {
 }
 
 async function readBody(req, max = QUEUE_BODY_LIMIT) {
-  let raw = '';
+  // Collect bytes and decode once: decoding chunk by chunk breaks a multi-byte character (½, °, é) that straddles a
+  // chunk boundary. The limit counts bytes.
+  const chunks = [];
+  let size = 0;
   for await (const chunk of req) {
-    raw += chunk;
-    if (raw.length > max) throw Object.assign(new Error('Body too large'), { status: 413 });
+    const buf = typeof chunk === 'string' ? Buffer.from(chunk) : chunk;
+    size += buf.length;
+    if (size > max) throw Object.assign(new Error('Body too large'), { status: 413 });
+    chunks.push(buf);
   }
+  const raw = Buffer.concat(chunks).toString('utf8');
   try {
     return JSON.parse(raw || '{}');
   } catch {
@@ -189,24 +213,33 @@ export function allowedHosts(env = process.env) {
  * `headers` are Node's lowercased request headers; `hosts` the extra allowed host names; `method` the
  * request method; `peer` the socket's remote address (unknown when the handler is called directly).
  */
+/**
+ * Refusal for a request addressed to a host name that is not loopback or configured, or null. Applied to every /api/
+ * request, reads included, so a page on a rebinding domain cannot read the collection or the queue. `peer` is the
+ * socket's remote address: a loopback Host only counts when the request really comes from this machine.
+ */
+export function hostRefusal(headers = {}, { hosts = [], peer } = {}) {
+  const remote = peer != null && !LOOPBACK_PEER.test(String(peer));
+  if (headers.host == null) {
+    return remote ? { status: 403, error: 'Refused: a request from another machine must name a host listed in RECIPE_BANK_HOSTS.' } : null;
+  }
+  const host = hostName(headers.host);
+  if (host && LOOPBACK.test(host) && remote) {
+    return { status: 403, error: 'Refused: a request from another machine cannot be addressed to this machine\'s loopback name.' };
+  }
+  if (!host || !(LOOPBACK.test(host) || hosts.includes(host))) {
+    return { status: 403, error: 'Refused: the request is addressed to an unknown host name. Add it to RECIPE_BANK_HOSTS.' };
+  }
+  return null;
+}
+
 export function writeRefusal(headers = {}, { hosts = [], method = 'POST', peer } = {}) {
   const site = headers['sec-fetch-site'];
   if (site != null && site !== 'same-origin' && site !== 'none') {
     return { status: 403, error: 'Refused: this request came from another website.' };
   }
-  const remote = peer != null && !LOOPBACK_PEER.test(String(peer));
-  let host = null;
-  if (headers.host != null) {
-    host = hostName(headers.host);
-    if (host && LOOPBACK.test(host) && remote) {
-      return { status: 403, error: 'Refused: a request from another machine cannot be addressed to this machine\'s loopback name.' };
-    }
-    if (!host || !(LOOPBACK.test(host) || hosts.includes(host))) {
-      return { status: 403, error: 'Refused: the request is addressed to an unknown host name. Add it to RECIPE_BANK_HOSTS.' };
-    }
-  } else if (remote) {
-    return { status: 403, error: 'Refused: a request from another machine must name a host listed in RECIPE_BANK_HOSTS.' };
-  }
+  const badHost = hostRefusal(headers, { hosts, peer });
+  if (badHost) return badHost;
   if (headers.origin != null) {
     let origin;
     try {
@@ -274,7 +307,13 @@ export function createHandler({
 
   // Creates (id = null) or replaces (id = the file to replace) a recipe file. Shared by POST and PUT.
   async function saveRecipe(res, body, id) {
-    const problems = validateRecipe(body, id ?? undefined);
+    let problems;
+    try {
+      problems = validateRecipe(body, id ?? undefined);
+    } catch {
+      // validateRecipe reads c.name, ing.item and s.text, so a null in one of those lists throws.
+      problems = ['malformed recipe (a component, ingredient or step is not an object)'];
+    }
     return withLock(async () => {
       const files = new Set((await readdir(dirs.recipesDir)).filter((f) => f.endsWith('.json')));
       if (id && !files.has(`${id}.json`)) return json(res, 404, { error: 'No recipe with that id.' });
@@ -300,7 +339,8 @@ export function createHandler({
 
   // POST /api/packs/import { pack, include?: [position, …] }. Plans the import against the
   // recipes on disk right now (never trusting a plan from the browser) and only creates new
-  // files: the 'wx' flag fails instead of overwriting, even if a file appeared meanwhile.
+  // files: createFileOnce fails instead of overwriting, even if a file appeared meanwhile, and
+  // never leaves half a file behind.
   async function importPack(res, body) {
     if (!body || typeof body !== 'object' || Array.isArray(body) || body.pack == null) {
       return json(res, 400, { error: 'Send JSON: { "pack": <recipe pack>, "include": [positions] }.' });
@@ -323,7 +363,7 @@ export function createHandler({
           continue;
         }
         try {
-          await writeFile(join(dirs.recipesDir, `${f.id}.json`), f.contents, { flag: 'wx' });
+          await createFileOnce(join(dirs.recipesDir, `${f.id}.json`), f.contents);
           created.push(f.id);
         } catch (e) {
           if (e.code !== 'EEXIST') throw e;
@@ -336,7 +376,10 @@ export function createHandler({
   }
 
   async function api(req, res, path) {
-    if (!READ_METHODS.has(req.method)) {
+    if (READ_METHODS.has(req.method)) {
+      const refused = hostRefusal(req.headers ?? {}, { hosts, peer: req.socket?.remoteAddress });
+      if (refused) return json(res, refused.status, { error: refused.error });
+    } else {
       const refused = writeRefusal(req.headers ?? {}, { hosts, method: req.method, peer: req.socket?.remoteAddress });
       if (refused) return json(res, refused.status, { error: refused.error });
     }
@@ -365,7 +408,8 @@ export function createHandler({
     }
     if (req.method === 'POST' && path === '/api/queue') return queueRequest(req, res);
     if (req.method === 'POST' && path === '/api/packs/import') {
-      return importPack(res, await readBody(req, MAX_PACK_CHARS + 10_000));
+      // readBody counts bytes: the pack's byte ceiling, plus room for the { "pack", "include" } wrapper.
+      return importPack(res, await readBody(req, MAX_PACK_BYTES + 10_000));
     }
     const del = path.match(/^\/api\/queue\/([\w-]+)$/);
     if (req.method === 'DELETE' && del) {
@@ -401,8 +445,13 @@ export function createHandler({
   }
 
   return async function handle(req, res) {
-    const { pathname } = new URL(req.url, 'http://localhost');
     try {
+      let pathname;
+      try {
+        ({ pathname } = new URL(req.url, 'http://localhost'));
+      } catch {
+        return json(res, 400, { error: 'Bad request path' });
+      }
       if (pathname.startsWith('/api/')) return await api(req, res, pathname);
       if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { error: 'Method not allowed' });
       return await serveStatic(res, pathname);

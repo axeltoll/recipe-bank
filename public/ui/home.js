@@ -113,6 +113,12 @@ export function renderHome() {
       if (state.keys.has(k)) state.keys.delete(k);
       else state.keys.add(k);
       chip.setAttribute('aria-pressed', String(state.keys.has(k)));
+      if (!state.keys.has(k)) {
+        // A chip past the first CHIP_LIMIT is shown only while it is on: turned off, it goes back under "Show all".
+        renderChips();
+        const chips = e.currentTarget;
+        (chips.querySelector(`.chip[data-key="${CSS.escape(k)}"]`) ?? chips.querySelector('#more'))?.focus();
+      }
       filtersChanged();
       return;
     }

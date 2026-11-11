@@ -122,6 +122,14 @@ const kept = [
   ['   ', 'unstated'],
 ];
 
+test('the count word agrees with the number as shown, after rounding', () => {
+  assert.equal(scaleAmount('1½ cups', 0.67).amount, '1 cup'); // 1.005 is shown as 1
+  assert.equal(scaleAmount('2 cans', 0.505).amount, '1 can');
+  assert.equal(scaleAmount('1 cup', 1.01).amount, '1 cup');
+  assert.equal(scaleAmount('1 cup', 1.5).amount, '1½ cups');
+  assert.equal(scaleAmount('2 cans', 0.5).amount, '1 can');
+});
+
 test('leaves words, rates and missing amounts exactly as they were', () => {
   for (const [input, reason] of kept) {
     const r = scaleAmount(input, 2);
