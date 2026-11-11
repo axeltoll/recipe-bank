@@ -6,6 +6,7 @@ import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { allowedHosts, writeRefusal } from '../server.mjs';
 import { markEntry } from '../scripts/queue.mjs';
+import { buildCapturePlan } from '../scripts/capture.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const page = (name) => readFile(join(ROOT, 'site', name), 'utf8');
@@ -76,4 +77,28 @@ test('the self-hosting page names the folder that is the bank and the tree a bui
   assert.doesNotMatch(build, /process\.env\.RECIPE_BANK_DIR/);
   const statics = text(/<h2 id="static">[\s\S]*?(?=<h2 id="tools">)/.exec(html)[0]);
   assert.match(statics, /always use the recipes and the queue in the repository\. They ignore RECIPE_BANK_DIR/);
+});
+
+test('the self-hosting page says which speech-to-text program wins and what model each wants', async () => {
+  const plan = buildCapturePlan({
+    video: { platform: 'youtube', id: 'mhNQ8y5ud0A', url: 'https://youtu.be/mhNQ8y5ud0A' },
+    captureDir: '/captures/youtube-mhNQ8y5ud0A',
+    tools: { 'yt-dlp': '/bin/yt-dlp', ffmpeg: '/bin/ffmpeg', 'whisper-ctranslate2': '/bin/whisper-ctranslate2', whisper: '/bin/whisper' },
+    modelPath: '/models/stt',
+  });
+  const step = plan.commands.find((c) => c.id === 'transcribe');
+  assert.equal(step.command, '/bin/whisper-ctranslate2');
+  assert.ok(step.args.includes('--model_directory'));
+  const only = buildCapturePlan({
+    video: { platform: 'youtube', id: 'mhNQ8y5ud0A', url: 'https://youtu.be/mhNQ8y5ud0A' },
+    captureDir: '/captures/youtube-mhNQ8y5ud0A',
+    tools: { 'yt-dlp': '/bin/yt-dlp', ffmpeg: '/bin/ffmpeg', whisper: '/bin/whisper' },
+    modelPath: '/models/stt.pt',
+  }).commands.find((c) => c.id === 'transcribe');
+  assert.ok(only.args.includes('--model') && !only.args.includes('--model_directory'));
+
+  const tools = text(/<h2 id="tools">[\s\S]*?(?=<h2 id="captures">)/.exec(await page('self-hosting.html'))[0]);
+  assert.match(tools, /When both programs are on your PATH, the helper uses whisper-ctranslate2/);
+  assert.match(tools, /CTranslate2 model folder \(passed as --model_directory\)/);
+  assert.match(tools, /whisper wants a Whisper model file \(passed as --model\)/);
 });

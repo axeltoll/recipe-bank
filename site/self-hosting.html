@@ -171,7 +171,7 @@ npm start</code></pre>
                 </tbody>
               </table>
             </div>
-            <p>Installing the tools and getting a speech-to-text model are your own steps. Transcription needs a model that is already on your disk: set <code>RECIPE_BANK_STT_MODEL</code> to its absolute path. The helper never names a model in a way that would start a download, and it runs transcription on the CPU.</p>
+            <p>Installing the tools and getting a speech-to-text model are your own steps. Transcription needs a model that is already on your disk: set <code>RECIPE_BANK_STT_MODEL</code> to its absolute path. When both programs are on your <code>PATH</code>, the helper uses <code>whisper-ctranslate2</code>. That program wants a CTranslate2 model folder (passed as <code>--model_directory</code>); <code>whisper</code> wants a Whisper model file (passed as <code>--model</code>). Give the model that fits the program that runs. The helper never names a model in a way that would start a download, and it runs transcription on the CPU.</p>
 
             <h2 id="captures">Where captures are kept</h2>
             <p>Captured material is the creators' own content, so the capture helper keeps it outside the repository. Set <code>RECIPE_BANK_CAPTURE_DIR</code> to an absolute folder of your choice, or let the helper use the data folder of your system:</p>
