@@ -1,87 +1,117 @@
-/* Shopping list (public/features/shopping-list.mjs). Theme it with the --rbf-* properties. */
+/* Shopping list (public/features/shopping-list.mjs). Themed through the --rbf-* properties; see week-plan.css
+   for how they fall back to the dashboard tokens. */
 .rbf-shop {
   --_fg: var(--rbf-fg, var(--ink, #1f1a16));
-  --_muted: var(--rbf-muted, var(--muted, #7a6f66));
-  --_line: var(--rbf-line, var(--line, #e6ddd1));
+  --_fg-2: var(--rbf-fg-2, var(--rbf-fg, var(--ink-2, #4a423b)));
+  --_muted: var(--rbf-muted, var(--muted, #655b53));
+  --_line: var(--rbf-line, var(--line-strong, #8f8378));
+  --_rule: var(--rbf-rule, var(--rbf-line, var(--line, #e6ddd1)));
   --_surface: var(--rbf-surface, var(--surface, #fff));
+  --_inset: var(--rbf-inset, var(--surface-2, transparent));
   --_accent: var(--rbf-accent, var(--accent, #c2410c));
-  --_warn: var(--rbf-warn, var(--warn, #9a6400));
-  --_radius: var(--rbf-radius, var(--radius, 14px));
-  --_gap: var(--rbf-gap, 12px);
+  --_accent-text: var(--rbf-accent-text, var(--rbf-accent, var(--accent-text, #9a3412)));
+  --_warn: var(--rbf-warn, var(--warn, #7a4d00));
+  --_warn-soft: var(--rbf-warn-soft, var(--warn-soft, transparent));
+  --_focus: var(--rbf-focus, var(--rbf-fg, var(--focus, #1f1a16)));
+  --_radius: var(--rbf-radius, var(--r-lg, 18px));
+  --_ctl: var(--rbf-control-radius, var(--r-md, 12px));
+  --_gap: var(--rbf-gap, var(--s-3, 12px));
+  --_tap: var(--tap, 44px);
+  --_measure: var(--measure-text, 60ch);
   --_font: var(--rbf-font, inherit);
   color: var(--_fg);
   font: var(--_font);
   display: grid;
   gap: var(--_gap);
+  min-width: 0;
 }
-.rbf-shop .rbf-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: calc(var(--_gap) / 2) var(--_gap); }
-.rbf-shop .rbf-head h2 { margin: 0; font-size: 1.25em; }
-.rbf-shop .rbf-actions { margin-left: auto; display: flex; gap: 8px; }
-.rbf-shop .rbf-muted, .rbf-shop .rbf-empty, .rbf-shop .rbf-note, .rbf-shop .rbf-for { color: var(--_muted); margin: 0; }
-.rbf-shop .rbf-for a { color: var(--_fg); }
-.rbf-shop .rbf-times { font-weight: 600; color: var(--_accent); }
+.rbf-shop .rbf-head { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--_gap) / 2) var(--_gap); min-height: var(--_tap); }
+.rbf-shop .rbf-head h2 { margin: 0; font: 650 var(--text-xl, 1.375rem) / 1.2 var(--font-display, Georgia, serif); }
+.rbf-shop .rbf-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+.rbf-shop .rbf-muted, .rbf-shop .rbf-note, .rbf-shop .rbf-for { margin: 0; max-width: var(--_measure); color: var(--_muted); font-size: var(--text-sm, 0.875rem); }
+/* Each recipe link in the "For …" line is a 44px target of its own. */
+.rbf-shop .rbf-for a { display: inline-flex; align-items: center; min-height: var(--_tap); color: var(--_fg); font-weight: 600; text-decoration-color: var(--_line); text-underline-offset: 3px; }
+.rbf-shop .rbf-times { font-weight: 700; color: var(--_accent-text); }
+/* Empty: the same dashed block the dashboard uses for an empty grid. */
+.rbf-shop .rbf-empty {
+  margin: 0; padding: calc(var(--_gap) * 2) var(--_gap);
+  border: 1px dashed var(--_line); border-radius: var(--_radius);
+  color: var(--_fg-2); text-align: center; text-wrap: balance;
+}
 
 .rbf-shop .rbf-btn {
-  font: inherit; cursor: pointer; min-height: 44px; padding: 8px 14px;
-  border-radius: calc(var(--_radius) / 2); border: 1px solid var(--_line);
-  background: var(--_surface); color: var(--_fg);
+  display: inline-flex; align-items: center; justify-content: center; min-height: var(--_tap); padding: 0 16px;
+  border: 1px solid var(--_line); border-radius: var(--_ctl);
+  background: var(--_surface); color: var(--_fg); font: inherit; font-weight: 600; white-space: nowrap; cursor: pointer;
 }
-.rbf-shop .rbf-btn-quiet { background: transparent; }
-.rbf-shop :focus-visible { outline: 2px solid var(--_accent); outline-offset: 2px; }
+.rbf-shop .rbf-btn-quiet { border-color: transparent; background: transparent; color: var(--_fg-2); }
+.rbf-shop :focus-visible { outline: 2px solid var(--_focus); outline-offset: 2px; }
+@media (hover: hover) {
+  .rbf-shop .rbf-btn:hover { background: var(--_inset); }
+}
 
 .rbf-shop .rbf-aisle {
-  background: var(--_surface); border: 1px solid var(--_line); border-radius: var(--_radius); padding: var(--_gap);
+  min-width: 0; padding: var(--_gap) calc(var(--_gap) * 4 / 3);
+  border: 1px solid var(--_rule); border-radius: var(--_radius); background: var(--_surface);
 }
-.rbf-shop .rbf-aisle h3 { margin: 0 0 calc(var(--_gap) / 2); font-size: 1em; }
+.rbf-shop .rbf-aisle h3 { margin: 0 0 calc(var(--_gap) / 3); color: var(--_accent-text); font: 700 var(--text-md, 1rem) / 1.35 var(--font-body, inherit); }
 .rbf-shop .rbf-items, .rbf-shop .rbf-lines { list-style: none; margin: 0; padding: 0; }
-.rbf-shop .rbf-item { padding: 8px 0; border-top: 1px solid var(--_line); }
+.rbf-shop .rbf-item { padding: 4px 0 8px; border-top: 1px solid var(--_rule); }
 .rbf-shop .rbf-item:first-child { border-top: 0; }
-.rbf-shop .rbf-item label { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; }
-.rbf-shop .rbf-item input { width: 20px; height: 20px; accent-color: var(--_accent); flex: none; }
-.rbf-shop .rbf-key { font-weight: 600; }
-.rbf-shop .rbf-count { color: var(--_muted); font-size: 0.875em; }
-.rbf-shop .rbf-lines { padding-left: 30px; display: grid; gap: 2px; font-size: 0.9375em; }
-.rbf-shop .rbf-lines li { display: flex; flex-wrap: wrap; gap: 4px 10px; }
-.rbf-shop .rbf-amt { font-variant-numeric: tabular-nums; }
-.rbf-shop .rbf-unstated { color: var(--_warn); font-style: italic; }
-.rbf-shop .rbf-from { color: var(--_muted); }
-.rbf-shop .rbf-done .rbf-key, .rbf-shop .rbf-done .rbf-lines { text-decoration: line-through; opacity: 0.6; }
+.rbf-shop .rbf-item label { display: flex; align-items: center; gap: 12px; min-height: var(--_tap); cursor: pointer; }
+.rbf-shop .rbf-item input { width: 22px; height: 22px; margin: 0; flex: none; accent-color: var(--_accent); }
+.rbf-shop .rbf-key { font-weight: 600; overflow-wrap: anywhere; }
+.rbf-shop .rbf-count { color: var(--_muted); font-size: var(--text-sm, 0.875rem); }
+.rbf-shop .rbf-lines { display: grid; gap: 2px; max-width: var(--_measure); padding-left: 34px; font-size: var(--text-sm, 0.875rem); }
+.rbf-shop .rbf-lines li { display: flex; flex-wrap: wrap; gap: 0 10px; min-width: 0; }
+.rbf-shop .rbf-amt { font-weight: 600; font-variant-numeric: tabular-nums; }
+/* "amount not given" reads the same here as on the recipe page. */
+.rbf-shop .rbf-unstated { color: var(--_muted); font-style: italic; font-weight: 400; }
+.rbf-shop .rbf-from { color: var(--_muted); overflow-wrap: anywhere; }
+/* Ticked: struck through in the muted colour, as on the recipe page. No opacity, so it stays readable. */
+.rbf-shop .rbf-done .rbf-key, .rbf-shop .rbf-done .rbf-lines, .rbf-shop .rbf-done .rbf-amt, .rbf-shop .rbf-done .rbf-from {
+  color: var(--_muted); text-decoration: line-through;
+}
 
-.rbf-shop .rbf-copy-fallback label { display: grid; gap: 6px; color: var(--_muted); }
+.rbf-shop .rbf-copy-fallback { margin: 0; }
+.rbf-shop .rbf-copy-fallback label { display: grid; gap: 6px; color: var(--_fg-2); font-size: var(--text-sm, 0.875rem); font-weight: 600; }
 .rbf-shop .rbf-copy-fallback textarea {
-  font: inherit; color: var(--_fg); background: var(--_surface);
-  border: 1px solid var(--_line); border-radius: calc(var(--_radius) / 2); padding: 8px;
+  width: 100%; padding: 12px; border: 1px solid var(--_line); border-radius: var(--_ctl);
+  background: var(--_surface); color: var(--_fg); font: inherit; font-size: max(1em, 16px); font-weight: 400;
 }
 
 /* ---- purchase option (rbank-amounts): mount(el, { household: true }) ---- */
 .rbf-purchase .rbf-household { color: var(--_fg); font-weight: 600; }
 .rbf-purchase .rbf-unscaled { color: var(--_warn); }
 .rbf-purchase .rbf-item label { flex-wrap: wrap; }
-.rbf-purchase .rbf-buy { margin-left: auto; font-weight: 600; text-align: right; }
+.rbf-purchase .rbf-buy { margin-left: auto; font-weight: 700; text-align: right; }
 .rbf-purchase .rbf-check {
-  color: var(--_warn); border: 1px solid currentColor; border-radius: calc(var(--_radius) / 2);
-  padding: 0 6px; font-size: 0.8125em;
+  padding: 1px 8px; border-radius: 999px; background: var(--_warn-soft); color: var(--_warn);
+  font-size: var(--text-xs, 0.75rem); font-weight: 700;
 }
-.rbf-purchase .rbf-flag-note { color: var(--_warn); font-size: 0.875em; }
+.rbf-purchase .rbf-flag-note { color: var(--_warn); }
 .rbf-purchase .rbf-pantry {
-  display: grid; gap: calc(var(--_gap) / 2);
-  border: 1px dashed var(--_line); border-radius: var(--_radius); padding: var(--_gap);
+  display: grid; gap: calc(var(--_gap) / 2); min-width: 0;
+  padding: var(--_gap); border: 1px dashed var(--_line); border-radius: var(--_radius);
 }
 .rbf-purchase .rbf-pantry-edit { display: grid; gap: calc(var(--_gap) / 2); }
-.rbf-purchase .rbf-pantry-edit summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; }
+.rbf-purchase .rbf-pantry-edit summary { display: flex; align-items: center; min-height: var(--_tap); color: var(--_accent-text); font-weight: 600; cursor: pointer; }
 .rbf-purchase .rbf-chips { list-style: none; margin: 0 0 calc(var(--_gap) / 2); padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .rbf-purchase .rbf-chip {
-  font: inherit; cursor: pointer; min-height: 44px; padding: 6px 12px;
-  border-radius: 999px; border: 1px solid var(--_line); background: var(--_surface); color: var(--_fg);
+  display: inline-flex; align-items: center; gap: 6px; min-height: var(--_tap); padding: 0 12px;
+  border: 1px solid var(--_line); border-radius: 999px; background: var(--_surface); color: var(--_fg);
+  font: inherit; font-size: var(--text-sm, 0.875rem); font-weight: 500; cursor: pointer;
 }
 .rbf-purchase .rbf-pantry-form { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; margin-bottom: calc(var(--_gap) / 2); }
-.rbf-purchase .rbf-pantry-form label { display: grid; gap: 4px; color: var(--_muted); flex: 1 1 12em; }
+.rbf-purchase .rbf-pantry-form label { display: grid; gap: 4px; flex: 1 1 12em; min-width: 0; color: var(--_fg-2); font-size: var(--text-sm, 0.875rem); font-weight: 600; }
 .rbf-purchase .rbf-pantry-form input {
-  font: inherit; font-size: max(1em, 16px); min-height: 44px; padding: 8px; color: var(--_fg); background: var(--_surface);
-  border: 1px solid var(--_line); border-radius: calc(var(--_radius) / 2);
+  width: 100%; min-width: 0; min-height: var(--_tap); padding: 0 12px;
+  border: 1px solid var(--_line); border-radius: var(--_ctl);
+  background: var(--_surface); color: var(--_fg); font: inherit; font-size: max(1em, 16px); font-weight: 400;
 }
 @media print {
-  .rbf-purchase .rbf-actions, .rbf-purchase .rbf-pantry-edit, .rbf-purchase .rbf-copy-fallback { display: none; }
-  .rbf-purchase .rbf-aisle { break-inside: avoid; }
+  .rbf-shop .rbf-actions, .rbf-shop .rbf-copy-fallback, .rbf-purchase .rbf-pantry-edit { display: none; }
+  .rbf-shop .rbf-aisle { break-inside: avoid; border: 0; padding: 0; }
+  .rbf-shop .rbf-item label { min-height: 0; }
 }
 /* ---- end purchase option ---- */

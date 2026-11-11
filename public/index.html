@@ -10,11 +10,13 @@
   <link rel="icon" href="/icon.svg" type="image/svg+xml">
   <link rel="manifest" href="/manifest.json">
   <script>
-    // Apply a saved theme before first paint. The toggle lives in ui/theme.js.
+    // Before first paint: apply a saved theme (the button lives in ui/theme.js), and pick the loading
+    // skeleton that matches the page being opened (a recipe or queued video, or the list).
     try {
       var t = JSON.parse(localStorage.getItem('rb:theme'));
       if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
     } catch (e) { /* storage unavailable: follow the system */ }
+    if (/^#\/[rq]\//.test(location.hash)) document.documentElement.dataset.boot = 'detail';
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,17 +40,17 @@
       <p class="stats" id="stats"></p>
       <div class="topbar-actions">
         <div class="mount" id="mount-topbar" data-mount="topbar"></div>
-        <button class="btn btn-quiet icon-btn" id="theme-toggle" type="button" aria-label="Switch theme"></button>
+        <button class="btn btn-quiet icon-btn" id="theme-toggle" type="button" aria-label="Theme"></button>
         <button class="btn btn-primary" id="open-add" type="button">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
-          <span>Add video</span>
+          <span class="label-wide">Add video</span>
         </button>
       </div>
     </div>
   </header>
 
   <main id="view" tabindex="-1" data-layout="list" data-view="loading">
-    <div class="home" aria-busy="true">
+    <div class="home skel-list" aria-busy="true">
       <div class="home-head">
         <div class="home-title">
           <h1>What are we cooking?</h1>
@@ -65,6 +67,18 @@
           <div class="card skel"><div class="card-media"></div><div class="card-body"><span class="skel-line"></span><span class="skel-line short"></span></div></div>
         </div>
       </div>
+    </div>
+    <div class="recipe skel skel-detail" aria-busy="true">
+      <div class="recipe-head">
+        <p class="sr-only">Loading the recipe…</p>
+        <span class="skel-line short"></span>
+        <span class="skel-line title"></span>
+        <span class="skel-line"></span>
+        <span class="skel-line short"></span>
+      </div>
+      <div class="recipe-media" aria-hidden="true"><span class="skel-block skel-player"></span></div>
+      <div class="recipe-ingredients" aria-hidden="true"><span class="skel-block skel-panel"></span></div>
+      <div class="recipe-steps" aria-hidden="true"><span class="skel-block skel-panel"></span></div>
     </div>
   </main>
 
