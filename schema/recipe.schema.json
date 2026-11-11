@@ -1,0 +1,235 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/axeltoll/recipe-bank/blob/main/schema/recipe.schema.json",
+  "title": "Recipe Bank recipe file",
+  "description": "One analyzed recipe video, stored as recipes/<id>.json. lib/recipe.mjs (validateRecipe) is the enforced contract; this schema documents every field, including the optional ones validateRecipe does not check. test/schema.test.mjs keeps the two in step.",
+  "$comment": "Not expressible here and enforced by lib/recipe.mjs only: id must equal the filename; video.url must parse with parseVideoUrl() in lib/video.mjs and video.id must equal the id parsed from it (this schema checks the URL's host and the id's form, per platform). The lowercase rule uses \\p{Lu} and \\p{Lt}, which is close to but not exactly String.prototype.toLowerCase(). Patterns are ECMA-262 with the u flag.",
+  "type": "object",
+  "required": ["id", "title", "status", "summary", "analyzed", "video", "creator", "tags", "components"],
+  "properties": {
+    "schema": {
+      "description": "Contract version this file was written for. Missing means 1. Upgrade older files with scripts/migrate.mjs.",
+      "type": ["integer", "null"],
+      "minimum": 1,
+      "maximum": 1
+    },
+    "id": {
+      "description": "Kebab-case slug, equal to the filename without .json.",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "title": { "description": "Dish name.", "$ref": "#/$defs/text" },
+    "status": {
+      "description": "analyzed: the video gives the method. partial: the creator withheld part of it (or it could not be checked); gaps must say what is missing.",
+      "enum": ["analyzed", "partial"]
+    },
+    "video": { "$ref": "#/$defs/video" },
+    "creator": { "$ref": "#/$defs/creator" },
+    "uploaded": {
+      "description": "Date the video was posted, YYYY-MM-DD.",
+      "type": ["string", "null"],
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "analyzed": {
+      "description": "Date the recipe file was written, YYYY-MM-DD.",
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "summary": { "description": "One or two plain sentences.", "$ref": "#/$defs/text" },
+    "serves": {
+      "description": "Yield as the creator stated it, in their words, or null.",
+      "type": ["string", "null"]
+    },
+    "tags": {
+      "description": "Lowercase tags, e.g. \"air fryer\".",
+      "type": "array",
+      "items": { "$ref": "#/$defs/lowercaseText" }
+    },
+    "components": {
+      "description": "Parts of the dish, e.g. Chicken, Pan sauce, To serve.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/component" }
+    },
+    "nutrition": { "$ref": "#/$defs/nutrition" },
+    "notes": {
+      "description": "Anything worth knowing that is not a step.",
+      "type": ["array", "null"],
+      "items": { "$ref": "#/$defs/text" }
+    },
+    "gaps": {
+      "description": "What the video does not say. Required and non-empty when status is partial.",
+      "type": ["array", "null"],
+      "items": { "$ref": "#/$defs/text" }
+    },
+    "source": { "$ref": "#/$defs/source" }
+  },
+  "allOf": [
+    {
+      "if": { "required": ["status"], "properties": { "status": { "const": "partial" } } },
+      "then": {
+        "required": ["gaps"],
+        "properties": { "gaps": { "type": "array", "minItems": 1 } }
+      }
+    }
+  ],
+  "$defs": {
+    "text": {
+      "description": "A string with at least one non-whitespace character.",
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "lowercaseText": {
+      "allOf": [
+        { "$ref": "#/$defs/text" },
+        { "pattern": "^[^\\p{Lu}\\p{Lt}]*$" }
+      ]
+    },
+    "video": {
+      "description": "The source video. url must be a supported YouTube, TikTok, Instagram, Facebook, Pinterest or X link, or an HTTPS page declared with platform \"web\". See docs/PLATFORMS.md.",
+      "type": "object",
+      "required": ["platform", "url"],
+      "properties": {
+        "platform": { "enum": ["youtube", "tiktok", "instagram", "facebook", "pinterest", "x", "web"] },
+        "id": {
+          "description": "The platform's video id, as parsed from url. Null or omitted only for web pages and unresolved short links (vm.tiktok.com, vt.tiktok.com, fb.watch, pin.it).",
+          "type": ["string", "null"]
+        },
+        "url": { "type": "string", "pattern": "^https?://" }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["platform"], "properties": { "platform": { "const": "youtube" } } },
+          "then": {
+            "required": ["id"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{11}$" },
+              "url": { "pattern": "^https?://(?:(?:www|m)\\.)?(?:youtube\\.com|music\\.youtube\\.com|youtube-nocookie\\.com|youtu\\.be)/" }
+            }
+          }
+        },
+        {
+          "if": { "required": ["platform"], "properties": { "platform": { "const": "tiktok" } } },
+          "then": {
+            "properties": {
+              "id": { "type": ["string", "null"], "pattern": "^\\d+$" },
+              "url": { "pattern": "^https?://(?:[a-z0-9-]+\\.)*tiktok\\.com/" }
+            }
+          }
+        },
+        {
+          "if": { "required": ["platform"], "properties": { "platform": { "const": "instagram" } } },
+          "then": {
+            "required": ["id"],
+            "properties": {
+              "id": { "$ref": "#/$defs/text" },
+              "url": { "pattern": "^https?://(?:(?:www|m)\\.)?instagram\\.com/(?:reels?|p|tv)/[^/?#]+" }
+            }
+          }
+        },
+        {
+          "if": { "required": ["platform"], "properties": { "platform": { "const": "facebook" } } },
+          "then": {
+            "properties": {
+              "id": { "type": ["string", "null"], "pattern": "^\\d+$" },
+              "url": { "pattern": "^https?://(?:(?:(?:www|m|web)\\.)?facebook\\.com|fb\\.watch)/" }
+            }
+          }
+        },
+        {
+          "if": { "required": ["platform"], "properties": { "platform": { "const": "pinterest" } } },
+          "then": {
+            "properties": {
+              "id": { "type": ["string", "null"], "pattern": "^\\d+$" },
+              "url": { "pattern": "^https?://(?:(?:www\\.|[a-z]{2}\\.)?pinterest\\.[a-z.]+|pin\\.it)/" }
+            }
+          }
+        },
+        {
+          "if": { "required": ["platform"], "properties": { "platform": { "const": "x" } } },
+          "then": {
+            "required": ["id"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^\\d+$" },
+              "url": { "pattern": "^https?://(?:(?:www|mobile)\\.)?(?:x|twitter)\\.com/" }
+            }
+          }
+        },
+        {
+          "if": { "required": ["platform"], "properties": { "platform": { "const": "web" } } },
+          "then": {
+            "properties": {
+              "id": { "type": "null" },
+              "url": { "pattern": "^https://" }
+            }
+          }
+        }
+      ]
+    },
+    "creator": {
+      "description": "Who made the video. Always credited.",
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "$ref": "#/$defs/text" },
+        "handle": { "description": "Platform handle, e.g. @EatLikeAnAdult.", "type": ["string", "null"], "pattern": "^@\\S+$" },
+        "url": { "description": "Creator's profile or channel.", "type": ["string", "null"], "format": "uri", "pattern": "^https?://\\S+$" }
+      }
+    },
+    "component": {
+      "type": "object",
+      "required": ["name", "ingredients", "steps"],
+      "properties": {
+        "name": { "$ref": "#/$defs/text" },
+        "ingredients": { "type": "array", "items": { "$ref": "#/$defs/ingredient" } },
+        "steps": { "type": "array", "items": { "$ref": "#/$defs/step" } }
+      }
+    },
+    "ingredient": {
+      "description": "amount is the creator's own words. basis says where it came from; unstated means the video gave no amount and amount must be null. Never invent amounts.",
+      "type": "object",
+      "required": ["item", "key", "basis"],
+      "properties": {
+        "item": { "description": "As you would read it in a recipe, e.g. Skin-on chicken thighs.", "$ref": "#/$defs/text" },
+        "key": { "description": "Shopping-level filter key: lowercase, singular, e.g. chicken.", "$ref": "#/$defs/lowercaseText" },
+        "amount": { "type": ["string", "null"] },
+        "basis": { "enum": ["on-screen", "spoken", "description", "unstated"] },
+        "note": { "type": "string" }
+      },
+      "if": { "required": ["basis"], "properties": { "basis": { "const": "unstated" } } },
+      "then": { "properties": { "amount": { "type": "null" } } },
+      "else": { "required": ["amount"], "properties": { "amount": { "$ref": "#/$defs/text" } } }
+    },
+    "step": {
+      "type": "object",
+      "required": ["text"],
+      "properties": {
+        "text": { "$ref": "#/$defs/text" },
+        "t": { "description": "Seconds into the video where this step starts.", "type": ["number", "null"], "minimum": 0 }
+      }
+    },
+    "nutrition": {
+      "description": "Only figures the creator gave, per the unit in per.",
+      "type": ["object", "null"],
+      "required": ["per", "basis"],
+      "properties": {
+        "per": { "description": "e.g. sub, bowl, serving (4 servings).", "$ref": "#/$defs/text" },
+        "basis": { "enum": ["on-screen", "spoken", "description"] },
+        "calories": { "$ref": "#/$defs/amountNumber" },
+        "protein_g": { "$ref": "#/$defs/amountNumber" },
+        "carbs_g": { "$ref": "#/$defs/amountNumber" },
+        "fat_g": { "$ref": "#/$defs/amountNumber" },
+        "note": { "type": "string" }
+      }
+    },
+    "amountNumber": { "type": ["number", "null"], "minimum": 0 },
+    "source": {
+      "description": "How the recipe was checked.",
+      "type": ["object", "null"],
+      "properties": {
+        "evidence": { "description": "What was checked, e.g. YouTube captions + video description.", "type": "string" },
+        "quantity_basis": { "description": "Where the amounts came from.", "type": "string" }
+      }
+    }
+  }
+}

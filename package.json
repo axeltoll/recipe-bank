@@ -1,6 +1,6 @@
 {
   "name": "recipe-bank",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "license": "MIT",
   "description": "Personal recipe bank: social-media recipe videos analyzed into ingredients and step-by-step guides, with an ingredient-filter dashboard.",
@@ -13,7 +13,16 @@
     "dev": "node --watch-path=server.mjs --watch-path=lib server.mjs",
     "validate": "node scripts/validate.mjs",
     "test": "node --test \"test/*.test.mjs\"",
+    "check": "npm test && npm run validate && npm run build",
     "build": "node scripts/build-static.mjs",
+    "migrate": "node scripts/migrate.mjs",
+    "packs": "node scripts/pack.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "device-check": "node scripts/device-check.mjs",
+    "site": "node scripts/serve-site.mjs",
+    "site:data": "node scripts/build-site-data.mjs",
+    "site:sync": "node scripts/sync-site.mjs",
     "deploy": "node scripts/build-static.mjs && npx wrangler pages deploy dist --project-name=recipe-bank --branch=main --commit-dirty=true"
   }
 }
