@@ -215,6 +215,14 @@ test('handleFromUrl reads @handles from creator URLs', () => {
   assert.equal(handleFromUrl(null), '');
 });
 
+test('handleFromUrl gives no handle, instead of throwing, for a broken escape', () => {
+  for (const url of ['https://www.youtube.com/@100%', 'https://www.youtube.com/@a%2', 'https://www.youtube.com/@a%2G']) {
+    assert.equal(handleFromUrl(url), '', url);
+  }
+  const entry = { id: 'q-3', video: { url: 'https://youtu.be/TestVideo01' }, title: 'T', creatorUrl: 'https://www.youtube.com/@100%' };
+  assert.equal(emptyDraft(entry).creator.handle, '');
+});
+
 test('a "__proto__" field in a recipe file never reaches a prototype', () => {
   const r = JSON.parse(JSON.stringify(recipeFromDraft(emptyDraft('https://youtu.be/TestVideo01'))));
   const evil = '{"__proto__": {"polluted": true}}';
