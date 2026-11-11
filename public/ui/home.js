@@ -72,7 +72,7 @@ export function renderHome() {
         <div class="mount" id="mount-home-top" data-mount="home-top"></div>
         <section aria-labelledby="recipes-h">
           <h2 class="sr-only" id="recipes-h">Recipes</h2>
-          <div class="grid" id="grid" data-mode="${listMode ? 'list' : 'grid'}"></div>
+          <div class="grid" id="grid" data-view="${listMode ? 'list' : 'grid'}"></div>
         </section>
         <section class="queue-section" id="queue-section" aria-labelledby="queue-h" hidden>
           <div class="section-head"><h2 id="queue-h">In the queue</h2><p>Waiting for the research agent</p></div>
@@ -90,17 +90,19 @@ export function renderHome() {
     listMode = !listMode;
     store.set(VIEW_KEY, listMode ? 'list' : 'grid');
     e.currentTarget.setAttribute('aria-pressed', String(listMode));
-    $('#grid').dataset.mode = listMode ? 'list' : 'grid';
+    $('#grid').dataset.view = listMode ? 'list' : 'grid';
   });
   $('#filter-close').addEventListener('click', () => setFiltersOpen(false));
   $('#filter-done').addEventListener('click', () => setFiltersOpen(false));
   $('#filter-scrim').addEventListener('click', () => setFiltersOpen(false));
   $('#clear').addEventListener('click', clearAll);
 
-  $$('[data-mode]', view).forEach((b) =>
+  // Only the Has all / Has any buttons: a click anywhere else (inside the grid, say) never changes the match mode.
+  const modeButtons = $$('.segmented [data-mode]', view);
+  modeButtons.forEach((b) =>
     b.addEventListener('click', () => {
       state.mode = b.dataset.mode;
-      $$('[data-mode]', view).forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      modeButtons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
       filtersChanged();
     }));
 

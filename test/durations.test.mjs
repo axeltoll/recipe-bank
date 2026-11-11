@@ -21,6 +21,14 @@ test('a range runs for its lower bound and keeps both figures in the label', () 
   assert.deepEqual(durations('Air fry at 400 for 8 to 10 minutes'), [{ seconds: 480, label: '8–10 min' }]);
 });
 
+test('a range that starts under five seconds still gives a timer when its upper bound is usable', () => {
+  assert.deepEqual(durations('Rest 0-10 minutes'), [{ seconds: 5, label: '0–10 min' }]);
+  assert.deepEqual(durations('Pulse 2 to 10 seconds'), [{ seconds: 5, label: '2–10 sec' }]);
+  assert.deepEqual(durations('Blend 1-3 seconds'), [], 'the whole range is under five seconds');
+  assert.deepEqual(durations('Cure 12-36 hours'), [], 'the range runs past a day');
+  assert.deepEqual(durations('Cook 3-4 mins per side'), [{ seconds: 180, label: '3–4 min' }], 'lower bound otherwise');
+});
+
 test('fractions: "1 1/2", "1½" and "½"', () => {
   assert.deepEqual(durations('Braise 1 1/2 hours'), [{ seconds: 5400, label: '1 1/2 h' }]);
   assert.deepEqual(durations('Chill 1½ hours'), [{ seconds: 5400, label: '1½ h' }]);

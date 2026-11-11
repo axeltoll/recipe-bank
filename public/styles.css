@@ -84,8 +84,9 @@
   --content-max: 1760px;
   --bar-h: 56px;
   --nav-h: 48px;
-  /* --head-h is the part of the header that stays on screen (the nav row below desktop, the whole bar from desktop). */
-  --head-h: 48px;
+  /* --head-h is the part of the header that stays on screen (the nav row below desktop, the whole bar from desktop),
+     with the top safe area under a notch. */
+  --head-h: calc(48px + env(safe-area-inset-top, 0px));
   --media-w: 280px;
 }
 
@@ -160,7 +161,7 @@
   :root { --gutter: 24px; --bar-h: 64px; }
 }
 @media (min-width: 1280px) {
-  :root { --gutter: 32px; --media-w: 300px; --head-h: 64px; }
+  :root { --gutter: 32px; --media-w: 300px; --head-h: calc(64px + env(safe-area-inset-top, 0px)); }
 }
 @media (min-width: 1920px) {
   :root { --gutter: 48px; --media-w: 400px; }
@@ -273,9 +274,11 @@ main:focus-visible { outline: none; box-shadow: none; }
 @keyframes pulse { 50% { opacity: 0.3; } }
 
 /* ---------- shell ---------- */
-/* Below desktop the header is two rows and collapses: the brand row scrolls away, the nav row stays (P1, T1). */
+/* Below desktop the header is two rows and collapses: the brand row scrolls away, the nav row stays (P1, T1).
+   Under a notch (viewport-fit=cover) the safe-area padding scrolls away with the brand row, and the nav row
+   carries the same inset, so the stuck row clears the notch and no slice of the brand row stays on screen. */
 .topbar {
-  position: sticky; top: calc(-1 * var(--bar-h)); z-index: var(--z-bar);
+  position: sticky; top: calc(-1 * (var(--bar-h) + env(safe-area-inset-top, 0px))); z-index: var(--z-bar);
   padding-top: env(safe-area-inset-top);
   padding-inline: max(var(--gutter), env(safe-area-inset-left), env(safe-area-inset-right), calc((100% - var(--content-max)) / 2));
   background: var(--surface);
@@ -295,7 +298,7 @@ main:focus-visible { outline: none; box-shadow: none; }
 .nav {
   order: 10; flex: 1 0 100%;
   display: flex; gap: var(--s-1); min-height: var(--nav-h); overflow-x: auto; overscroll-behavior-x: contain;
-  margin-inline: calc(-1 * var(--s-2)); padding-bottom: var(--s-1);
+  margin-inline: calc(-1 * var(--s-2)); padding-top: env(safe-area-inset-top, 0px); padding-bottom: var(--s-1);
   scrollbar-width: none;
 }
 .nav a {
@@ -498,22 +501,22 @@ main[data-layout='message'] > .state, main[data-layout='detail'] > .state { max-
 .grid-enter > .card:nth-child(8) { --i: 7; }
 
 /* Compact list view (the toggle in the home tools): one dense row per recipe at every width. */
-.grid[data-mode='list'] { gap: var(--s-2); }
-.grid[data-mode='list'] .card { grid-template-columns: 64px minmax(0, 1fr); border-radius: var(--r-md); }
-.grid[data-mode='list'] .card-link::after { border-radius: var(--r-md); }
-.grid[data-mode='list'] .card-media { min-height: 64px; }
-.grid[data-mode='list'] .card-ph span, .grid[data-mode='list'] .card-media .badge { display: none; }
-.grid[data-mode='list'] .card-body {
+.grid[data-view='list'] { gap: var(--s-2); }
+.grid[data-view='list'] .card { grid-template-columns: 64px minmax(0, 1fr); border-radius: var(--r-md); }
+.grid[data-view='list'] .card-link::after { border-radius: var(--r-md); }
+.grid[data-view='list'] .card-media { min-height: 64px; }
+.grid[data-view='list'] .card-ph span, .grid[data-view='list'] .card-media .badge { display: none; }
+.grid[data-view='list'] .card-body {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-auto-rows: min-content; align-content: center;
   column-gap: var(--s-3); row-gap: 0; padding: var(--s-2) var(--s-3);
 }
-.grid[data-mode='list'] .card-body > * { grid-column: 1; min-width: 0; }
-.grid[data-mode='list'] .card-title { font-size: var(--text-md); }
-.grid[data-mode='list'] .card-tags, .grid[data-mode='list'] .card-macros, .grid[data-mode='list'] .card-meta { display: none; }
+.grid[data-view='list'] .card-body > * { grid-column: 1; min-width: 0; }
+.grid[data-view='list'] .card-title { font-size: var(--text-md); }
+.grid[data-view='list'] .card-tags, .grid[data-view='list'] .card-macros, .grid[data-view='list'] .card-meta { display: none; }
 /* The badge on the thumbnail does not fit a 64px square; the same word moves into the creator line. */
-.grid[data-mode='list'] .card-partial { display: inline; color: var(--warn); font-weight: 700; }
-.grid[data-mode='list'] .card-body > .card-foot { grid-column: 2; grid-row: 1 / span 3; align-self: center; margin: 0; padding: 0; }
-.grid[data-mode='list'] .card-slot { margin: 0 calc(-1 * var(--s-1)) 0 0; }
+.grid[data-view='list'] .card-partial { display: inline; color: var(--warn); font-weight: 700; }
+.grid[data-view='list'] .card-body > .card-foot { grid-column: 2; grid-row: 1 / span 3; align-self: center; margin: 0; padding: 0; }
+.grid[data-view='list'] .card-slot { margin: 0 calc(-1 * var(--s-1)) 0 0; }
 
 /* Queue */
 .queue-section { margin-top: var(--s-7); }
@@ -541,7 +544,9 @@ main[data-layout='message'] > .state, main[data-layout='detail'] > .state { max-
 .recipe-head { grid-area: head; min-width: 0; }
 .recipe-media { grid-area: media; min-width: 0; }
 .recipe-ingredients { grid-area: ingredients; }
-.recipe-steps { grid-area: steps; }
+/* One step counter for the page: each part is its own ol.steps, and the circles count across the parts, as cook
+   mode does ("Step 4 of 9"). */
+.recipe-steps { grid-area: steps; counter-reset: step; }
 .recipe-more { grid-area: more; display: grid; gap: var(--s-5); align-content: start; min-width: 0; }
 .queue-panel { grid-area: panel; }
 
@@ -618,7 +623,7 @@ main[data-layout='message'] > .state, main[data-layout='detail'] > .state { max-
 .ing input:checked ~ .ing-text .ing-name { color: var(--muted); text-decoration: line-through; }
 .ing input:checked ~ .ing-amt { color: var(--muted); }
 
-.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+.steps { margin: 0; padding: 0; list-style: none; }
 .steps li { display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: var(--s-3); padding: var(--s-3) 0; counter-increment: step; }
 .steps li + li { border-top: 1px solid var(--line); }
 .steps li::before {
@@ -913,12 +918,12 @@ main[data-view='new'] .feature-page, main[data-view='edit'] .feature-page { widt
   .card-media { aspect-ratio: 4 / 3; min-height: 0; }
   .card-body { flex: 1; padding: var(--s-4); }
   .card-hits, .card-tags { flex-wrap: wrap; }
-  .grid[data-mode='list'] { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: var(--s-3); }
-  .grid[data-mode='list'] .card { display: grid; }
-  .grid[data-mode='list'] .card-media { aspect-ratio: auto; min-height: 64px; }
-  .grid[data-mode='list'] .card-body { padding: var(--s-2) var(--s-3); }
-  .grid[data-mode='list'] .card-meta { display: block; }
-  .grid[data-mode='list'] .card-body > .card-foot { gap: var(--s-3); }
+  .grid[data-view='list'] { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: var(--s-3); }
+  .grid[data-view='list'] .card { display: grid; }
+  .grid[data-view='list'] .card-media { aspect-ratio: auto; min-height: 64px; }
+  .grid[data-view='list'] .card-body { padding: var(--s-2) var(--s-3); }
+  .grid[data-view='list'] .card-meta { display: block; }
+  .grid[data-view='list'] .card-body > .card-foot { gap: var(--s-3); }
   .queue { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   /* Detail: sticky player column, content beside it. */
@@ -955,7 +960,7 @@ main[data-view='new'] .feature-page, main[data-view='edit'] .feature-page { widt
 @media (min-width: 1280px) {
   /* The header is one row and stays whole. */
   .topbar { top: 0; }
-  .nav { order: 0; flex: 0 1 auto; min-height: 0; margin-inline: var(--s-2) 0; padding-bottom: 0; }
+  .nav { order: 0; flex: 0 1 auto; min-height: 0; margin-inline: var(--s-2) 0; padding-block: 0; }
 
   /* Feature pages with two parts (week plan + shopping list, household + budget) go side by side. */
   .feature-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
@@ -1039,7 +1044,7 @@ main[data-view='new'] .feature-page, main[data-view='edit'] .feature-page { widt
     color-scheme: light;
   }
   .topbar, .footer, .skip, .toast, .recipe-top, .back, .recipe-media, .recipe-actions, .mount, .panel-tools, .cook, .modal,
-  .step-tools button, .tags, .scrim { display: none !important; }
+  .step-tools .timer, .tags, .scrim { display: none !important; }
   .print-only { display: block; }
   body { display: block; font-size: 11pt; }
   main { padding: 0; }
@@ -1060,6 +1065,11 @@ main[data-view='new'] .feature-page, main[data-view='edit'] .feature-page { widt
   .ing input:checked ~ .ing-text .ing-name { color: inherit; text-decoration: none; }
   .steps li::before { border: 1px solid var(--line-strong); }
   .step-text { max-width: none; font-size: 11pt; }
+  /* Timestamps print as plain text ("at 0:17"); on YouTube recipes they are play buttons on screen. */
+  .step-tools { margin-top: 2pt; }
+  .ts { min-height: 0; padding: 0; border: 0; background: none; color: var(--muted); font-size: 9pt; font-weight: 400; }
+  .ts .icon { display: none; }
+  button.ts::before { content: 'at '; }
   .callout { border: 1px solid var(--line-strong); }
   /* The week-plan page prints as the shopping list alone. */
   .feature-head p, .feature-cols > [data-part='week'] { display: none; }
