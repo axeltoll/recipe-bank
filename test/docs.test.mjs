@@ -58,3 +58,16 @@ test('the changelog does not promise a midnight move of "this week" that the bud
   const changelog = flat(await read('CHANGELOG.md'));
   if (!timer) assert.doesNotMatch(changelog, /moves on at midnight in an open tab/);
 });
+
+test('the roadmap total says what it adds up, and both figures match the items', async () => {
+  const roadmap = await read('ROADMAP.md');
+  let all = 0;
+  let open = 0;
+  for (const line of roadmap.split('\n')) {
+    const m = /^- \[( |x)\] .*?\(~(\d+) h\)/.exec(line);
+    if (!m) continue;
+    all += Number(m[2]);
+    if (m[1] === ' ') open += Number(m[2]);
+  }
+  assert.match(roadmap, new RegExp(`About ${all} hours in total, ticked items included; the open items add up to about ${open} hours\\.`));
+});
