@@ -6,9 +6,10 @@ import assert from 'node:assert/strict';
 import { request as httpRequest } from 'node:http';
 import { connect } from 'node:net';
 import { Readable } from 'node:stream';
-import { readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createApp, createHandler, hostRefusal } from '../server.mjs';
+import { createApp, createHandler, createFileOnce, hostRefusal } from '../server.mjs';
 import { exportPack, MAX_PACK_CHARS } from '../lib/pack.mjs';
 import { makeRecipe, tempBank } from './helpers/bank.mjs';
 
@@ -148,4 +149,25 @@ test('a pack under the character cap imports even when its UTF-8 form is far lar
   const res = await call({ url: '/api/packs/import', headers: JSON_TYPE, chunks: [body] });
   assert.equal(res.status, 201, JSON.stringify(res.json)?.slice(0, 200));
   assert.deepEqual(res.json.created, ['long-notes']);
+});
+
+test('createFileOnce: a write that fails part-way leaves no file, and an existing file is never replaced', async (t) => {
+  const folder = await mkdtemp(join(tmpdir(), 'recipe-bank-once-'));
+  t.after(() => rm(folder, { recursive: true, force: true }));
+  const file = join(folder, 'pack-recipe.json');
+  const text = JSON.stringify(makeRecipe('pack-recipe', 30), null, 2);
+
+  // A full disk: half the text is written, then the write fails.
+  const full = async (path, data, options) => {
+    await writeFile(path, data.slice(0, data.length / 2), options);
+    throw Object.assign(new Error('no space left on device'), { code: 'ENOSPC' });
+  };
+  await assert.rejects(createFileOnce(file, text, { write: full }), { code: 'ENOSPC' });
+  assert.deepEqual(await readdir(folder), [], 'no partial recipe file and no temp file');
+
+  await createFileOnce(file, text);
+  assert.equal(await readFile(file, 'utf8'), text);
+  await assert.rejects(createFileOnce(file, 'other'), { code: 'EEXIST' });
+  assert.equal(await readFile(file, 'utf8'), text, 'unchanged');
+  assert.deepEqual(await readdir(folder), ['pack-recipe.json']);
 });

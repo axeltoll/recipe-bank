@@ -10,7 +10,7 @@
 // RECIPE_BANK_DIR points the server and the scripts at another folder holding recipes/ and data/.
 
 import { createServer } from 'node:http';
-import { readFile, readdir, writeFile, rename, mkdir, unlink } from 'node:fs/promises';
+import { readFile, readdir, writeFile, rename, mkdir, unlink, link } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { parseVideoUrl, videoKey, PLATFORMS } from './lib/video.mjs';
@@ -95,6 +95,24 @@ async function writeJsonAtomic(file, value) {
 }
 
 const saveQueue = (queueFile, queue) => writeJsonAtomic(queueFile, queue);
+
+// Creates `file` only if it does not exist, never leaving half a file: like writeJsonAtomic it writes a temp file
+// first, but then hard-links it into place, and link() fails with EEXIST instead of replacing an existing file. On a
+// file system without hard links it falls back to an exclusive create. `write` is for tests.
+export async function createFileOnce(file, text, { write = writeFile } = {}) {
+  const tmp = `${file}.${process.pid}.${randomUUID().slice(0, 8)}.tmp`;
+  try {
+    await write(tmp, text, { flag: 'wx' });
+    try {
+      await link(tmp, file);
+    } catch (e) {
+      if (!['EPERM', 'ENOTSUP', 'ENOSYS', 'EOPNOTSUPP'].includes(e.code)) throw e;
+      await writeFile(file, text, { flag: 'wx' });
+    }
+  } finally {
+    await unlink(tmp).catch(() => {});
+  }
+}
 
 // Best-effort title/creator lookup from public, key-free oEmbed endpoints; the queue entry is
 // still saved if this fails. Facebook, Instagram and web pages are never looked up.
@@ -321,7 +339,8 @@ export function createHandler({
 
   // POST /api/packs/import { pack, include?: [position, …] }. Plans the import against the
   // recipes on disk right now (never trusting a plan from the browser) and only creates new
-  // files: the 'wx' flag fails instead of overwriting, even if a file appeared meanwhile.
+  // files: createFileOnce fails instead of overwriting, even if a file appeared meanwhile, and
+  // never leaves half a file behind.
   async function importPack(res, body) {
     if (!body || typeof body !== 'object' || Array.isArray(body) || body.pack == null) {
       return json(res, 400, { error: 'Send JSON: { "pack": <recipe pack>, "include": [positions] }.' });
@@ -344,7 +363,7 @@ export function createHandler({
           continue;
         }
         try {
-          await writeFile(join(dirs.recipesDir, `${f.id}.json`), f.contents, { flag: 'wx' });
+          await createFileOnce(join(dirs.recipesDir, `${f.id}.json`), f.contents);
           created.push(f.id);
         } catch (e) {
           if (e.code !== 'EEXIST') throw e;
