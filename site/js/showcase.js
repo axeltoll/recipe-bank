@@ -83,8 +83,8 @@ export function initShowcase() {
       state.activeId = card.dataset.recipe;
       list.querySelectorAll('[data-recipe]').forEach((b) => b.setAttribute('aria-pressed', String(b === card)));
       drawDetail();
-      // Below 1024 px the recipe sits under the list, so bring it into view.
-      if (!matchMedia('(min-width: 1024px)').matches) {
+      // Below the desktop breakpoint (1280 px) the recipe sits under the list, so bring it into view.
+      if (!matchMedia('(min-width: 1280px)').matches) {
         const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
         detail.scrollIntoView({ behavior: calm ? 'auto' : 'smooth', block: 'start' });
       }

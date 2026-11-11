@@ -1,7 +1,7 @@
 // Writes site/data/showcase.js: the sample recipes the public site (site/) shows in its interactive showcase.
 // The site is a separate static folder, so it cannot read recipes/ at runtime; this script copies the fields
 // the page renders, unchanged, from the real recipe files. Run `npm run site:data` after editing one of the
-// showcased recipes; test/site-data.test.mjs fails when the committed copy is out of date.
+// showcased recipes; test/site-showcase.test.mjs fails when the committed copy is out of date.
 import { readFile, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { validateRecipe } from '../lib/recipe.mjs';

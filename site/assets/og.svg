@@ -1,12 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
   <!-- Source artwork for the social preview image. Social platforms do not read SVG: export this file to
-       og.png (1200 x 630) and reference that from og:image. See site/README.md, "What a deploy needs". -->
+       og.png (1200 x 630) and point ogImage in data/site.json at it. See site/README.md, "Publishing settings".
+       Colours are the light-theme tokens of css/site.css (--bg, --ink, --accent, --accent-text, --ink-2). -->
   <title>Recipe Bank: turn recipe videos into exact ingredients and steps</title>
   <defs>
-    <pattern id="t" width="20" height="20" patternUnits="userSpaceOnUse"><rect x="2" y="2" width="16" height="16" rx="3" fill="#2b241e"/></pattern>
+    <pattern id="t" width="20" height="20" patternUnits="userSpaceOnUse"><rect x="2" y="2" width="16" height="16" rx="3" fill="#1f1a16"/></pattern>
     <pattern id="a" width="20" height="20" patternUnits="userSpaceOnUse"><rect x="2" y="2" width="16" height="16" rx="3" fill="#c2410c"/></pattern>
   </defs>
-  <rect width="1200" height="630" fill="#f8f4ee"/>
+  <rect width="1200" height="630" fill="#faf6f0"/>
   <g transform="translate(80 86)">
     <rect width="56" height="56" rx="14" fill="#c2410c"/>
     <path d="M15.75 35c0-8.75 5.25-15.75 12.25-15.75S40.25 26.25 40.25 35z" fill="#fff7ed"/>
@@ -15,8 +16,8 @@
   </g>
   <text font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="700" fill="#1f1a16">
     <tspan x="80" y="290">Turn any recipe video</tspan>
-    <tspan x="80" y="372" fill="#b03a0a" font-style="italic" font-weight="400">into exact ingredients</tspan>
-    <tspan x="80" y="454" fill="#b03a0a" font-style="italic" font-weight="400">and steps.</tspan>
+    <tspan x="80" y="372" fill="#9a3412" font-style="italic" font-weight="400">into exact ingredients</tspan>
+    <tspan x="80" y="454" fill="#9a3412" font-style="italic" font-weight="400">and steps.</tspan>
   </text>
   <text x="80" y="540" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="#4a423b">Open source · MIT licensed · runs on your machine</text>
   <!-- the recipe shape of the hero mark, 18 x 26 tiles -->

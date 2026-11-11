@@ -24,7 +24,7 @@ No dependencies. Node ≥ 22 (built-in `fetch`, `node:test`, `import.meta.dirnam
 | `server.mjs` | `node:http` server: static `public/` and `/lib/`, plus the JSON API. |
 | `public/` | Dashboard (vanilla ES modules + CSS, light/dark). Hash routes: `#/`, `#/r/<id>`, `#/q/<queueId>`. |
 | `scripts/validate.mjs` | CLI validator; exits 1 on any problem. |
-| `site/` | Public website (static landing page, self-hosting guide, changelog). Not the dashboard. `npm run site` previews it on port 4790; `site/README.md` has the rules. Its showcase data (`site/data/showcase.js`) is generated from three recipe files: after editing one of them, run `npm run site:data`, or `npm test` fails. |
+| `site/` | Public website (static home page, docs, changelog). Not the dashboard. `npm run site` previews it on port 4790; `site/README.md` has the rules. Its showcase data (`site/data/showcase.js`) is generated from three recipe files: after editing one of them, run `npm run site:data`, or `npm test` fails. What the site says about a feature comes from `site/data/features.json` (`status`: `shipped`, `next` or `planned`): when a feature merges, change its status there and run `npm run site:sync`, or `npm test` fails. |
 
 API: `GET /api/recipes` → `{recipes, invalid}` · `GET /api/queue` · `POST /api/queue {url, note}` (409 if the video is already a recipe or queued; best-effort oEmbed title) · `DELETE /api/queue/<id>`.
 

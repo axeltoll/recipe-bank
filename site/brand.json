@@ -1,5 +1,5 @@
 {
-  "_doc": "Brand definition for the Recipe Bank public site (site/). Written first, then applied by hand to css/site.css and the HTML, because there is no scaffolder in this repository. test/site.test.mjs checks that the colours, the three.js address, the repository address and the primary action here match the pages.",
+  "_doc": "Brand definition for the Recipe Bank public site (site/): name, promise, voice, the layout contract and the facts ledger. Colour, type, spacing, radius and motion are not defined here any more: the site uses the dashboard's design tokens (docs/design/DESIGN.md), written out in css/site.css, and test/site.test.mjs checks them (contrast, the two dark blocks, the hero palette, and the dashboard's own stylesheet once the redesign is merged). What the site claims about features lives in data/features.json; publishing settings live in data/site.json.",
 
   "slug": "recipe-bank",
   "brand_name": "Recipe Bank",
@@ -14,73 +14,36 @@
   "primary_cta": { "label": "Star and run it from GitHub", "nav_label": "Star on GitHub", "href": "https://github.com/axeltoll/recipe-bank" },
   "secondary_cta": { "label": "See a real recipe", "href": "#showcase" },
 
-  "colors": {
-    "_doc": "Ink, paper and one accent, taken from the dashboard (public/styles.css) so the site and the product look like one thing. The accent is a fill colour; accent_text is the tone for text and thin lines and passes 4.5:1 on both page backgrounds of its theme.",
-    "light": {
-      "bg": "#f8f4ee",
-      "bg_2": "#f2ece3",
-      "surface": "#ffffff",
-      "ink": "#1f1a16",
-      "ink_2": "#4a423b",
-      "muted": "#6b6159",
-      "line": "#e0d5c6",
-      "accent": "#c2410c",
-      "on_accent": "#ffffff",
-      "accent_hover": "#a8380a",
-      "accent_text": "#b03a0a",
-      "accent_soft": "#fde8d7",
-      "ok": "#276b43",
-      "warn": "#855600"
-    },
-    "dark": {
-      "bg": "#15120f",
-      "bg_2": "#1b1713",
-      "surface": "#221d18",
-      "ink": "#f3ede6",
-      "ink_2": "#d4cbc1",
-      "muted": "#a0958a",
-      "line": "#3a3229",
-      "accent": "#f07a3e",
-      "on_accent": "#1a0f08",
-      "accent_hover": "#f79461",
-      "accent_text": "#f58a52",
-      "accent_soft": "#3a2316",
-      "ok": "#7fd09c",
-      "warn": "#f0c060"
-    },
-    "contrast_notes": "Worked out by hand from the WCAG relative-luminance formula, not measured in a browser. Light: ink on bg about 15:1, muted on bg 5.5:1, accent_text on bg 5.5:1 and on bg_2 5.1:1, white on accent 5.2:1, ok on its soft ground 5.5:1, warn on its soft ground 5.5:1. Dark: muted on surface 5.3:1, accent on bg 6.7:1, on_accent on accent 6.7:1. The dashboard's own muted (#7a6f66), ok (#2f7d4f) and warn (#9a6400) come out just under 4.5:1 on paper, so the site uses slightly darker tones."
-  },
-
-  "fonts": {
-    "display": "'Fraunces', Georgia, 'Times New Roman', serif",
-    "body": "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
-    "mono": "ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
-    "google_fonts_url": "https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,650;1,9..144,500&family=Inter:wght@400;500;600&display=swap",
-    "_doc": "The dashboard's own pair. Headings use Fraunces 650; the emphasis words in headings use Fraunces italic 500 in accent_text. Every stack ends in system fonts, so the page reads without the web fonts."
-  },
-
-  "palette_3d": {
-    "_doc": "Tile colours of the hero mark per page theme (js/hero.js PALETTES and the --tile token). Light pages get dark tiles.",
-    "dark": { "tile": "#e9e1d6", "accent": "#f07a3e", "rim": "#f07a3e" },
-    "light": { "tile": "#2b241e", "accent": "#c2410c", "rim": "#f0a070" }
+  "design": {
+    "_doc": "Where the visual language comes from. The site adds only the tokens marked 'site only' in css/site.css.",
+    "tokens": "docs/design/DESIGN.md (the dashboard's design contract), implemented in site/css/site.css",
+    "site_only_tokens": ["--text-hero", "--text-section", "--s-9", "--dur-reveal", "--z-stage", "--z-content", "--content-max", "--header-h", "--side-w", "--stage-line"],
+    "fonts": "System fonts only. The dashboard's faces (Fraunces, Inter) are named first in the stacks, so a visitor who has them installed sees them; nothing is downloaded.",
+    "hero_palette": "js/hero.js PALETTES: tile = --ink, accent = --accent of each theme."
   },
 
   "voice": {
-    "tone": "Calm, specific, no hype. Says what the product does today and labels what is planned.",
+    "tone": "Calm, specific, no hype. Says what the product does today and labels what is being merged and what is planned.",
     "rules": [
-      "Every claim comes from README.md, ROADMAP.md, CLAUDE.md or the code. Nothing else goes on a page.",
+      "Every claim comes from README.md, ROADMAP.md, CLAUDE.md, the code, or the documents of a branch that is being merged. Nothing else goes on a page.",
+      "A feature is named on the site only if it is in data/features.json with a status and a source.",
       "No invented users, numbers, reviews, logos or deadlines.",
-      "Planned features carry the word planned.",
       "No exclamation marks. No em or en dashes in page copy: use a full stop, a comma, a colon, or the word to.",
       "Headings in two parts: a plain line, then the emphasis words in italics."
     ]
   },
 
   "layout_contract": {
-    "breakpoints_px": [768, 1024, 1280, 1920],
-    "shell": "Sticky header, full-bleed bands with a centred inner container (1240 px, 1440 px from 1920), footer.",
-    "nav": "Menu button below 1024 px, inline links from 1024 px.",
-    "layout_types": { "index.html": "landing with a 3D scroll hero", "self-hosting.html": "detail", "changelog.html": "detail", "404.html": "detail" }
+    "breakpoints_px": [768, 1280, 1920],
+    "checked_at": ["390x844", "768x1024", "1280x800", "1920x1080", "2560x1440"],
+    "shell": "html paints the page. Sticky full-bleed header, full-bleed bands whose inner container caps content with padding (1240 px, 1440 px from 1920), full-bleed footer.",
+    "nav": "One nav in the header. Below 1280 px it is the header's second row and scrolls sideways inside itself; from 1280 px it sits inline. No script.",
+    "layout_types": {
+      "landing": ["index.html"],
+      "docs": ["getting-started.html", "recipe-format.html", "recipe-format-cheatsheet.html", "how-analysis-works.html", "recipe-agent.html", "self-hosting.html", "contributing.html", "changelog.html"],
+      "message": ["404.html"]
+    },
+    "docs": "Below 1280 px: one column with a Docs menu button (a plain list without JavaScript). From 1280 px: a sticky sidebar. From 1920 px: sidebar, text, and an 'on this page' column."
   },
 
   "facts": [
@@ -88,19 +51,17 @@
     { "claim": "Today: YouTube (including Shorts), TikTok and Instagram Reels", "source": "README.md, lib/video.mjs" },
     { "claim": "No runtime dependencies, no framework, no build step for development; Node.js 22 or newer", "source": "README.md (Built with, Run it), package.json" },
     { "claim": "Runs locally at http://127.0.0.1:4780; PORT and HOST override", "source": "README.md, server.mjs" },
-    { "claim": "Filter by ingredient with Has all / Has any; search by dish or creator", "source": "README.md, public/app.js" },
-    { "claim": "Each recipe embeds the video; steps have play-from-here timestamps; ingredients can be ticked off", "source": "README.md, public/app.js" },
-    { "claim": "Copy a recipe's ingredients as a shopping list", "source": "README.md, public/app.js" },
-    { "claim": "Amounts are the creator's own words; 'amount not given' when unstated; partial recipes list gaps", "source": "README.md, CLAUDE.md, lib/recipe.mjs" },
+    { "claim": "Every feature card and status note", "source": "site/data/features.json (each entry has its own source)" },
     { "claim": "Paste a link to queue a video; duplicates are refused; title looked up when the platform offers it", "source": "README.md, server.mjs (oEmbed for YouTube and TikTok)" },
-    { "claim": "Every recipe links back to the creator and the video; videos are embedded, never re-hosted", "source": "README.md" },
     { "claim": "Transcripts, captions and frames are kept out of the repository", "source": "CLAUDE.md (Analysis pipeline), .gitignore" },
-    { "claim": "An AI agent writes the recipe files today, but its instructions are not in the repository", "source": "ROADMAP.md (Recipe Agent and self-hosting)" },
-    { "claim": "npm run build makes a read-only static copy; Add video copies a request there", "source": "README.md, scripts/build-static.mjs" },
+    { "claim": "The recipe format page: fields, bases, what the validator enforces, the queue states", "source": "CLAUDE.md (Recipe file contract), lib/recipe.mjs" },
+    { "claim": "The Recipe Agent, analysis and self-hosting pages: what the agent does and does not do, evidence rules, capture privacy, entry files, queue helper, optional tools, capture folders, troubleshooting", "source": "agent/RECIPE-AGENT.md, agent/QUEUE.md, agent/CLAUDE.md, agent/SOUL.md, agent/skills/recipe-video-analysis/SKILL.md and SELF-HOSTING.md on the Recipe Agent branch" },
+    { "claim": "The contributor page: lib/video.mjs functions, feature modules with install(rb), mount points, events, filters and routes", "source": "lib/video.mjs, CLAUDE.md (Conventions), docs/design/MOUNT-POINTS.md on the redesign branch" },
+    { "claim": "npm run build makes a read-only static copy; Add video copies a request there; npm run deploy publishes to Cloudflare Pages", "source": "README.md, scripts/build-static.mjs, package.json" },
     { "claim": "The server has no login", "source": "server.mjs" },
-    { "claim": "The dashboard has layouts for narrow screens; an installable offline version is planned", "source": "public/styles.css, ROADMAP.md (Offline and mobile)" },
-    { "claim": "Every roadmap card on the page", "source": "ROADMAP.md, labelled Planned on the page" },
-    { "claim": "The showcase recipes and the four amount examples", "source": "recipes/cold-pan-chicken.json, recipes/air-fried-chicken-nuggets.json, recipes/banana-milk.json (checked by tests)" },
+    { "claim": "The dashboard has layouts for narrow screens", "source": "public/styles.css" },
+    { "claim": "The showcase recipes, the static recipe list and the four amount examples", "source": "recipes/cold-pan-chicken.json, recipes/air-fried-chicken-nuggets.json, recipes/banana-milk.json (checked by tests)" },
+    { "claim": "This website has no analytics, cookies or web fonts; its one third-party request is three.js from jsDelivr for the hero, skipped under reduced motion, with data saving on, and without WebGL 2", "source": "site/js/hero-boot.js, site/js/hero.js, test/site.test.mjs" },
     { "claim": "Version 0.1.0", "source": "package.json" }
   ]
 }

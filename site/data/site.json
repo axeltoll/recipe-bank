@@ -1,0 +1,7 @@
+{
+  "_doc": "Publishing settings for the site. baseUrl is empty until hosting is decided. When it is set (https, no trailing slash needed), run `npm run site:sync`: it writes canonical, og:url and og:image into every page and puts the address into robots.txt and sitemap.xml. ogImage is a path inside site/. Social platforms do not read SVG, so export assets/og.svg to assets/og.png (1200 x 630) and point ogImage at the PNG before publishing.",
+  "name": "Recipe Bank",
+  "baseUrl": "",
+  "repoUrl": "https://github.com/axeltoll/recipe-bank",
+  "ogImage": "assets/og.svg"
+}
