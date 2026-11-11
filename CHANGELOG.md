@@ -25,7 +25,8 @@ Fixes from the review of 0.2.0.
 - **Browser checks.** Chrome is killed and its profile removed on every way out (crash, unhandled rejection,
   `process.exit()`, a second Ctrl-C); CI actions are pinned to commit SHAs and the tests also run on Node 24.
 - **Budget.** Formatters are made once, the currency list works without `Intl.supportedValuesOf` and refuses
-  non-money codes, blank CSV lines are skipped, and "this week" moves on at midnight in an open tab.
+  non-money codes, blank CSV lines are skipped, and "this week" is taken from today's date each time the budget is
+  drawn (opening the page, a save, a shop), so an open tab moves on at its next redraw; there is no midnight timer.
 - `npm run check` runs the tests, the validator and the build; `CONTRIBUTING.md` and `.editorconfig` are new.
 
 ## 0.2.0 (2026-11-11)

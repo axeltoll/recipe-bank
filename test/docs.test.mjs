@@ -51,3 +51,10 @@ test('README lists household purchase amounts under "What it does" only once the
   assert.equal(/Amounts for your household|how much to buy/.test(whatItDoes), shown,
     shown ? 'the dashboard shows purchase amounts: README should say so' : '#/plan mounts the creator-words list: README must not promise purchase amounts');
 });
+
+test('the changelog does not promise a midnight move of "this week" that the budget has no timer for', async () => {
+  const budget = await read('public/features/budget.mjs');
+  const timer = /\bset(?:Timeout|Interval)\s*\(/.test(budget);
+  const changelog = flat(await read('CHANGELOG.md'));
+  if (!timer) assert.doesNotMatch(changelog, /moves on at midnight in an open tab/);
+});
