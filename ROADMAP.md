@@ -4,18 +4,18 @@ Work I plan to do on Recipe Bank, roughly in order. Estimates are my own and inc
 
 ## Next
 
-- [ ] **Week plan and combined shopping list** (~6 h). Pick several recipes for the week and get one shopping list, with the same ingredient merged by its `key` and amounts kept in the creators' own words.
-- [ ] **Exclude ingredients** (~2 h). A "without" filter next to *Has all* / *Has any*: no nuts, no pork, nothing I'm out of.
-- [ ] **Filter by tag and nutrition** (~3 h). Tags such as "air fryer" or "high protein" as chips, and a minimum-protein / maximum-calorie filter for recipes that state macros.
-- [ ] **Server and API tests** (~4 h). `node:test` coverage for `/api/recipes` and `/api/queue` (add, duplicate → 409, delete, bad input), plus the static build.
+- [ ] **Week plan and combined shopping list** (~6 h). Pick several recipes for the week and get one shopping list, with the same ingredient merged by its `key` and amounts kept in the creators' own words. *Logic (`lib/plan.mjs`), tests and UI modules (`public/features/week-plan.mjs`, `shopping-list.mjs`) are built; left: placing them in the redesigned dashboard.*
+- [ ] **Exclude ingredients** (~2 h). A "without" filter next to *Has all* / *Has any*: no nuts, no pork, nothing I'm out of. *Logic (`lib/filter.mjs`, already used by the dashboard's search) and UI module (`public/features/filters.mjs`) are built; left: placing the panel in the dashboard.*
+- [ ] **Filter by tag and nutrition** (~3 h). Tags such as "air fryer" or "high protein" as chips, and a minimum-protein / maximum-calorie filter for recipes that state macros. *Built with the Without filter above; same step left.*
+- [x] **Server and API tests** (~4 h). `node:test` coverage for `/api/recipes` and `/api/queue` (add, duplicate → 409, delete, bad input), plus the static build. *`test/server.test.mjs`.*
 - [ ] **Browser smoke test** (~3 h). A headless run that loads the dashboard, filters, opens a recipe and presses a step's timestamp.
 
 ## Later
 
-- [ ] **Serving scaling** (~5 h). Scale amounts that are plain numbers and units, and leave words like "a good amount" untouched, marking scaled amounts clearly.
+- [ ] **Serving scaling** (~5 h). Scale amounts that are plain numbers and units, and leave words like "a good amount" untouched, marking scaled amounts clearly. *Logic (`lib/scale.mjs`), tests and UI module (`public/features/scale.mjs`) are built; left: placing it on the recipe page.*
 - [ ] **Add and edit recipes in the dashboard** (~8 h). A form that writes a valid `recipes/<id>.json` through the contract in `lib/recipe.mjs`, so a recipe doesn't need hand-written JSON.
 - [ ] **Queue from the static site** (~4 h). Let the deployed copy queue a video (for example through a small Cloudflare Function) instead of only copying a request.
-- [ ] **Schema version and migration** (~3 h). A `schema` field, a migration script and a JSON Schema export of the recipe contract.
+- [x] **Schema version and migration** (~3 h). A `schema` field, a migration script and a JSON Schema export of the recipe contract. *`lib/schema.mjs`, `npm run migrate`, `npm run schema` → `schema/recipe.schema.json`.*
 - [ ] **Offline and mobile** (~4 h). Installable PWA with the recipes cached for cooking without signal, and a pass on the mobile layout and keyboard navigation.
 
 ## Household planning and budget
@@ -37,7 +37,7 @@ Today an AI agent turns a video into a recipe file, but its instructions live ou
 
 ## Sharing
 
-- [ ] **Recipe packs** (~5 h). Export favourite recipes as a single file or link and import someone else's pack, with duplicates detected by video. No accounts and no server needed.
+- [ ] **Recipe packs** (~5 h). Export favourite recipes as a single file or link and import someone else's pack, with duplicates detected by video. No accounts and no server needed. *Logic (`lib/pack.mjs`) and the command line (`npm run packs`) are built; left: export and import buttons in the dashboard.*
 - [ ] **Community list for self-hosters** (~6 h). An optional, read-only "top recipes" page for a self-hosted copy, built from the packs its owner chooses to include. Ratings stay local.
 
 About 111 hours in total.

@@ -1,0 +1,338 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/axeltoll/recipe-bank/blob/main/schema/recipe.schema.json",
+  "title": "Recipe Bank recipe",
+  "description": "One recipe, analyzed from a social-media cooking video. One file per recipe: recipes/<id>.json. Generated from lib/schema.mjs by `npm run schema`; lib/recipe.mjs (validateRecipe) is the enforced source of truth.",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "status",
+    "video",
+    "creator",
+    "analyzed",
+    "summary",
+    "tags",
+    "components"
+  ],
+  "properties": {
+    "schema": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1,
+      "description": "Contract version. Absent means 1."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "description": "Kebab-case slug; must equal the filename."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "analyzed",
+        "partial"
+      ],
+      "description": "partial = part of the method is missing; gaps[] lists what."
+    },
+    "video": {
+      "type": "object",
+      "required": [
+        "platform",
+        "url"
+      ],
+      "properties": {
+        "platform": {
+          "enum": [
+            "youtube",
+            "tiktok",
+            "instagram"
+          ]
+        },
+        "id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "creator": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "handle": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "uploaded": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "analyzed": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "serves": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "As stated by the creator, or null."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "^[^A-Z]*$"
+      }
+    },
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/component"
+      }
+    },
+    "nutrition": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/nutrition"
+        }
+      ]
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "What the video does not say."
+    },
+    "source": {
+      "type": "object",
+      "properties": {
+        "evidence": {
+          "type": "string",
+          "description": "What was checked, e.g. captions and the video description."
+        },
+        "quantity_basis": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "partial"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "gaps"
+        ],
+        "properties": {
+          "gaps": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "component": {
+      "type": "object",
+      "required": [
+        "name",
+        "ingredients",
+        "steps"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ingredients": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ingredient"
+          }
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/step"
+          }
+        }
+      }
+    },
+    "ingredient": {
+      "type": "object",
+      "required": [
+        "item",
+        "key",
+        "basis"
+      ],
+      "properties": {
+        "item": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^A-Z]*$",
+          "description": "Shopping-level filter key, e.g. \"chicken\"."
+        },
+        "amount": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The creator's own words; null when unstated. Never invented."
+        },
+        "basis": {
+          "enum": [
+            "on-screen",
+            "spoken",
+            "description",
+            "unstated"
+          ]
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "if": {
+        "properties": {
+          "basis": {
+            "const": "unstated"
+          }
+        },
+        "required": [
+          "basis"
+        ]
+      },
+      "then": {
+        "properties": {
+          "amount": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "required": [
+          "amount"
+        ],
+        "properties": {
+          "amount": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "step": {
+      "type": "object",
+      "required": [
+        "text"
+      ],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "t": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "description": "Seconds into the video."
+        }
+      }
+    },
+    "nutrition": {
+      "type": "object",
+      "properties": {
+        "per": {
+          "type": "string"
+        },
+        "basis": {
+          "enum": [
+            "on-screen",
+            "spoken",
+            "description",
+            "unstated"
+          ]
+        },
+        "calories": {
+          "type": "number"
+        },
+        "protein_g": {
+          "type": "number"
+        },
+        "carbs_g": {
+          "type": "number"
+        },
+        "fat_g": {
+          "type": "number"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

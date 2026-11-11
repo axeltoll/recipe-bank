@@ -19,6 +19,13 @@ Me, first: I save a lot of cooking videos and could never find the one I wanted,
 - **Queue new videos.** Paste a video link to add it to the queue for analysis.
 - **Credit.** Every recipe links back to the creator and the original video. Videos are embedded from the platform, never re-hosted.
 
+Built and tested, waiting to be placed in the dashboard's new design (see [`public/features/INTEGRATION.md`](public/features/INTEGRATION.md)):
+
+- **Week plan and combined shopping list.** Pick recipes for the days of the week and get one list, merged by ingredient and grouped by aisle. Each recipe's amount stays in the creator's words; nothing is added up or guessed.
+- **More filters.** *Without* (hide recipes with pork, nuts, or whatever you're out of), tags, a minimum protein and a maximum calories for recipes that state their macros.
+- **Serving scaling.** Scale plain numbers and units (fractions, ranges, decimals); amounts given in words stay as they are, and every scaled amount shows the creator's original.
+- **Recipe packs.** Export recipes as one file or link and import someone else's; recipes for a video you already have are skipped (`npm run packs`).
+
 ## Built with
 
 - Node.js 22 and nothing else: no runtime dependencies, no framework, no build step for development.
@@ -42,25 +49,30 @@ Other commands:
 ```bash
 npm run dev        # restarts on server/lib changes
 npm run validate   # checks every recipes/*.json and data/queue.json
-npm test           # URL parsing and recipe-contract tests
+npm test           # all node:test suites: lib/, API, static build, feature modules
 npm run build      # static copy in dist/ (read-only: "Add video" copies a request instead of queueing)
+npm run schema     # regenerate schema/recipe.schema.json from lib/schema.mjs
+npm run migrate    # bring recipe files up to the current contract version (dry run; add -- --write)
+npm run packs -- export banana-milk --out my.pack.json    # or: import my.pack.json [--write]
 ```
 
 ## Project layout
 
 | Path | What |
 |---|---|
-| `recipes/<id>.json` | One file per recipe. The format is documented in [CLAUDE.md](CLAUDE.md) and enforced by `lib/recipe.mjs`. |
+| `recipes/<id>.json` | One file per recipe. The format is documented in [CLAUDE.md](CLAUDE.md), enforced by `lib/recipe.mjs` and exported as JSON Schema in `schema/recipe.schema.json`. |
 | `data/queue.json` | Videos waiting for analysis. |
-| `lib/` | Video-URL parsing and the recipe contract, shared by the server, the validator and the browser. |
+| `lib/` | Shared by the server, the scripts and the browser: video-URL parsing (`video.mjs`), the recipe contract (`recipe.mjs`), filters (`filter.mjs`), week plan and shopping list (`plan.mjs`), serving scaling (`scale.mjs`), recipe packs (`pack.mjs`) and contract versions (`schema.mjs`). |
 | `server.mjs` | Static files plus the JSON API (`/api/recipes`, `/api/queue`). |
 | `public/` | The dashboard. |
-| `scripts/` | Validator and static build. |
+| `public/features/` | Self-contained UI modules (week plan, shopping list, scaling, filters) with an integration guide. |
+| `schema/` | JSON Schema export of the recipe contract. |
+| `scripts/` | Validator, static build, schema export, migration and recipe packs. |
 | `test/` | `node:test` suites. |
 
 ## Plans
 
-See [ROADMAP.md](ROADMAP.md). Next up: a week plan with a combined shopping list, household planning with a food budget, and a self-hosted Recipe Agent that turns a video link into a recipe with the coding agent you already use.
+See [ROADMAP.md](ROADMAP.md). Next up: putting the week plan, shopping list, scaling and filters into the redesigned dashboard, household planning with a food budget, and a self-hosted Recipe Agent that turns a video link into a recipe with the coding agent you already use.
 
 ## License
 

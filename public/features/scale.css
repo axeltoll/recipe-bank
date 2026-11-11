@@ -1,0 +1,47 @@
+/* Serving scaling (public/features/scale.mjs). Theme it with the --rbf-* properties. */
+.rbf-scale {
+  --_fg: var(--rbf-fg, var(--ink, #1f1a16));
+  --_muted: var(--rbf-muted, var(--muted, #7a6f66));
+  --_line: var(--rbf-line, var(--line, #e6ddd1));
+  --_surface: var(--rbf-surface, var(--surface, #fff));
+  --_accent: var(--rbf-accent, var(--accent, #c2410c));
+  --_accent-soft: var(--rbf-accent-soft, var(--accent-soft, #fde8d7));
+  --_warn: var(--rbf-warn, var(--warn, #9a6400));
+  --_radius: var(--rbf-radius, var(--radius, 14px));
+  --_gap: var(--rbf-gap, 12px);
+  --_font: var(--rbf-font, inherit);
+  color: var(--_fg);
+  font: var(--_font);
+  display: grid;
+  gap: calc(var(--_gap) / 1.5);
+}
+.rbf-scale .rbf-scale-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.rbf-scale .rbf-label { color: var(--_muted); margin-right: 4px; }
+.rbf-scale .rbf-target { min-width: 2.5ch; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; }
+.rbf-scale .rbf-unit { color: var(--_muted); }
+
+.rbf-scale .rbf-btn {
+  font: inherit; cursor: pointer; min-height: 44px; min-width: 44px; padding: 8px 12px;
+  border-radius: calc(var(--_radius) / 2); border: 1px solid var(--_line);
+  background: var(--_surface); color: var(--_fg);
+}
+.rbf-scale .rbf-btn[aria-pressed="true"] { background: var(--_accent); border-color: var(--_accent); color: var(--rbf-accent-ink, var(--accent-ink, #fff)); }
+.rbf-scale .rbf-btn:disabled { opacity: 0.4; cursor: default; }
+.rbf-scale .rbf-btn-quiet { background: transparent; }
+.rbf-scale .rbf-btn:focus-visible { outline: 2px solid var(--_accent); outline-offset: 2px; }
+
+.rbf-scale .rbf-scale-note { margin: 0; color: var(--_muted); font-size: 0.9375em; }
+.rbf-scale h3 { margin: var(--_gap) 0 0; font-size: 1em; }
+.rbf-scale .rbf-scale-list { list-style: none; margin: 0; padding: 0; }
+.rbf-scale .rbf-scale-list li {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px var(--_gap);
+  padding: 8px 0; border-top: 1px solid var(--_line);
+}
+.rbf-scale .rbf-scale-list li:first-child { border-top: 0; }
+.rbf-scale .rbf-amts { display: grid; justify-items: end; text-align: right; }
+.rbf-scale .rbf-amt { font-variant-numeric: tabular-nums; }
+.rbf-scale .rbf-scaled { background: var(--_accent-soft); border-radius: 6px; padding: 0 6px; font-weight: 600; }
+.rbf-scale .rbf-badge { color: var(--_accent); font-size: 0.8125em; }
+.rbf-scale .rbf-kept { font-style: italic; }
+.rbf-scale .rbf-unstated { color: var(--_warn); font-style: italic; }
+.rbf-scale .rbf-orig { color: var(--_muted); font-size: 0.8125em; }

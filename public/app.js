@@ -1,4 +1,5 @@
 import { parseVideoUrl, embedUrl, thumbnailUrl } from '/lib/video.mjs';
+import { ingredientKeys, matchesFilter } from '/lib/filter.mjs';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const view = $('#view');
@@ -55,28 +56,11 @@ async function copy(text, done = 'Copied') {
   }
 }
 
-function recipeKeys(r) {
-  const keys = new Set();
-  for (const c of r.components) for (const i of c.ingredients) keys.add(i.key);
-  return [...keys];
-}
+const recipeKeys = ingredientKeys;
 const stepCount = (r) => r.components.reduce((n, c) => n + c.steps.length, 0);
 
-function matches(r) {
-  const keys = recipeKeys(r);
-  if (state.keys.size) {
-    const sel = [...state.keys];
-    const ok = state.mode === 'all' ? sel.every((k) => keys.includes(k)) : sel.some((k) => keys.includes(k));
-    if (!ok) return false;
-  }
-  const q = state.q.trim().toLowerCase();
-  if (!q) return true;
-  const hay = [
-    r.title, r.summary, r.creator.name, ...(r.tags ?? []),
-    ...r.components.flatMap((c) => [c.name, ...c.ingredients.flatMap((i) => [i.item, i.key])]),
-  ].join(' ').toLowerCase();
-  return q.split(/\s+/).every((w) => hay.includes(w));
-}
+// Search + Has all / Has any live in lib/filter.mjs (also: without, tags, nutrition; see public/features/).
+const matches = (r) => matchesFilter(r, state);
 
 // ---------- data ----------
 async function load() {
