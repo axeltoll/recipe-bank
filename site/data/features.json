@@ -1,0 +1,198 @@
+{
+  "_doc": "Every feature the site talks about, in display order. status: shipped = on the main branch; next = built and being merged; planned = on the roadmap, not built. The home page draws its feature and roadmap sections from this file, and the docs pages draw their status notes from it. To change what the site claims, change a status here and run `npm run site:sync` (it rewrites the static copies in the pages; `npm test` fails while they are out of date). Keep the text plain: no quotes, ampersands or angle brackets, no em or en dashes. source says where in the repository the claim comes from.",
+  "features": [
+    {
+      "id": "ingredient-filter",
+      "status": "shipped",
+      "title": "Filter by ingredient",
+      "text": "Pick ingredients and switch between Has all and Has any, or search by dish or creator.",
+      "source": "README.md (What it does), public/app.js"
+    },
+    {
+      "id": "cook-from-video",
+      "status": "shipped",
+      "title": "Cook from the video",
+      "text": "Each recipe embeds the original video. Every step has a play from here timestamp, and you can tick off ingredients as you go.",
+      "source": "README.md (What it does), public/app.js"
+    },
+    {
+      "id": "shopping-list",
+      "status": "shipped",
+      "title": "Shopping list",
+      "text": "Copy the ingredients of a recipe as a shopping list, in the amounts the creator gave.",
+      "source": "README.md (What it does), public/app.js"
+    },
+    {
+      "id": "honest-amounts",
+      "status": "shipped",
+      "title": "Honest amounts",
+      "text": "Amounts are the words the creator used. When a video does not say, the recipe says amount not given instead of guessing, and a recipe with a withheld method is marked partial with its gaps listed.",
+      "source": "README.md (What it does), CLAUDE.md, lib/recipe.mjs",
+      "link": { "label": "Read the recipe format", "href": "recipe-format.html" }
+    },
+    {
+      "id": "queue",
+      "status": "shipped",
+      "title": "Queue new videos",
+      "text": "Paste a link to a YouTube video or Short, a TikTok or an Instagram Reel to add it to the queue for analysis. A video that is already a recipe or already queued is refused.",
+      "source": "README.md (What it does), server.mjs, lib/video.mjs"
+    },
+    {
+      "id": "credit",
+      "status": "shipped",
+      "title": "Credit to the creator",
+      "text": "Every recipe links back to the creator and the original video. Videos are embedded from the platform, never re-hosted.",
+      "source": "README.md (What it does, License)"
+    },
+    {
+      "id": "recipe-contract",
+      "status": "shipped",
+      "title": "A recipe contract with a validator",
+      "text": "One JSON file per recipe, checked against the contract by npm run validate, with tests on the test runner built into Node.",
+      "source": "CLAUDE.md, lib/recipe.mjs, scripts/validate.mjs",
+      "link": { "label": "Print the cheat sheet", "href": "recipe-format-cheatsheet.html" }
+    },
+    {
+      "id": "static-export",
+      "status": "shipped",
+      "title": "Read-only static copy",
+      "text": "npm run build writes a static copy of the dashboard that any static host can serve. On that copy, Add video copies a request instead of queueing.",
+      "source": "README.md (Run it), scripts/build-static.mjs"
+    },
+    {
+      "id": "redesign",
+      "status": "next",
+      "title": "Redesigned dashboard",
+      "text": "Phone, tablet and desktop layouts inside one shell, a theme switch, loading and empty states, a printable recipe, and colour contrast checked by the test suite.",
+      "source": "docs/design/DESIGN.md and docs/design/AUDIT.md on the redesign branch"
+    },
+    {
+      "id": "cook-mode",
+      "status": "next",
+      "title": "Cook mode",
+      "text": "One step at a time in large type, with the screen kept awake where the browser allows it.",
+      "source": "README.md on the integration branch (What it does), docs/design/DESIGN.md (Cook mode)"
+    },
+    {
+      "id": "recipe-agent",
+      "status": "next",
+      "title": "A Recipe Agent you host yourself",
+      "text": "Instructions that let the coding agent you already use turn a video link or a queue entry into a validated recipe file: captions and description first, local speech-to-text as a fallback, sampled frames for on-screen text. There is no hosted analysis service.",
+      "source": "agent/RECIPE-AGENT.md, agent/skills/recipe-video-analysis/SKILL.md, SELF-HOSTING.md on the Recipe Agent branch",
+      "link": { "label": "Read about the Recipe Agent", "href": "recipe-agent.html" }
+    },
+    {
+      "id": "private-captures",
+      "status": "next",
+      "title": "Private captures and a setup check",
+      "text": "A capture helper keeps transcripts, captions and frames in a folder outside the repository, and npm run doctor reports which optional tools are installed. The dashboard works without any of them.",
+      "source": "SELF-HOSTING.md on the Recipe Agent branch (Optional capture tools, Private capture storage)",
+      "link": { "label": "Read the self-hosting guide", "href": "self-hosting.html" }
+    },
+    {
+      "id": "week-plan",
+      "status": "next",
+      "title": "Week plan and one shopping list",
+      "text": "Pick recipes for the days of the week and get one list, merged by ingredient. Each amount stays in the words of its creator: nothing is added up or guessed. The logic and the interface modules are built. Placing them in the redesigned dashboard is the step left.",
+      "source": "ROADMAP.md and README.md on the integration branch (lib/plan.mjs, public/features/)"
+    },
+    {
+      "id": "more-filters",
+      "status": "next",
+      "title": "More ways to filter",
+      "text": "A Without filter next to Has all and Has any, tags as chips, and a minimum protein and a maximum calories for recipes that state their macros. Built, waiting for its place in the redesigned dashboard.",
+      "source": "ROADMAP.md and README.md on the integration branch (lib/filter.mjs, public/features/filters.mjs)"
+    },
+    {
+      "id": "serving-scaling",
+      "status": "next",
+      "title": "Serving scaling",
+      "text": "Scales amounts that are plain numbers and units. Amounts given in words stay as they are, and every scaled amount shows the original. Built, waiting for its place on the recipe page.",
+      "source": "ROADMAP.md and README.md on the integration branch (lib/scale.mjs, public/features/scale.mjs)"
+    },
+    {
+      "id": "household-profile",
+      "status": "next",
+      "title": "Household profile",
+      "text": "Age groups, eating habits and portion estimates for your household, anonymous and kept on the device: no names, no accounts, nothing sent to a server.",
+      "source": "ROADMAP.md and README.md on the integration branch (Household planning and budget)"
+    },
+    {
+      "id": "food-budget",
+      "status": "next",
+      "title": "Food budget",
+      "text": "A weekly or monthly budget, what each shop cost, and spend per meal and per person, kept on the device.",
+      "source": "ROADMAP.md and README.md on the integration branch (Household planning and budget)"
+    },
+    {
+      "id": "recipe-editor",
+      "status": "next",
+      "title": "Recipe editor",
+      "text": "A form in the dashboard that writes a valid recipe file through the contract, so a recipe does not need hand-written JSON.",
+      "source": "ROADMAP.md (Add and edit recipes in the dashboard), built on a branch that is being merged"
+    },
+    {
+      "id": "recipe-packs",
+      "status": "next",
+      "title": "Recipe packs",
+      "text": "Export recipes as one file or link and import a pack from someone else. Recipes whose video you already have are skipped and nothing is overwritten. No accounts and no server. The logic and a command line tool are built. The buttons in the dashboard are the step left.",
+      "source": "ROADMAP.md and README.md on the integration branch (lib/pack.mjs, npm run packs)"
+    },
+    {
+      "id": "versioned-contract",
+      "status": "next",
+      "title": "Versioned recipe contract",
+      "text": "A schema version in every recipe file, a migration command, and a JSON Schema export of the file format.",
+      "source": "ROADMAP.md and README.md on the integration branch (lib/schema.mjs, npm run migrate, npm run schema)"
+    },
+    {
+      "id": "more-platforms",
+      "status": "next",
+      "title": "More platforms",
+      "text": "Link parsing, embeds and validation for Facebook, Pinterest, X and opted-in HTTPS web pages are built. The dashboard labels and the web page opt-in still need wiring, so today the dashboard takes YouTube, TikTok and Instagram links.",
+      "source": "ROADMAP.md on the integration branch (More platforms), docs/PLATFORMS.md"
+    },
+    {
+      "id": "household-amounts",
+      "status": "planned",
+      "title": "Amounts for your household",
+      "text": "Turn a week plan into purchase amounts for everyone at the table. Amounts a creator only gave in words stay as words and are flagged.",
+      "source": "ROADMAP.md (Household planning and budget)"
+    },
+    {
+      "id": "local-prices",
+      "status": "planned",
+      "title": "Local prices and deals",
+      "text": "Current prices and offers for the shopping list, from official store APIs or published offer feeds only, cached locally with a last updated time.",
+      "source": "ROADMAP.md (Household planning and budget)"
+    },
+    {
+      "id": "static-queue",
+      "status": "planned",
+      "title": "Queue from the static copy",
+      "text": "Let a hosted read-only copy queue a video instead of only copying a request.",
+      "source": "ROADMAP.md (Later)"
+    },
+    {
+      "id": "offline",
+      "status": "planned",
+      "title": "Installable and offline",
+      "text": "An installable version with the recipes cached for cooking without signal.",
+      "source": "ROADMAP.md (Later: Offline and mobile)"
+    },
+    {
+      "id": "community-list",
+      "status": "planned",
+      "title": "Community list for self-hosters",
+      "text": "An optional, read-only top recipes page for a self-hosted copy, built from the packs its owner chooses to include. Ratings stay local.",
+      "source": "ROADMAP.md (Sharing)"
+    },
+    {
+      "id": "browser-smoke-test",
+      "status": "planned",
+      "title": "Browser smoke test",
+      "text": "A headless run that loads the dashboard, filters, opens a recipe and presses the timestamp of a step.",
+      "source": "ROADMAP.md (Next)"
+    }
+  ]
+}
