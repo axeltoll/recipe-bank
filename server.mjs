@@ -132,11 +132,17 @@ function json(res, status, body) {
 }
 
 async function readBody(req, max = QUEUE_BODY_LIMIT) {
-  let raw = '';
+  // Collect bytes and decode once: decoding chunk by chunk breaks a multi-byte character (½, °, é) that straddles a
+  // chunk boundary. The limit counts bytes.
+  const chunks = [];
+  let size = 0;
   for await (const chunk of req) {
-    raw += chunk;
-    if (raw.length > max) throw Object.assign(new Error('Body too large'), { status: 413 });
+    const buf = typeof chunk === 'string' ? Buffer.from(chunk) : chunk;
+    size += buf.length;
+    if (size > max) throw Object.assign(new Error('Body too large'), { status: 413 });
+    chunks.push(buf);
   }
+  const raw = Buffer.concat(chunks).toString('utf8');
   try {
     return JSON.parse(raw || '{}');
   } catch {
@@ -189,24 +195,33 @@ export function allowedHosts(env = process.env) {
  * `headers` are Node's lowercased request headers; `hosts` the extra allowed host names; `method` the
  * request method; `peer` the socket's remote address (unknown when the handler is called directly).
  */
+/**
+ * Refusal for a request addressed to a host name that is not loopback or configured, or null. Applied to every /api/
+ * request, reads included, so a page on a rebinding domain cannot read the collection or the queue. `peer` is the
+ * socket's remote address: a loopback Host only counts when the request really comes from this machine.
+ */
+export function hostRefusal(headers = {}, { hosts = [], peer } = {}) {
+  const remote = peer != null && !LOOPBACK_PEER.test(String(peer));
+  if (headers.host == null) {
+    return remote ? { status: 403, error: 'Refused: a request from another machine must name a host listed in RECIPE_BANK_HOSTS.' } : null;
+  }
+  const host = hostName(headers.host);
+  if (host && LOOPBACK.test(host) && remote) {
+    return { status: 403, error: 'Refused: a request from another machine cannot be addressed to this machine\'s loopback name.' };
+  }
+  if (!host || !(LOOPBACK.test(host) || hosts.includes(host))) {
+    return { status: 403, error: 'Refused: the request is addressed to an unknown host name. Add it to RECIPE_BANK_HOSTS.' };
+  }
+  return null;
+}
+
 export function writeRefusal(headers = {}, { hosts = [], method = 'POST', peer } = {}) {
   const site = headers['sec-fetch-site'];
   if (site != null && site !== 'same-origin' && site !== 'none') {
     return { status: 403, error: 'Refused: this request came from another website.' };
   }
-  const remote = peer != null && !LOOPBACK_PEER.test(String(peer));
-  let host = null;
-  if (headers.host != null) {
-    host = hostName(headers.host);
-    if (host && LOOPBACK.test(host) && remote) {
-      return { status: 403, error: 'Refused: a request from another machine cannot be addressed to this machine\'s loopback name.' };
-    }
-    if (!host || !(LOOPBACK.test(host) || hosts.includes(host))) {
-      return { status: 403, error: 'Refused: the request is addressed to an unknown host name. Add it to RECIPE_BANK_HOSTS.' };
-    }
-  } else if (remote) {
-    return { status: 403, error: 'Refused: a request from another machine must name a host listed in RECIPE_BANK_HOSTS.' };
-  }
+  const badHost = hostRefusal(headers, { hosts, peer });
+  if (badHost) return badHost;
   if (headers.origin != null) {
     let origin;
     try {
@@ -336,7 +351,10 @@ export function createHandler({
   }
 
   async function api(req, res, path) {
-    if (!READ_METHODS.has(req.method)) {
+    if (READ_METHODS.has(req.method)) {
+      const refused = hostRefusal(req.headers ?? {}, { hosts, peer: req.socket?.remoteAddress });
+      if (refused) return json(res, refused.status, { error: refused.error });
+    } else {
       const refused = writeRefusal(req.headers ?? {}, { hosts, method: req.method, peer: req.socket?.remoteAddress });
       if (refused) return json(res, refused.status, { error: refused.error });
     }
@@ -401,8 +419,13 @@ export function createHandler({
   }
 
   return async function handle(req, res) {
-    const { pathname } = new URL(req.url, 'http://localhost');
     try {
+      let pathname;
+      try {
+        ({ pathname } = new URL(req.url, 'http://localhost'));
+      } catch {
+        return json(res, 400, { error: 'Bad request path' });
+      }
       if (pathname.startsWith('/api/')) return await api(req, res, pathname);
       if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { error: 'Method not allowed' });
       return await serveStatic(res, pathname);
