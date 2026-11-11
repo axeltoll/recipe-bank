@@ -227,3 +227,20 @@ test('Untick all shows as soon as a box is ticked and hides when the last one is
     });
   }
 });
+
+test('a stored ticked value that is not an array counts as nothing ticked instead of breaking the list', async () => {
+  for (const stored of ['{"chicken":true}', '7', '"chicken"', '[1, "chicken", null]']) {
+    await withFakeDom((doc) => {
+      const mem = memory();
+      mem.setItem(ui.CHECKED_KEY, stored);
+      const el = fakeElement();
+      const shop = ui.mount(el, { recipes: [alpha], plan: week, storage: mem, css: false });
+      assert.match(el.innerHTML, stored.startsWith('[') ? /1 of \d+ ticked/ : /0 of \d+ ticked/, stored);
+      // The same value arriving from another tab.
+      mem.setItem(ui.CHECKED_KEY, '{"x":1}');
+      globalThis.window.dispatchEvent(Object.assign(new Event('storage'), { key: ui.CHECKED_KEY }));
+      assert.match(el.innerHTML, /0 of \d+ ticked/);
+      shop.destroy();
+    });
+  }
+});

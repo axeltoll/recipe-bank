@@ -47,10 +47,9 @@ export function install(rb) {
           </div>
         </div>`;
       const recipes = rb.recipes();
-      parts = [
-        mountWeek(root.querySelector('[data-part="week"]'), { recipes }),
-        mountShop(root.querySelector('[data-part="shop"]'), { recipes }),
-      ];
+      // One at a time, so a part that fails to mount still leaves the ones before it to unmount().
+      parts.push(mountWeek(root.querySelector('[data-part="week"]'), { recipes }));
+      parts.push(mountShop(root.querySelector('[data-part="shop"]'), { recipes }));
     },
   });
 

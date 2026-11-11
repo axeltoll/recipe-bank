@@ -211,7 +211,12 @@ export function mount(el, options = {}) {
   const follow = !opts.plan;
   let recipes = opts.recipes ?? [];
   let plan = normalizePlan(opts.plan ?? readPlan({ key: opts.planKey, storage: opts.storage }));
-  let checked = new Set(opts.persist ? store.get(opts.checkedKey, []) : []);
+  // A stored value that is not an array (edited by hand, or another app's data) counts as nothing ticked.
+  const storedChecked = () => {
+    const raw = opts.persist ? store.get(opts.checkedKey, []) : [];
+    return new Set(Array.isArray(raw) ? raw.filter((k) => typeof k === 'string') : []);
+  };
+  let checked = storedChecked();
   let list;
 
   // ---- purchase option: state is only read when opts.household is on ----
@@ -317,7 +322,7 @@ export function mount(el, options = {}) {
       plan = readPlan({ key: opts.planKey, storage: opts.storage });
       render();
     } else if (e.key === opts.checkedKey && opts.persist) {
-      checked = new Set(store.get(opts.checkedKey, []));
+      checked = storedChecked();
       render();
     } else if (opts.household && e.key === opts.householdKey && followHousehold) { // purchase option
       profile = null;
