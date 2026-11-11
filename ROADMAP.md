@@ -20,9 +20,9 @@ Work I plan to do on Recipe Bank, roughly in order. Estimates are my own and inc
 
 ## Household planning and budget
 
-- [ ] **Household profile** (~6 h). Set up the household once: how many people, age groups (for example "2 adults, 1 child aged 6–10") and general eating habits (portion size, vegetarian days, how often you cook). It is anonymous and stays on the device: no names, no accounts, nothing sent to a server.
+- [x] **Household profile** (~6 h). Set up the household once: how many people, age groups (for example "2 adults, 1 child aged 6–10") and general eating habits (portion size, vegetarian days, how often you cook). It is anonymous and stays on the device: no names, no accounts, nothing sent to a server.
 - [ ] **Amounts for your household** (~8 h). Use the profile to turn a week plan into purchase amounts: how much chicken, rice or cheese to buy for everyone, built on serving scaling and the combined shopping list. Amounts that the creator only gave in words stay as words and are flagged.
-- [ ] **Food budget** (~6 h). Set a weekly or monthly food budget, record what each shop actually cost, and see spend per meal and per person over time, so purchase amounts and plans get more accurate.
+- [x] **Food budget** (~6 h). Set a weekly or monthly food budget, record what each shop actually cost, and see spend per meal and per person over time, so purchase amounts and plans get more accurate.
 - [ ] **Local prices and deals** (~12 h). Link each shopping-list ingredient to current prices and offers at nearby supermarkets, and suggest where the week's list is cheapest. Uses official store APIs or published offer feeds only (no scraping), cached locally, with a clear "last updated" time.
 
 ## Recipe Agent and self-hosting
