@@ -4,7 +4,7 @@
 // as the creator gave them, and data-amount (the creator's words) is never changed: it is what we restore from.
 // With a saved household profile there is one more button: scale to the household's servings per meal.
 import { mount as mountScale } from './scale.mjs';
-import { factorFor } from '../../lib/scale.mjs';
+import { factorFor, servingCount } from '../../lib/scale.mjs';
 import { householdTarget } from './household-target.js';
 
 /** Show a scaled recipe's amounts in the page's ingredient list, or (scaled = null) restore the creator's words. */
@@ -33,7 +33,8 @@ export function install(rb) {
     const slot = rb.mount('recipe-scaling');
     if (!slot) return;
     const target = householdTarget();
-    const householdFactor = target ? factorFor(recipe, target.servings) : null;
+    // Only a recipe that states servings scales to a household; "about 12 nuggets" counts items, not servings.
+    const householdFactor = target && servingCount(recipe.serves) != null ? factorFor(recipe, target.servings) : null;
     const servings = target ? target.servings.toFixed(1) : '';
     slot.innerHTML = `<div data-scale></div>${householdFactor
       ? `<p class="scale-household">Your household eats about ${rb.esc(servings)} servings a meal.

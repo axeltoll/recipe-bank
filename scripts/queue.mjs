@@ -2,7 +2,10 @@
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { open, readFile, readdir, rename, rm } from 'node:fs/promises';
-import { parseVideoUrl, videoKey } from '../lib/video.mjs';
+import { parseVideoUrl as parseUrl, videoKey } from '../lib/video.mjs';
+
+// Web pages are a valid queue input when the entry says so (the dashboard's "It's a web page" box).
+const parseVideoUrl = (url, video) => parseUrl(url, { allowWeb: video?.platform === 'web' });
 import { validateRecipe } from '../lib/recipe.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '..');
@@ -11,7 +14,7 @@ export function assertQueue(queue) {
   if (!Array.isArray(queue)) throw new Error('Queue must be an array.');
   const ids = new Set();
   for (const entry of queue) {
-    if (!entry?.id || ids.has(entry.id) || !['queued', 'analyzing', 'failed'].includes(entry.status) || !parseVideoUrl(entry.video?.url)) {
+    if (!entry?.id || ids.has(entry.id) || !['queued', 'analyzing', 'failed'].includes(entry.status) || !parseVideoUrl(entry.video?.url, entry.video)) {
       throw new Error('Queue has an invalid entry or duplicate ID; run npm run validate and fix it first.');
     }
     ids.add(entry.id);
@@ -30,8 +33,8 @@ export function markEntry(queue, id, status, { reason, recipes = [], now = new D
   if (!entry) throw new Error(`Queue entry not found: ${id}`);
   if (status === 'done') {
     if (entry.status !== 'analyzing') throw new Error('Only an analyzing entry can be completed.');
-    const key = videoKey(parseVideoUrl(entry.video.url));
-    const recipe = recipes.find((item) => item.recipe && videoKey(parseVideoUrl(item.recipe.video?.url)) === key);
+    const key = videoKey(parseVideoUrl(entry.video.url, entry.video));
+    const recipe = recipes.find((item) => item.recipe && videoKey(parseVideoUrl(item.recipe.video?.url, item.recipe.video)) === key);
     if (!recipe || validateRecipe(recipe.recipe, recipe.fileId).length) {
       // A recipe file that does not parse cannot be matched; name it, it may be the one being completed.
       const unreadable = recipes.filter((item) => item.error).map((item) => `recipes/${item.fileId}.json (${item.error})`);
