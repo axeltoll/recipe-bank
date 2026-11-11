@@ -1,4 +1,4 @@
-// Regression tests for the findings of the review of the full round-1 tree: request bodies split across chunks, a
+// Regression tests for the findings of a review of the whole tree: request bodies split across chunks, a
 // path that used to stop the server, Host checks on reads, web pages in the agent's queue helper, and household
 // scaling for recipes that count items.
 import { test, before, after } from 'node:test';
