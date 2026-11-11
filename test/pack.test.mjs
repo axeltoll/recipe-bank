@@ -8,7 +8,7 @@ import {
   packLink, packFromLink, packParam, hasPackLink, toBase64url, fromBase64url, slugify, uniqueId,
 } from '../lib/pack.mjs';
 import { validateRecipe } from '../lib/recipe.mjs';
-import { makeRecipe, ROOT, tempBank } from './helpers/bank.mjs';
+import { makeRecipe, videoId, ROOT, tempBank } from './helpers/bank.mjs';
 import { readPackFile } from '../scripts/pack-file.mjs';
 
 const EXPORTED = '2026-11-11T10:00:00.000Z';
@@ -45,7 +45,19 @@ test('exportPack refuses empty, invalid and doubled recipes', () => {
   assert.equal(code(() => exportPack([{ ...a, status: 'draft' }])), 'invalid-recipe');
   assert.equal(code(() => exportPack([a, a])), 'duplicate');
   assert.equal(code(() => exportPack([a, { ...makeRecipe('other', 1) }])), 'duplicate', 'same video, other id');
-  assert.equal(code(() => exportPack(Array.from({ length: MAX_PACK_RECIPES + 1 }, (_, i) => makeRecipe(`r${i}`, i)))), 'too-many');
+  const tooMany = Array.from({ length: MAX_PACK_RECIPES + 1 }, (_, i) => makeRecipe(`r${i}`, i));
+  assert.deepEqual(tooMany.flatMap((r) => validateRecipe(r)), [], 'every recipe is valid, so only the count is wrong');
+  assert.equal(code(() => exportPack(tooMany)), 'too-many');
+});
+
+test('makeRecipe gives a valid recipe with a distinct 11-character video id for any n', () => {
+  const ns = [0, 1, 9, 10, 99, 100, 101, 999, 1000, 12345, 99_999_999_999];
+  const ids = ns.map((n) => videoId(n));
+  assert.ok(ids.every((id) => id.length === 11), ids.join(' '));
+  assert.equal(new Set(ids).size, ns.length);
+  assert.equal(videoId(1), 'testvideo01');
+  for (const n of ns) assert.deepEqual(validateRecipe(makeRecipe(`r${n}`, n), `r${n}`), [], `n = ${n}`);
+  for (const bad of [-1, 1.5, 1e12, NaN]) assert.throws(() => videoId(bad), RangeError, String(bad));
 });
 
 test('exportPack refuses a pack that would be larger than readPack accepts', () => {
