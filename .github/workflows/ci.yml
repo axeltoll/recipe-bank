@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+      - run: npm run validate
+      - run: npm run build
+      - name: Browser smoke (runner Chrome)
+        run: npm run smoke
+        env:
+          SMOKE_REQUIRED: '1'
+          CHROME_PATH: /usr/bin/google-chrome
