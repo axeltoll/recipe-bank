@@ -13,7 +13,7 @@ Work I plan to do on Recipe Bank, roughly in order. Estimates are my own and inc
 ## Later
 
 - [ ] **Serving scaling** (~5 h). Scale amounts that are plain numbers and units, and leave words like "a good amount" untouched, marking scaled amounts clearly.
-- [ ] **Add and edit recipes in the dashboard** (~8 h). A form that writes a valid `recipes/<id>.json` through the contract in `lib/recipe.mjs`, so a recipe doesn't need hand-written JSON.
+- [ ] **Add and edit recipes in the dashboard** (~8 h). A form that writes a valid `recipes/<id>.json` through the contract in `lib/recipe.mjs`, so a recipe doesn't need hand-written JSON. *Built: the form module (`public/features/recipe-editor.mjs`), its logic (`lib/draft.mjs`) and the `POST` / `PUT /api/recipes` routes. Left: the dashboard's "New recipe" and "Edit" entry points (see `public/features/EDITOR.md`).*
 - [ ] **Queue from the static site** (~4 h). Let the deployed copy queue a video (for example through a small Cloudflare Function) instead of only copying a request.
 - [ ] **Schema version and migration** (~3 h). A `schema` field, a migration script and a JSON Schema export of the recipe contract.
 - [ ] **Offline and mobile** (~4 h). Installable PWA with the recipes cached for cooking without signal, and a pass on the mobile layout and keyboard navigation.

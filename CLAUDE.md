@@ -8,7 +8,7 @@ A personal recipe bank. Recipe videos from social media (YouTube Shorts, TikTok,
 npm start          # http://127.0.0.1:4780 (PORT / HOST env to override)
 npm run dev        # same, restarts on server/lib changes
 npm run validate   # checks every recipes/*.json and data/queue.json
-npm test           # node:test: URL parsing + recipe contract
+npm test           # node:test: URL parsing, recipe contract, editor drafts, recipe write API
 ```
 
 No dependencies. Node ≥ 22 (built-in `fetch`, `node:test`, `import.meta.dirname`). `.claude/launch.json` has the `recipe-bank` preview config.
@@ -21,11 +21,15 @@ No dependencies. Node ≥ 22 (built-in `fetch`, `node:test`, `import.meta.dirnam
 | `data/queue.json` | Videos waiting for analysis (`queued` → `analyzing` → removed once the recipe file lands; `failed` if analysis is impossible). |
 | `lib/video.mjs` | URL parsing, embed and thumbnail URLs. Shared by the server, validator and browser (served at `/lib/`). |
 | `lib/recipe.mjs` | Recipe contract (`validateRecipe`). The enforced source of truth for the format below. |
-| `server.mjs` | `node:http` server: static `public/` and `/lib/`, plus the JSON API. |
+| `lib/draft.mjs` | Recipe editor logic, pure and shared with the browser: `emptyDraft`, `draftFromRecipe` / `recipeFromDraft` (round-trip safe, unknown fields kept), `checkDraft` (contract + form checks), `slugify`, `parseTimestamp` / `formatTimestamp`. |
+| `server.mjs` | `node:http` server: static `public/` and `/lib/`, plus the JSON API. `RECIPE_BANK_DATA_DIR` points it at another folder with `recipes/` and `data/` (tests use a temporary copy). |
+| `public/features/recipe-editor.mjs` | Self-contained "add / edit recipe" form: `mount(element, { recipe?, video?, readOnly })`. Mounting, events and data: `public/features/EDITOR.md`. |
 | `public/` | Dashboard (vanilla ES modules + CSS, light/dark). Hash routes: `#/`, `#/r/<id>`, `#/q/<queueId>`. |
 | `scripts/validate.mjs` | CLI validator; exits 1 on any problem. |
 
 API: `GET /api/recipes` → `{recipes, invalid}` · `GET /api/queue` · `POST /api/queue {url, note}` (409 if the video is already a recipe or queued; best-effort oEmbed title) · `DELETE /api/queue/<id>`.
+
+Recipe writes (local server only; the static build stays read-only): `POST /api/recipes <recipe>` creates `recipes/<id>.json` → 201 `{recipe, dequeued}` · `PUT /api/recipes/<id> <recipe>` replaces it → 200. Both run `validateRecipe` (400 `{error, problems}`), refuse a duplicate id or video (409 `{error, recipeId}`; PUT answers 404 for an unknown id), write atomically as two-space JSON with a trailing newline, and remove the queue entry for the recipe's video.
 
 ## Recipe file contract (for analysis agents)
 

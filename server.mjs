@@ -1,19 +1,22 @@
 // Recipe Bank local server: serves the dashboard and a small JSON API.
 // Zero dependencies. Data lives in recipes/*.json (one file per recipe) and
-// data/queue.json (videos waiting for analysis).
+// data/queue.json (videos waiting for analysis). RECIPE_BANK_DATA_DIR points the
+// server at another folder holding recipes/ and data/ (default: this repository).
 
 import { createServer } from 'node:http';
-import { readFile, readdir, writeFile, rename, mkdir } from 'node:fs/promises';
+import { readFile, readdir, writeFile, rename, mkdir, unlink } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
-import { extname, join, normalize, resolve, sep } from 'node:path';
+import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { parseVideoUrl, videoKey } from './lib/video.mjs';
 import { validateRecipe } from './lib/recipe.mjs';
 
 const ROOT = resolve(import.meta.dirname);
-const RECIPES_DIR = join(ROOT, 'recipes');
-const QUEUE_FILE = join(ROOT, 'data', 'queue.json');
+const DATA_DIR = resolve(process.env.RECIPE_BANK_DATA_DIR || ROOT);
+const RECIPES_DIR = join(DATA_DIR, 'recipes');
+const QUEUE_FILE = join(DATA_DIR, 'data', 'queue.json');
 const PORT = Number(process.env.PORT ?? 4780);
 const HOST = process.env.HOST ?? '127.0.0.1';
+const RECIPE_BODY_LIMIT = 500_000;
 
 const STATIC = { '/': 'public', '/lib/': 'lib' };
 const TYPES = {
@@ -27,14 +30,14 @@ const TYPES = {
   '.ico': 'image/x-icon',
 };
 
-export async function loadRecipes() {
-  const files = (await readdir(RECIPES_DIR)).filter((f) => f.endsWith('.json')).sort();
+export async function loadRecipes(recipesDir = RECIPES_DIR) {
+  const files = (await readdir(recipesDir)).filter((f) => f.endsWith('.json')).sort();
   const recipes = [];
   const invalid = [];
   for (const f of files) {
     const id = f.slice(0, -5);
     try {
-      const r = JSON.parse(await readFile(join(RECIPES_DIR, f), 'utf8'));
+      const r = JSON.parse(await readFile(join(recipesDir, f), 'utf8'));
       const errs = validateRecipe(r, id);
       if (errs.length) invalid.push({ file: f, errors: errs });
       else recipes.push(r);
@@ -45,21 +48,30 @@ export async function loadRecipes() {
   return { recipes, invalid };
 }
 
-async function loadQueue() {
+async function loadQueue(queueFile) {
   try {
-    return JSON.parse(await readFile(QUEUE_FILE, 'utf8'));
+    return JSON.parse(await readFile(queueFile, 'utf8'));
   } catch (e) {
     if (e.code === 'ENOENT') return [];
     throw e;
   }
 }
 
-async function saveQueue(queue) {
-  await mkdir(join(ROOT, 'data'), { recursive: true });
-  const tmp = `${QUEUE_FILE}.${process.pid}.tmp`;
-  await writeFile(tmp, JSON.stringify(queue, null, 2) + '\n');
-  await rename(tmp, QUEUE_FILE);
+// Write to a temp file in the same folder, then rename over the target, so a crash never leaves half a file.
+// The temp name doesn't end in .json, so loadRecipes never reads it.
+async function writeJsonAtomic(file, value) {
+  await mkdir(dirname(file), { recursive: true });
+  const tmp = `${file}.${process.pid}.${randomUUID().slice(0, 8)}.tmp`;
+  try {
+    await writeFile(tmp, JSON.stringify(value, null, 2) + '\n');
+    await rename(tmp, file);
+  } catch (e) {
+    await unlink(tmp).catch(() => {});
+    throw e;
+  }
 }
+
+const saveQueue = (queueFile, queue) => writeJsonAtomic(queueFile, queue);
 
 // Best-effort title/creator lookup; the queue entry is still saved if this fails.
 async function oembed(video) {
@@ -78,18 +90,60 @@ async function oembed(video) {
   }
 }
 
-// Serialise queue writes so concurrent POSTs can't drop entries.
+// Serialise queue and recipe writes so concurrent requests can't drop entries or race on the same id.
 let queueLock = Promise.resolve();
 const withQueue = (fn) => (queueLock = queueLock.then(fn, fn));
 
-async function api(req, res, path) {
+const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+// Creates (id = null) or replaces (id = the file to replace) a recipe file. Shared by POST and PUT.
+async function saveRecipe(res, dirs, body, id) {
+  const problems = validateRecipe(body, id ?? undefined);
+  return withQueue(async () => {
+    const files = new Set((await readdir(dirs.recipesDir)).filter((f) => f.endsWith('.json')));
+    if (id && !files.has(`${id}.json`)) return json(res, 404, { error: 'No recipe with that id.' });
+    if (problems.length) return json(res, 400, { error: 'The recipe does not match the contract.', problems });
+    if (!id && files.has(`${body.id}.json`)) {
+      return json(res, 409, { error: `A recipe with the id "${body.id}" already exists.`, recipeId: body.id });
+    }
+    const key = videoKey(body.video);
+    const { recipes } = await loadRecipes(dirs.recipesDir);
+    const other = recipes.find((r) => r.id !== body.id && videoKey(r.video) === key);
+    if (other) return json(res, 409, { error: 'That video is already in the bank.', recipeId: other.id });
+
+    await writeJsonAtomic(join(dirs.recipesDir, `${body.id}.json`), body);
+
+    // The recipe file now exists, so its queue entry is done: remove it.
+    const queue = await loadQueue(dirs.queueFile);
+    const next = queue.filter((q) => videoKey(q.video) !== key);
+    const dequeued = queue.filter((q) => videoKey(q.video) === key).map((q) => q.id);
+    if (dequeued.length) await saveQueue(dirs.queueFile, next);
+    return json(res, id ? 200 : 201, { recipe: body, dequeued });
+  });
+}
+
+async function api(req, res, path, dirs) {
   if (req.method === 'GET' && path === '/api/recipes') {
-    return json(res, 200, await loadRecipes());
+    return json(res, 200, await loadRecipes(dirs.recipesDir));
+  }
+  if (req.method === 'POST' && path === '/api/recipes') {
+    return saveRecipe(res, dirs, await readBody(req, RECIPE_BODY_LIMIT), null);
+  }
+  const one = path.match(/^\/api\/recipes\/([^/]+)$/);
+  if (req.method === 'PUT' && one) {
+    let id;
+    try {
+      id = decodeURIComponent(one[1]);
+    } catch {
+      id = '';
+    }
+    if (!SLUG.test(id)) return json(res, 404, { error: 'No recipe with that id.' });
+    return saveRecipe(res, dirs, await readBody(req, RECIPE_BODY_LIMIT), id);
   }
   if (req.method === 'GET' && path === '/api/queue') {
-    const { recipes } = await loadRecipes();
+    const { recipes } = await loadRecipes(dirs.recipesDir);
     const done = new Set(recipes.map((r) => videoKey(r.video)));
-    const queue = (await loadQueue()).map((q) => (done.has(videoKey(q.video)) ? { ...q, status: 'done' } : q));
+    const queue = (await loadQueue(dirs.queueFile)).map((q) => (done.has(videoKey(q.video)) ? { ...q, status: 'done' } : q));
     return json(res, 200, { queue });
   }
   if (req.method === 'POST' && path === '/api/queue') {
@@ -99,11 +153,11 @@ async function api(req, res, path) {
     const note = typeof body.note === 'string' ? body.note.trim().slice(0, 500) : '';
     const meta = await oembed(video);
     return withQueue(async () => {
-      const { recipes } = await loadRecipes();
+      const { recipes } = await loadRecipes(dirs.recipesDir);
       const key = videoKey(video);
       const existing = recipes.find((r) => videoKey(r.video) === key);
       if (existing) return json(res, 409, { error: 'Already in the bank.', recipeId: existing.id });
-      const queue = await loadQueue();
+      const queue = await loadQueue(dirs.queueFile);
       if (queue.some((q) => videoKey(q.video) === key)) return json(res, 409, { error: 'Already waiting for analysis.' });
       const entry = {
         id: randomUUID(),
@@ -117,17 +171,17 @@ async function api(req, res, path) {
         status: 'queued',
       };
       queue.push(entry);
-      await saveQueue(queue);
+      await saveQueue(dirs.queueFile, queue);
       return json(res, 201, { entry });
     });
   }
   const del = path.match(/^\/api\/queue\/([\w-]+)$/);
   if (req.method === 'DELETE' && del) {
     return withQueue(async () => {
-      const queue = await loadQueue();
+      const queue = await loadQueue(dirs.queueFile);
       const next = queue.filter((q) => q.id !== del[1]);
       if (next.length === queue.length) return json(res, 404, { error: 'Not in the queue.' });
-      await saveQueue(next);
+      await saveQueue(dirs.queueFile, next);
       return json(res, 200, { ok: true });
     });
   }
@@ -154,11 +208,11 @@ function json(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
-async function readBody(req) {
+async function readBody(req, limit = 10_000) {
   let raw = '';
   for await (const chunk of req) {
     raw += chunk;
-    if (raw.length > 10_000) throw Object.assign(new Error('Body too large'), { status: 413 });
+    if (raw.length > limit) throw Object.assign(new Error('Body too large'), { status: 413 });
   }
   try {
     return JSON.parse(raw || '{}');
@@ -167,18 +221,26 @@ async function readBody(req) {
   }
 }
 
-const server = createServer(async (req, res) => {
-  const { pathname } = new URL(req.url, 'http://localhost');
-  try {
-    if (pathname.startsWith('/api/')) return await api(req, res, pathname);
-    if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { error: 'Method not allowed' });
-    return await serveStatic(res, pathname);
-  } catch (e) {
-    console.error(e);
-    json(res, e.status ?? 500, { error: e.status ? e.message : 'Server error' });
-  }
-});
+/**
+ * The HTTP server, not yet listening. `dataDir` is a folder with recipes/ and data/queue.json
+ * (default: RECIPE_BANK_DATA_DIR, else this repository). Tests point it at a temporary copy.
+ */
+export function createRecipeServer({ dataDir = DATA_DIR } = {}) {
+  const root = resolve(dataDir);
+  const dirs = { recipesDir: join(root, 'recipes'), queueFile: join(root, 'data', 'queue.json') };
+  return createServer(async (req, res) => {
+    const { pathname } = new URL(req.url, 'http://localhost');
+    try {
+      if (pathname.startsWith('/api/')) return await api(req, res, pathname, dirs);
+      if (req.method !== 'GET' && req.method !== 'HEAD') return json(res, 405, { error: 'Method not allowed' });
+      return await serveStatic(res, pathname);
+    } catch (e) {
+      console.error(e);
+      json(res, e.status ?? 500, { error: e.status ? e.message : 'Server error' });
+    }
+  });
+}
 
 if (process.argv[1] === import.meta.filename) {
-  server.listen(PORT, HOST, () => console.log(`Recipe Bank → http://${HOST}:${PORT}`));
+  createRecipeServer().listen(PORT, HOST, () => console.log(`Recipe Bank → http://${HOST}:${PORT}`));
 }

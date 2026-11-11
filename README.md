@@ -42,7 +42,7 @@ Other commands:
 ```bash
 npm run dev        # restarts on server/lib changes
 npm run validate   # checks every recipes/*.json and data/queue.json
-npm test           # URL parsing and recipe-contract tests
+npm test           # URL parsing, recipe-contract, editor and recipe-API tests
 npm run build      # static copy in dist/ (read-only: "Add video" copies a request instead of queueing)
 ```
 
@@ -52,9 +52,10 @@ npm run build      # static copy in dist/ (read-only: "Add video" copies a reque
 |---|---|
 | `recipes/<id>.json` | One file per recipe. The format is documented in [CLAUDE.md](CLAUDE.md) and enforced by `lib/recipe.mjs`. |
 | `data/queue.json` | Videos waiting for analysis. |
-| `lib/` | Video-URL parsing and the recipe contract, shared by the server, the validator and the browser. |
-| `server.mjs` | Static files plus the JSON API (`/api/recipes`, `/api/queue`). |
+| `lib/` | Video-URL parsing, the recipe contract and the recipe editor's draft logic, shared by the server, the validator and the browser. |
+| `server.mjs` | Static files plus the JSON API (`/api/recipes`, `/api/queue`). On the local server, `POST /api/recipes` and `PUT /api/recipes/<id>` create and edit recipe files through the contract. |
 | `public/` | The dashboard. |
+| `public/features/recipe-editor.mjs` | A form for adding and editing recipes without hand-written JSON: amounts stay in the creator's words, blank means "amount not given", and on the read-only static copy it downloads the JSON instead. See [EDITOR.md](public/features/EDITOR.md). |
 | `scripts/` | Validator and static build. |
 | `test/` | `node:test` suites. |
 
