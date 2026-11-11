@@ -6,7 +6,8 @@ import { platformFixture } from './helpers/platform-fixture.mjs';
 
 async function request(fixture, body, method = 'POST', path = '/api/queue') {
   const req = Readable.from(body === undefined ? [] : [JSON.stringify(body)]);
-  Object.assign(req, { method, url: path });
+  // Writes carry the JSON content type the server requires (server.mjs writeRefusal).
+  Object.assign(req, { method, url: path, headers: method === 'GET' ? {} : { 'content-type': 'application/json' } });
   const res = {
     writeHead(status, headers) { Object.assign(this, { status, headers }); },
     end(raw) { this.body = JSON.parse(raw); },

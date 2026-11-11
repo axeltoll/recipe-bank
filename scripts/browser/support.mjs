@@ -61,25 +61,25 @@ export function assertClean(page) {
   if (errors.length || page.exceptions.length) throw new Error(JSON.stringify({ consoleErrors: errors, exceptions: page.exceptions }, null, 2));
 }
 export async function withBrowser(run, { headed = false } = {}) {
-  let browser, staticSite;
-  // Foreground signal handling ensures profiles and the child browser are cleaned up.
+  let browser, staticSite, failure;
+  // The browser's own guards (cdp.mjs launch) kill Chrome and remove its profile on every way out;
+  // these handlers also stop the two local servers. Both stay installed until cleanup has finished,
+  // so a second Ctrl-C during cleanup does not cut it short.
   let cleanupPromise;
   const cleanup = () => cleanupPromise ??= (async () => {
-    try { await browser?.close(); }
-    finally { await Promise.all([stop(server), staticSite ? stop(staticSite) : Promise.resolve()]); }
+    const results = await Promise.allSettled([
+      browser?.close(), stop(server), staticSite ? stop(staticSite) : undefined,
+    ]);
+    const failed = results.find((r) => r.status === 'rejected');
+    if (failed) throw failed.reason;
   })();
-  const onSignal = () => { cleanup().finally(() => process.exit(130)); };
-  process.once('SIGINT', onSignal);
-  process.once('SIGTERM', onSignal);
+  const onSignal = () => { cleanup().catch(() => {}).finally(() => process.exit(130)); };
+  process.on('SIGINT', onSignal);
+  process.on('SIGTERM', onSignal);
   try {
     const live = await listen(server);
     const origins = [live];
-    // launch handles signals until its browser handle becomes available.
-    process.off('SIGINT', onSignal);
-    process.off('SIGTERM', onSignal);
     browser = await launch({ headed });
-    process.once('SIGINT', onSignal);
-    process.once('SIGTERM', onSignal);
     if (!browser) throw new Error('Browser disappeared after discovery');
     await browser.page.localOnly(origins);
     const startStatic = async () => {
@@ -92,9 +92,16 @@ export async function withBrowser(run, { headed = false } = {}) {
       return origin;
     };
     await run(browser.page, origins, startStatic);
-  } finally {
+  } catch (e) {
+    failure = e;
+  }
+  try {
     await cleanup();
+  } catch (e) {
+    failure ??= e; // a cleanup error never hides the check that failed
+  } finally {
     process.off('SIGINT', onSignal);
     process.off('SIGTERM', onSignal);
   }
+  if (failure) throw failure;
 }

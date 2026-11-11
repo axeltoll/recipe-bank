@@ -14,12 +14,18 @@ import { readFile, readdir, writeFile, rename, mkdir, unlink } from 'node:fs/pro
 import { randomUUID } from 'node:crypto';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { parseVideoUrl, videoKey, PLATFORMS } from './lib/video.mjs';
-import { validateRecipe, SLUG } from './lib/recipe.mjs';
+import { validateRecipe, isWebLink, SLUG } from './lib/recipe.mjs';
 import { resolveShortVideo } from './lib/video-resolver.mjs';
 import { readPack, planImport, applyImport, MAX_PACK_CHARS } from './lib/pack.mjs';
 
 const ROOT = resolve(import.meta.dirname);
-const DATA_ROOT = resolve(process.env.RECIPE_BANK_DIR || ROOT);
+
+/** The data folder an environment asks for: RECIPE_BANK_DIR, else this repository. */
+export function defaultDataDir(env = process.env) {
+  return resolve(env.RECIPE_BANK_DIR || ROOT);
+}
+
+const DATA_ROOT = defaultDataDir();
 const PORT = Number(process.env.PORT ?? 4780);
 const HOST = process.env.HOST ?? '127.0.0.1';
 const QUEUE_BODY_LIMIT = 10_000;
@@ -97,14 +103,17 @@ export async function oembed(video) {
     youtube: 'https://www.youtube.com/oembed?format=json&url=',
     tiktok: 'https://www.tiktok.com/oembed?url=',
     pinterest: 'https://www.pinterest.com/oembed.json?url=',
-    x: 'https://publish.x.com/oembed?url=',
+    // X's documented oEmbed endpoint (docs.x.com, "oEmbed API") is still on the twitter.com host.
+    x: 'https://publish.twitter.com/oembed?url=',
   }[video.platform];
   if (!endpoint) return {};
   try {
     const res = await fetch(endpoint + encodeURIComponent(video.url), { signal: AbortSignal.timeout(5000) });
     if (!res.ok) return {};
     const j = await res.json();
-    return { title: j.title ?? null, creator: j.author_name ?? null, creatorUrl: j.author_url ?? null };
+    // Third-party answers: only short plain text, and only an http(s) link, are kept.
+    const text = (v) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, 300) : null);
+    return { title: text(j?.title), creator: text(j?.author_name), creatorUrl: isWebLink(j?.author_url) ? j.author_url : null };
   } catch {
     return {};
   }
@@ -135,9 +144,71 @@ async function readBody(req, max = QUEUE_BODY_LIMIT) {
   }
 }
 
-// Writes that create files require a JSON content type. That forces a CORS preflight, which this
-// server never grants, so another website open in the same browser cannot write recipes.
-const isJson = (req) => /^application\/json\b/i.test(req.headers?.['content-type'] ?? '');
+// ---------- who may change data ----------
+//
+// The server listens on 127.0.0.1, but every web page open in the same browser can still send it
+// requests. Three checks keep those pages out of every state-changing request (POST, PUT, DELETE, …):
+//   1. Sec-Fetch-Site, when the browser sends it, must say "same-origin" (or "none": typed by the user).
+//   2. Origin, when present, must be this server's own origin; Host must be a loopback name or one
+//      listed in RECIPE_BANK_HOSTS (or the HOST the server binds to). That also stops DNS rebinding.
+//   3. The body must be sent as application/json. A foreign page can only send that after a CORS
+//      preflight, which this server never grants.
+// Requests without Origin, Sec-Fetch-Site or Host (curl, scripts, tests calling the handler) pass 1 and 2.
+
+const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+const LOOPBACK = /^(?:localhost|127(?:\.\d{1,3}){3}|\[::1\])$/;
+
+const isJson = (headers) => /^application\/json\s*(?:;|$)/i.test(String(headers['content-type'] ?? '').trim());
+
+/** The hostname of a Host header value ("127.0.0.1:4780" → "127.0.0.1"), lowercased; null if malformed. */
+function hostName(value) {
+  const text = String(value).trim().toLowerCase();
+  if (!/^[a-z0-9.\-[\]:]+$/.test(text)) return null;
+  try {
+    return new URL(`http://${text}`).hostname;
+  } catch {
+    return null;
+  }
+}
+
+/** Host names a write may be addressed to, besides loopback: RECIPE_BANK_HOSTS and a non-wildcard HOST. */
+export function allowedHosts(env = process.env) {
+  const names = String(env.RECIPE_BANK_HOSTS ?? '').split(',').map((h) => h.trim().toLowerCase()).filter(Boolean);
+  const bind = String(env.HOST ?? '').trim().toLowerCase();
+  if (bind && !['0.0.0.0', '::', '[::]'].includes(bind)) names.push(bind.includes(':') && !bind.startsWith('[') ? `[${bind}]` : bind);
+  return names;
+}
+
+/**
+ * Why a state-changing request must be refused, as { status, error }, or null when it may go ahead.
+ * `headers` are Node's lowercased request headers; `hosts` the extra allowed host names.
+ */
+export function writeRefusal(headers = {}, { hosts = [] } = {}) {
+  const site = headers['sec-fetch-site'];
+  if (site != null && site !== 'same-origin' && site !== 'none') {
+    return { status: 403, error: 'Refused: this request came from another website.' };
+  }
+  let host = null;
+  if (headers.host != null) {
+    host = hostName(headers.host);
+    if (!host || !(LOOPBACK.test(host) || hosts.includes(host))) {
+      return { status: 403, error: 'Refused: the request is addressed to an unknown host name. Add it to RECIPE_BANK_HOSTS.' };
+    }
+  }
+  if (headers.origin != null) {
+    let origin;
+    try {
+      origin = new URL(headers.origin);
+    } catch {
+      origin = null;
+    }
+    const own = headers.host != null && origin && origin.protocol === 'http:'
+      && origin.host === String(headers.host).trim().toLowerCase();
+    if (!own) return { status: 403, error: 'Refused: this request came from another website.' };
+  }
+  if (!isJson(headers)) return { status: 415, error: 'Send the request as application/json.' };
+  return null;
+}
 
 /**
  * The request handler. Options (all optional):
@@ -146,9 +217,11 @@ const isJson = (req) => /^application\/json\b/i.test(req.headers?.['content-type
  *   queueFile   queue file, overrides dataDir's
  *   oembed      async (video) => ({ title, creator, creatorUrl }), or null to skip the lookup
  *   resolve     async (video) => video, short-link resolution (default lib/video-resolver.mjs)
+ *   hosts       host names besides loopback that writes may be addressed to (default: allowedHosts())
  */
 export function createHandler({
   dataDir, recipesDir, queueFile, oembed: lookup = oembed, resolve: resolveVideo = resolveShortVideo,
+  hosts = allowedHosts(),
 } = {}) {
   const paths = dataPaths(dataDir ?? DATA_ROOT);
   const dirs = { recipesDir: recipesDir ?? paths.recipesDir, queueFile: queueFile ?? paths.queueFile };
@@ -251,11 +324,14 @@ export function createHandler({
   }
 
   async function api(req, res, path) {
+    if (!READ_METHODS.has(req.method)) {
+      const refused = writeRefusal(req.headers ?? {}, { hosts });
+      if (refused) return json(res, refused.status, { error: refused.error });
+    }
     if (req.method === 'GET' && path === '/api/recipes') {
       return json(res, 200, await loadRecipes(dirs.recipesDir));
     }
     if (req.method === 'POST' && path === '/api/recipes') {
-      if (!isJson(req)) return json(res, 415, { error: 'Send the recipe as application/json.' });
       return saveRecipe(res, await readBody(req, RECIPE_BODY_LIMIT), null);
     }
     const one = path.match(/^\/api\/recipes\/([^/]+)$/);
@@ -267,7 +343,6 @@ export function createHandler({
         id = '';
       }
       if (!SLUG.test(id)) return json(res, 404, { error: 'No recipe with that id.' });
-      if (!isJson(req)) return json(res, 415, { error: 'Send the recipe as application/json.' });
       return saveRecipe(res, await readBody(req, RECIPE_BODY_LIMIT), id);
     }
     if (req.method === 'GET' && path === '/api/queue') {
@@ -278,7 +353,6 @@ export function createHandler({
     }
     if (req.method === 'POST' && path === '/api/queue') return queueRequest(req, res);
     if (req.method === 'POST' && path === '/api/packs/import') {
-      if (!isJson(req)) return json(res, 415, { error: 'Send the pack as application/json.' });
       return importPack(res, await readBody(req, MAX_PACK_CHARS + 10_000));
     }
     const del = path.match(/^\/api\/queue\/([\w-]+)$/);

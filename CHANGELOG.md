@@ -3,6 +3,29 @@
 What changed in each version of Recipe Bank. Built from the work packages' own reports; dates are the day a version
 was put together.
 
+## Unreleased
+
+Fixes from the review of 0.2.0.
+
+- **Security.** Recipe files may only carry `http(s)` creator and video links (`validateRecipe`), so a pack with a
+  `javascript:` link is reported invalid; the dashboard and the website render every link from data through one
+  `safeUrl()` helper. The local server refuses changes that are not JSON or that come from another website
+  (`Origin`, `Sec-Fetch-Site`, a host name that is not this machine; `RECIPE_BANK_HOSTS` adds names). oEmbed answers
+  keep only plain text and an `http(s)` author link.
+- **Recipe Agent capture.** Each speech-to-text engine gets its own model flag (`--model_directory` for
+  whisper-ctranslate2); captions are fetched in the video's own language only, never every automatic translation;
+  the capture-folder guard compares folder identity, not spelling; yt-dlp writes through `-P`; video up to 1080p
+  for OCR; every step has a time limit; tools are found only in absolute `PATH` entries; the queue helper's errors
+  say what to do. The privacy test skips its git half in a copy without `.git`.
+- **Platforms.** Short links are stored as `https://<host>/<code>` without the share query; Pinterest language
+  subdomains, X `/video/1` and `/photo/1` links and trailing-dot hosts are understood; web pages need a public host
+  name; `pin.it` links resolve through Pinterest's shortener; X oEmbed uses `publish.twitter.com`.
+- **Browser checks.** Chrome is killed and its profile removed on every way out (crash, unhandled rejection,
+  `process.exit()`, a second Ctrl-C); CI actions are pinned to commit SHAs and the tests also run on Node 24.
+- **Budget.** Formatters are made once, the currency list works without `Intl.supportedValuesOf` and refuses
+  non-money codes, blank CSV lines are skipped, and "this week" moves on at midnight in an open tab.
+- `npm run check` runs the tests, the validator and the build; `CONTRIBUTING.md` and `.editorconfig` are new.
+
 ## 0.2.0 (2026-11-11)
 
 Round 1: nine work packages built side by side, then merged into one product.

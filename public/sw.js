@@ -9,7 +9,7 @@
 //
 // Bump VERSION when the list of shell files changes.
 
-const VERSION = 'v2';
+const VERSION = 'v3';
 const SHELL_CACHE = `recipe-bank-shell-${VERSION}`;
 const DATA_CACHE = `recipe-bank-data-${VERSION}`;
 
@@ -69,6 +69,7 @@ const SHELL = [
   '/lib/pack.mjs',
   '/lib/migrate.mjs',
   '/lib/draft.mjs',
+  '/lib/purchase.mjs',
 ];
 
 // The local server serves /api/recipes; the static build serves /api/recipes.json.

@@ -11,8 +11,11 @@ a video, call `parseVideoUrl(url, { allowWeb: true })`. This returns
 `{ platform: 'web', id: null, url }`, with the URL normalized by `URL`. Its entire
 query and fragment are retained because they can identify a particular video.
 `videoKey` uses this URL. HTTP pages, non-HTTP schemes, credentials and non-default
-ports are rejected. Invalid links on recognized platform domains (including
-Facebook redirect links) do not fall back to web pages.
+ports are rejected, and so are hosts that are not a dotted public name: IP
+literals (`https://127.0.0.1/`, `https://[::1]/`) and single labels
+(`https://router/`). Invalid links on recognized platform domains (including
+Facebook redirect links, and hosts written with a trailing dot such as
+`www.facebook.com.`) do not fall back to web pages.
 
 Recipes may use web pages only by explicitly declaring `video.platform: "web"`;
 the recipe validator enables web parsing only for that declaration. The queue
@@ -47,19 +50,24 @@ be private, deleted, region restricted or blocked by the viewer's browser.
 
 Facebook accepts `/watch?v=`, `/watch/?v=`, `/reel/<id>` and
 `/<page>/videos/<id>`, on the root, `www.`, `m.` and `web.` hosts. `l.facebook.com`
-redirect links are rejected. Pinterest accepts `/pin/<id>` on the root or `www.`
-of the exact country domains in `PINTEREST_DOMAINS` in `lib/video.mjs` (including
-`.com`, `.co.uk`, `.com.au` and `.se`), and canonicalizes them to `.com`. Other
-subdomains and domains are not implicitly trusted. X accepts root, `www.` and
-`mobile.` hosts on both `x.com` and `twitter.com`. IDs stay strings, so large
-numeric IDs retain their precision. Query tracking and fragments on these full
-platform URLs are discarded; an optional trailing slash is accepted.
+redirect links are rejected. Pinterest accepts `/pin/<id>` (and the
+`/pin/<id>/sent/` page a shared link lands on) on the root, `www.` or a
+two-letter language subdomain (`br.`, `de.`) of the exact country domains in
+`PINTEREST_DOMAINS` in `lib/video.mjs` (including `.com`, `.co.uk`, `.com.au` and
+`.se`), and canonicalizes them to `.com`. Other subdomains and domains are not
+implicitly trusted. X accepts root, `www.` and `mobile.` hosts on both `x.com` and
+`twitter.com`, with or without the `/video/<n>` or `/photo/<n>` suffix the share
+sheet adds. IDs stay strings, so large numeric IDs retain their precision. Query
+tracking and fragments on these full platform URLs are discarded; an optional
+trailing slash is accepted. One trailing dot on a host name is ignored.
 
 Unresolved `fb.watch/<code>`, `pin.it/<code>`, `vm.tiktok.com/<code>` and
-`vt.tiktok.com/<code>` links retain their original normalized URL and `id: null`,
-just as TikTok short links did before. Without a resolved ID they have no embed.
-`videoKey` is unchanged: `<platform>:<id>` when an ID exists, otherwise the URL.
-No stored recipe or queue entry is rewritten. The compatibility fixture pins all
+`vt.tiktok.com/<code>` links keep `id: null` and the URL
+`https://<host>/<code>` (path as given, query and fragment dropped, `http:`
+turned into `https:` so the resolver can follow it). Without a resolved ID they
+have no embed. `videoKey` is `<platform>:<id>` when an ID exists, otherwise that
+normal form of the URL, so `http://pin.it/AbC?si=1` and `https://pin.it/AbC`
+are one video. No stored recipe or queue entry is rewritten. The compatibility fixture pins all
 17 existing recipes and the currently empty queue; deliberately update that
 fixture when the collection changes.
 
@@ -71,7 +79,9 @@ HTTPS URL without credentials or a non-default port and parse as the same
 platform. TikTok additionally uses an exact root/`www.`/`m.`/`vm.`/`vt.` host list.
 Relative redirects are accepted; cross-platform targets, redirector subdomains,
 loops, excess hops, failed requests and unsupported HEAD responses retain the
-original short link. Browser parsing and static exports never resolve links.
+original short link. One intermediate hop is allowed for Pinterest only:
+`https://api.pinterest.com/url_shortener/<code>/redirect/`, the shortener that
+`pin.it` links pass through; it is never accepted as the result. Browser parsing and static exports never resolve links.
 The oEmbed timeout is a separate five-second budget after resolution.
 
 Facebook embeds use `https://www.facebook.com/plugins/video.php` with a fixed,
@@ -82,7 +92,10 @@ return `null` from `thumbnailUrl`: no stable public poster URL is assumed.
 
 The server requests best-effort oEmbed metadata from YouTube, TikTok, Pinterest
 and X's public key-free endpoints, with the existing five-second timeout and
-failure fallback. X often omits a title; an entry with a null title is valid.
+failure fallback. X is asked at `publish.twitter.com`, the host X's oEmbed
+documentation names. X often omits a title; an entry with a null title is valid.
+Only text titles and author names (trimmed, at most 300 characters) and an
+`http(s)` author link are kept from any provider's answer.
 Facebook and Instagram need app credentials for oEmbed and are skipped. Web
 pages are never fetched for metadata. Third-party HTML returned by oEmbed is
 never rendered or used as a title.
@@ -113,39 +126,24 @@ shared modules to the static export; parsing there remains offline.
 
 ## Dashboard integration
 
-Done in the round-1 merge: `public/ui/core.js` derives `PLATFORM` and the
-supported-platform copy (`PLATFORM_LIST`) from `PLATFORMS`; the Add dialog
-(`public/index.html`, `public/ui/add.js`) has the "It's a web page with a video
-on it" checkbox, passes `{ allowWeb: true }` only while it is ticked, labels web
-results as a page to check, and the static copy's request names a web source;
-`player()` keeps the link fallback; timestamps are buttons only on YouTube. The
-recipe editor takes its labels from the same table. What still needs a person
-is the visual check in step 5 below. The original checklist:
+How the dashboard uses this table:
 
-1. Add `PLATFORMS` to the import from `/lib/video.mjs` in `public/app.js`. Replace
-   the hard-coded `PLATFORM` object with
-   `const PLATFORM = Object.fromEntries(PLATFORMS.map(({ id, label }) => [id, label]));`.
-   Keep using this derived map for queue subtitles, recipe and queue "Open on"
-   links, and the Add dialog's detection hint. Escape labels when inserting HTML
-   and fall back to a generic label if a future platform is unknown.
-2. Derive the Add dialog's supported-platform copy from
-   `PLATFORMS.filter(({ id }) => id !== 'web')`. Update both its initial HTML copy
-   in `public/index.html` and the static-site override in `setupAdd()`, which
-   currently lists only three platforms. Keep default `parseVideoUrl(url)` strict
-   in both the live and static supported-link checks.
-3. Add an explicit "This is a web page containing a video" checkbox, off by
-   default. Only while checked, pass `{ allowWeb: true }` to parsing in the input
-   hint and submit validation, and send `allowWeb: true` in `POST /api/queue`.
-   For static requests, include the parsed platform and URL in the copied
-   analysis request so web-page opt-in survives the handoff. Label web results
-   as a page to check, rather than a verified video.
-4. Keep `player()`'s `embedUrl(video) === null` link fallback: X, web pages and
-   unresolved short links use it. Preserve the always-visible original link for
-   embeds that fail to load. Do not inject X's oEmbed HTML or load widget scripts.
-   Use `embeds` for capability copy, and `embedUrl` for each actual iframe.
-5. Make timestamp controls truthful: use YouTube seeking where supported; for
-   other platforms offer an original-video link or omit the seek button. Verify
-   Facebook and Pinterest iframe sizing on mobile, link-only X/web views, labels
-   on recipe and queue views, strict hints, and web opt-in for live/static modes.
-   Rebuild the static export; `scripts/build-static.mjs` already copies shared
-   `lib/` modules, so no special bundling change is required.
+- `public/ui/core.js` derives `PLATFORM` (labels) and the supported-source copy
+  (`PLATFORM_LIST`) from `PLATFORMS`. Every view falls back to a generic label
+  ("Video", "the platform") for an unknown id; `test/platform-nits.test.mjs`
+  checks that.
+- The Add dialog (`public/index.html`, `public/ui/add.js`) has an "It's a web
+  page with a video on it" checkbox, off by default. Only while it is ticked does
+  it parse with `{ allowWeb: true }` and send `allowWeb: true`; web results are
+  labelled as a page to check. The static copy's request names the web source.
+- `player()` in `public/ui/recipe.js` shows the original link when `embedUrl`
+  is null (X, web pages, unresolved short links). X's oEmbed HTML and widget
+  scripts are never used. Every link from data goes through `safeUrl()`
+  (`lib/format.mjs`).
+- Timestamps are buttons only on YouTube, the one player that can start at a
+  given second; elsewhere they are plain text.
+- The recipe editor takes its labels from the same table.
+
+Still to check by eye in a browser: Facebook and Pinterest iframe sizing on a
+phone, the link-only X and web views, and the web-page opt-in on the live and
+static copies.

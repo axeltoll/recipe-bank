@@ -288,7 +288,7 @@ test('uniqueId and slugify', () => {
   assert.equal(slugify(null), '');
 });
 
-// Taken over from the roadmap-functions lane's pack tests: the real bank must survive a pack.
+// The real bank must survive a pack.
 test('every real recipe round-trips through a pack, and re-importing it adds nothing', async () => {
   const dir = join(ROOT, 'recipes');
   const recipes = [];

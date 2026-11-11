@@ -16,8 +16,10 @@ let base;
 before(async () => {
   dir = await tempBank([alpha]);
   await writeRecipe(dir, '{ not json', 'broken-file.json');
-  process.env.RECIPE_BANK_DIR = dir; // read when server.mjs is first imported, below
-  ({ server } = await import('../server.mjs'));
+  // The data folder RECIPE_BANK_DIR=dir selects, passed to the factory. Setting process.env before the first
+  // import of server.mjs only worked while every test file ran in its own process.
+  const { createApp, defaultDataDir } = await import('../server.mjs');
+  server = createApp({ dataDir: defaultDataDir({ RECIPE_BANK_DIR: dir }), oembed: null });
   await new Promise((ok) => server.listen(0, '127.0.0.1', ok));
   base = `http://127.0.0.1:${server.address().port}`;
 });

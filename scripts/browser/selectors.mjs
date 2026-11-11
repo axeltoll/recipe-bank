@@ -26,6 +26,11 @@ export const SELECTORS = {
   timestampAt: (t) => `button.ts[data-t="${t}"]`,
 };
 
+/** Copy the checks read back. test/selectors.test.mjs checks that each text is still in the view that shows it. */
+export const TEXT = {
+  unsupportedLink: 'Not a supported video link yet', // public/ui/add.js, the Add dialog hint
+};
+
 /** Pages the device check measures: [name, hash, selector that says the page has rendered]. `recipe` gets an id. */
 export const PAGES = [
   ['home', '#/', SELECTORS.cards],

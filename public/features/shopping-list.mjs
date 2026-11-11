@@ -7,16 +7,16 @@
 // Ticked items persist in localStorage ('rb:shopping-checked'). Fires 'rb:shopping-check' { checked }
 // and 'rb:shopping-copy' { text, copied }.
 //
-// Purchase option (rbank-amounts, see PURCHASE.md): mount(el, { recipes, household: true }) shows how
+// Purchase option (see PURCHASE.md): mount(el, { recipes, household: true }) shows how
 // much to buy for the household profile instead, with a pantry of keys that are left out
 // ('rb:pantry', fires 'rb:pantry-change' { pantry }). Without the option nothing changes.
 
 import { shoppingListForPlan, shoppingListText, lineAmount, normalizePlan } from '../../lib/plan.mjs';
 import { esc, makeStore, ensureStylesheet, emit, copyText } from './shared.mjs';
 import { PLAN_KEY, PLAN_EVENT, readPlan } from './week-plan.mjs';
-// purchase option (rbank-amounts)
+// purchase option
 import { purchaseList, purchaseListText, householdLine, normalizePantry, DEFAULT_PANTRY, FLAGS } from '../../lib/purchase.mjs';
-import { normalizeProfile } from '../../lib/household.mjs'; // purchase option (rbank-amounts)
+import { normalizeProfile } from '../../lib/household.mjs'; // purchase option
 
 export const CHECKED_KEY = 'rb:shopping-checked';
 
@@ -74,7 +74,7 @@ export function renderShoppingList(list, checked = new Set(), { title = 'Shoppin
     </section>`;
 }
 
-// ---------- purchase option (rbank-amounts) ----------
+// ---------- purchase option ----------
 
 export const PANTRY_KEY = 'rb:pantry';
 export const PANTRY_EVENT = 'rb:pantry-change';
@@ -194,7 +194,7 @@ export function renderPurchaseList(purchase, checked = new Set(), {
  * options: recipes (required); plan (fixed plan; default: follow the stored week plan and 'rb:plan-change');
  *          planKey, checkedKey, storage, persist (default true), title, href, css (default true),
  *          copyChecked (default false: ticked items are left out of the copied text).
- *          Purchase option (rbank-amounts): household (default false: show purchase amounts for the
+ *          Purchase option: household (default false: show purchase amounts for the
  *          household profile); profile (fixed profile; default: the stored one, following
  *          'recipe-bank:household-change'); pantry (initial pantry; default the stored one or DEFAULT_PANTRY);
  *          householdKey, pantryKey.
@@ -203,7 +203,7 @@ export function renderPurchaseList(purchase, checked = new Set(), {
 export function mount(el, options = {}) {
   let opts = {
     planKey: PLAN_KEY, checkedKey: CHECKED_KEY, persist: true, css: true, copyChecked: false,
-    householdKey: HOUSEHOLD_KEY, pantryKey: PANTRY_KEY, // purchase option (rbank-amounts)
+    householdKey: HOUSEHOLD_KEY, pantryKey: PANTRY_KEY, // purchase option
     ...options,
   };
   if (opts.css) ensureStylesheet(new URL('./shopping-list.css', import.meta.url).href);
@@ -214,7 +214,7 @@ export function mount(el, options = {}) {
   let checked = new Set(opts.persist ? store.get(opts.checkedKey, []) : []);
   let list;
 
-  // ---- purchase option (rbank-amounts): state is only read when opts.household is on ----
+  // ---- purchase option: state is only read when opts.household is on ----
   const followHousehold = !options.profile;
   let purchase = null;
   let profile = null;
@@ -241,8 +241,8 @@ export function mount(el, options = {}) {
 
   const render = () => {
     list = shoppingListForPlan(plan, recipes);
-    if (opts.household) return renderPurchase(); // purchase option (rbank-amounts)
-    purchase = null; // purchase option (rbank-amounts)
+    if (opts.household) return renderPurchase(); // purchase option
+    purchase = null; // purchase option
     el.innerHTML = renderShoppingList(list, checked, opts);
   };
   const saveChecked = () => {
@@ -255,13 +255,13 @@ export function mount(el, options = {}) {
     if (!box) return;
     box.checked ? checked.add(box.dataset.key) : checked.delete(box.dataset.key);
     box.closest('.rbf-item')?.classList.toggle('rbf-done', box.checked);
-    const shown = purchase ?? list; // purchase option (rbank-amounts): count what is on screen
+    const shown = purchase ?? list; // purchase option: count what is on screen
     const done = shown.groups.reduce((n, g) => n + g.items.filter((it) => checked.has(it.key)).length, 0);
     const progress = el.querySelector('[data-progress]');
     if (progress) progress.textContent = `${done} of ${shown.itemCount} ticked`;
     saveChecked();
   };
-  // purchase option (rbank-amounts): the plain text of whatever is shown
+  // purchase option: the plain text of whatever is shown
   const textNow = () => (purchase
     ? purchaseListText(purchase, { checked: opts.copyChecked ? null : checked })
     : shoppingListText(list, { checked: opts.copyChecked ? null : checked }));
@@ -271,7 +271,7 @@ export function mount(el, options = {}) {
       saveChecked();
       return render();
     }
-    // ---- purchase option (rbank-amounts): pantry chips, reset and print ----
+    // ---- purchase option: pantry chips, reset and print ----
     const remove = e.target.closest('[data-pantry-remove]');
     if (remove) {
       pantryOpen = true;
@@ -287,7 +287,7 @@ export function mount(el, options = {}) {
     }
     // ---- end purchase option ----
     if (e.target.closest('[data-copy]')) {
-      const text = textNow(); // purchase option (rbank-amounts)
+      const text = textNow(); // purchase option
       const copied = await copyText(text);
       const fallback = el.querySelector('.rbf-copy-fallback');
       if (!copied && fallback) {
@@ -317,15 +317,15 @@ export function mount(el, options = {}) {
     } else if (e.key === opts.checkedKey && opts.persist) {
       checked = new Set(store.get(opts.checkedKey, []));
       render();
-    } else if (opts.household && e.key === opts.householdKey && followHousehold) { // purchase option (rbank-amounts)
+    } else if (opts.household && e.key === opts.householdKey && followHousehold) { // purchase option
       profile = null;
       render();
-    } else if (opts.household && e.key === opts.pantryKey && opts.persist) { // purchase option (rbank-amounts)
+    } else if (opts.household && e.key === opts.pantryKey && opts.persist) { // purchase option
       pantry = readPantry({ key: opts.pantryKey, storage: opts.storage });
       render();
     }
   };
-  // ---- purchase option (rbank-amounts): household changes and the pantry form ----
+  // ---- purchase option: household changes and the pantry form ----
   const onHousehold = (e) => {
     if (!opts.household || !followHousehold || !e.detail?.profile) return;
     profile = normalizeProfile(e.detail.profile);
@@ -353,24 +353,24 @@ export function mount(el, options = {}) {
 
   return {
     getList: () => list,
-    getText: () => textNow(), // purchase option (rbank-amounts): purchase text when it is shown
-    getPurchase: () => purchase, // purchase option (rbank-amounts)
-    getPantry: () => (loadPurchaseState(), [...pantry]), // purchase option (rbank-amounts)
-    setPantry, // purchase option (rbank-amounts)
+    getText: () => textNow(), // purchase option: purchase text when it is shown
+    getPurchase: () => purchase, // purchase option
+    getPantry: () => (loadPurchaseState(), [...pantry]), // purchase option
+    setPantry, // purchase option
     update(next = {}) {
       opts = { ...opts, ...next };
       if (next.recipes) recipes = next.recipes;
       if (next.plan) plan = normalizePlan(next.plan);
-      if (next.profile) profile = normalizeProfile(next.profile); // purchase option (rbank-amounts)
-      if (next.pantry) pantry = normalizePantry(next.pantry); // purchase option (rbank-amounts)
+      if (next.profile) profile = normalizeProfile(next.profile); // purchase option
+      if (next.pantry) pantry = normalizePantry(next.pantry); // purchase option
       render();
     },
     destroy() {
       el.removeEventListener('change', onChange);
       el.removeEventListener('click', onClick);
-      el.removeEventListener('submit', onSubmit); // purchase option (rbank-amounts)
+      el.removeEventListener('submit', onSubmit); // purchase option
       document.removeEventListener(PLAN_EVENT, onPlan);
-      document.removeEventListener(HOUSEHOLD_EVENT, onHousehold); // purchase option (rbank-amounts)
+      document.removeEventListener(HOUSEHOLD_EVENT, onHousehold); // purchase option
       window.removeEventListener('storage', onStorage);
       el.innerHTML = '';
     },

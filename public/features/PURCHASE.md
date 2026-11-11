@@ -31,7 +31,7 @@ With `household: true` the module:
 
 Without the option nothing changes: the module renders and copies the plain shopping list, and it does not read the household or pantry keys (`test/purchase-ui.test.mjs` checks this).
 
-Extra options: `profile`, `pantry` (initial list), `householdKey`, `pantryKey`. Extra controller methods: `getPurchase()` (the `purchaseList()` result, `null` when the option is off), `getPantry()`, `setPantry(keys)`. Extra event: `rb:pantry-change`, `detail: { pantry }`. Checkboxes share `rb:shopping-checked` with the plain list, because both are keyed by ingredient key. Added lines in the module and its stylesheet are marked `purchase option (rbank-amounts)`.
+Extra options: `profile`, `pantry` (initial list), `householdKey`, `pantryKey`. Extra controller methods: `getPurchase()` (the `purchaseList()` result, `null` when the option is off), `getPantry()`, `setPantry(keys)`. Extra event: `rb:pantry-change`, `detail: { pantry }`. Checkboxes share `rb:shopping-checked` with the plain list, because both are keyed by ingredient key. Added lines in the module and its stylesheet are marked `purchase option`.
 
 ## How amounts are worked out
 

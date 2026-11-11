@@ -5,13 +5,12 @@ import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { loadRecipes } from '../server.mjs';
 import { ROOT, options, browserAvailable, withBrowser, assertClean } from './browser/support.mjs';
-import { SELECTORS } from './browser/selectors.mjs';
+import { SELECTORS, TEXT } from './browser/selectors.mjs';
 
 export { SELECTORS };
 
-const opts = options();
 const checks = ['grid', 'filters', 'creator', 'recipe', 'timestamp', 'queue', 'keyboard', 'features'];
-if (opts.only && !checks.includes(opts.only)) throw new Error(`--only must be one of: ${checks.join(', ')}`);
+let opts = { headed: false, only: null }; // set in the try block below, so bad options print a FAIL line
 const enabled = (name) => !opts.only || opts.only === name;
 const q = JSON.stringify;
 const keys = (r) => new Set(r.components.flatMap((c) => c.ingredients.map((i) => i.key)));
@@ -63,7 +62,7 @@ async function smoke(page, origin, label, recipes) {
     await input(SELECTORS.search, recipe.creator.name);
     const found = await ids();
     assert.ok(found.includes(recipe.id), 'search finds the creator recipe');
-    assert.ok(found.length < recipes.length, 'creator search narrows the grid');
+    assert.ok(found.length < recipes.length, 'creator search narrows the grid (this needs recipes from at least two creators in recipes/)');
     await page.click(SELECTORS.clear);
     console.log(`PASS ${label}: creator search`);
   }
@@ -127,7 +126,7 @@ async function smoke(page, origin, label, recipes) {
   if (enabled('queue')) {
     await page.click(SELECTORS.add);
     await input(SELECTORS.url, 'https://example.invalid/not-a-video');
-    assert.equal(await page.evaluate(`document.querySelector(${q(SELECTORS.hint)}).textContent`), 'Not a supported video link yet');
+    assert.equal(await page.evaluate(`document.querySelector(${q(SELECTORS.hint)}).textContent`), TEXT.unsupportedLink);
     await page.click(SELECTORS.cancel);
     console.log(`PASS ${label}: unsupported link warning (no queue writes)`);
   }
@@ -162,6 +161,8 @@ async function smoke(page, origin, label, recipes) {
 }
 
 try {
+  opts = options();
+  if (opts.only && !checks.includes(opts.only)) throw new Error(`--only must be one of: ${checks.join(', ')}`);
   if (browserAvailable()) {
     const { recipes, invalid } = await loadRecipes();
     assert.deepEqual(invalid, [], 'all recipe files must be valid');

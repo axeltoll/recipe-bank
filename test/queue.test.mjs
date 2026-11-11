@@ -87,6 +87,8 @@ test('failed transformations and competing helper locks preserve the original qu
   assert.equal(await readFile(file, 'utf8'), original);
   await writeFile(`${file}.agent.tmp`, 'another helper');
   await assert.rejects(updateQueueFile(file, assert.fail), /EEXIST/);
+  // The message says what to do, not just the error code.
+  await assert.rejects(updateQueueFile(file, assert.fail), /queue\.json\.agent\.tmp exists .*delete that file and retry .*agent\/QUEUE\.md/s);
   assert.equal(await readFile(`${file}.agent.tmp`, 'utf8'), 'another helper');
   assert.equal(await readFile(file, 'utf8'), original);
 });
@@ -97,6 +99,22 @@ test('concurrent external edits abort rather than overwrite the changed queue', 
   await assert.rejects(updateQueueFile(file, async () => { await writeFile(file, changed); return []; }), /Queue changed/);
   assert.equal(await readFile(file, 'utf8'), changed);
   assert.deepEqual(await readdir(path.dirname(file)), ['queue.json']);
+});
+
+test('an unrelated broken recipe file neither blocks completion nor hides behind a SyntaxError', async (t) => {
+  const { root, file } = await fixture(t);
+  const errors = [];
+  const options = { root, log() {}, error: (m) => errors.push(m) };
+  await writeFile(path.join(root, 'recipes', 'half-written.json'), '{ "id": "half-');
+  assert.equal(await queueMain(['mark', 'a', 'analyzing'], options), 0);
+  // No matching recipe yet: the unreadable file is named.
+  assert.equal(await queueMain(['mark', 'a', 'done'], options), 1);
+  assert.match(errors.join('\n'), /matching valid recipe file\. Unreadable: recipes\/half-written\.json \(/);
+  // With the matching recipe written, the broken neighbour does not stop completion.
+  const source = new URL('../recipes/gochujang-chicken-thighs.json', import.meta.url);
+  await writeFile(path.join(root, 'recipes', 'gochujang-chicken-thighs.json'), await readFile(source));
+  assert.equal(await queueMain(['mark', 'a', 'done'], options), 0);
+  assert.deepEqual(JSON.parse(await readFile(file, 'utf8')), []);
 });
 
 test('CLI rejects unsupported arguments and malformed files without modifying them', async (t) => {

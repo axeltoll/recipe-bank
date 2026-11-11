@@ -127,7 +127,8 @@ export async function removeQueued(id, btn) {
     btn.setAttribute('aria-busy', 'true');
   }
   try {
-    const res = await fetch(`/api/queue/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    // The server refuses writes that are not JSON (server.mjs writeRefusal), DELETE included.
+    const res = await fetch(`/api/queue/${encodeURIComponent(id)}`, { method: 'DELETE', headers: { 'content-type': 'application/json' } });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     state.queue = state.queue.filter((q) => q.id !== id);
     renderStats();

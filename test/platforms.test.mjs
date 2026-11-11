@@ -64,19 +64,31 @@ test('large numeric platform IDs retain every digit', () => {
   }
 });
 
-test('short links keep their URL and use it as their unresolved key', () => {
-  for (const [platform, url] of [
-    ['facebook', 'https://fb.watch/AbC_123-/'],
-    ['facebook', 'https://fb.watch/AbC123?si=abc'],
-    ['pinterest', 'https://pin.it/AbC123'],
-    ['pinterest', 'https://pin.it/AbC123/?si=abc'],
-    ['tiktok', 'https://vm.tiktok.com/AbC123/'],
-    ['tiktok', 'https://vt.tiktok.com/AbC123/?si=abc'],
+// Short links are kept as https://<host><path>: an http: link could never be resolved (the resolver
+// only fetches HTTPS) and a share query must not make the same link a second queue entry.
+test('short links keep their https host and path and use them as their unresolved key', () => {
+  for (const [platform, input, url] of [
+    ['facebook', 'https://fb.watch/AbC_123-/', 'https://fb.watch/AbC_123-/'],
+    ['facebook', 'https://fb.watch/AbC123?si=abc', 'https://fb.watch/AbC123'],
+    ['facebook', 'http://fb.watch/AbC123#x', 'https://fb.watch/AbC123'],
+    ['pinterest', 'https://pin.it/AbC123', 'https://pin.it/AbC123'],
+    ['pinterest', 'https://pin.it/AbC123/?si=abc', 'https://pin.it/AbC123/'],
+    ['pinterest', 'HTTPS://PIN.IT/AbC123?si=1', 'https://pin.it/AbC123'],
+    ['tiktok', 'https://vm.tiktok.com/AbC123/', 'https://vm.tiktok.com/AbC123/'],
+    ['tiktok', 'http://vm.tiktok.com/AbC123/', 'https://vm.tiktok.com/AbC123/'],
+    ['tiktok', 'https://vt.tiktok.com/AbC123/?si=abc', 'https://vt.tiktok.com/AbC123/'],
+    ['tiktok', 'https://vt.tiktok.com./AbC123/', 'https://vt.tiktok.com/AbC123/'],
   ]) {
-    const parsed = parseVideoUrl(url);
-    assert.deepEqual(parsed, { platform, id: null, url });
-    assert.equal(videoKey(parsed), url);
+    const parsed = parseVideoUrl(input);
+    assert.deepEqual(parsed, { platform, id: null, url }, input);
+    assert.equal(videoKey(parsed), url, input);
   }
+  // The same link with and without a share query is one video, also when the stored form is the old one.
+  assert.equal(videoKey(parseVideoUrl('https://pin.it/AbC123?si=1')), videoKey(parseVideoUrl('https://pin.it/AbC123')));
+  assert.equal(videoKey({ platform: 'pinterest', id: null, url: 'http://pin.it/AbC123?si=1' }), 'https://pin.it/AbC123');
+  assert.equal(videoKey({ platform: 'web', id: null, url: 'https://example.com/r?v=2' }), 'https://example.com/r?v=2');
+  assert.equal(videoKey({ platform: 'web', url: 'not a url' }), 'not a url', 'unparseable stored URLs stay as they are');
+  assert.equal(videoKey(null), '');
 });
 
 test('rejects dangerous schemes, userinfo, look-alikes and unsupported hosts', () => {

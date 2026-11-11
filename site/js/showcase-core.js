@@ -2,7 +2,9 @@
 // The filter rules mirror the dashboard (public/app.js): "Has all" / "Has any" over ingredient keys, plus a
 // word search over title, summary, creator, tags, component names and ingredients.
 
-export const PLATFORM = { youtube: 'YouTube', tiktok: 'TikTok', instagram: 'Instagram' };
+export const PLATFORM = {
+  youtube: 'YouTube', tiktok: 'TikTok', instagram: 'Instagram', facebook: 'Facebook', pinterest: 'Pinterest', x: 'X',
+};
 export const BASIS_LABEL = {
   'on-screen': 'shown on screen',
   spoken: 'said in the video',
@@ -15,6 +17,22 @@ const ENTITIES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ENTITIES[c]);
 export const mmss = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
 export const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
+
+/**
+ * An absolute http: or https: URL in the form the browser will use, or null for anything else
+ * (javascript:, data:, vbscript:, relative or broken text). The same function as safeUrl in
+ * lib/format.mjs; the site may not import from outside site/, and test/safe-url.test.mjs checks both.
+ */
+export function safeUrl(value) {
+  if (typeof value !== 'string') return null;
+  let u;
+  try {
+    u = new URL(value.trim());
+  } catch {
+    return null;
+  }
+  return u.protocol === 'https:' || u.protocol === 'http:' ? u.href : null;
+}
 
 /** Unique ingredient filter keys of a recipe, in first-seen order. */
 export function recipeKeys(r) {
@@ -51,13 +69,16 @@ export function keyCounts(recipes) {
   return [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
 }
 
-/** Link to the video on its platform. YouTube links start at second `t` when it is above zero. */
+/**
+ * Link to the video on its platform. YouTube links start at second `t` when it is above zero.
+ * '' when the recipe's URL is not a safe http(s) link.
+ */
 export function watchUrl(video, t = 0) {
   const start = Math.floor(Number(t) || 0);
   if (video?.platform === 'youtube' && video.id && start > 0) {
     return `https://www.youtube.com/watch?v=${encodeURIComponent(video.id)}&t=${start}s`;
   }
-  return video?.url ?? '';
+  return safeUrl(video?.url) ?? '';
 }
 
 /** The same plain-text shopping list the dashboard copies. */
@@ -114,6 +135,7 @@ function renderStep(s, video) {
   if (s.t == null) return `<li><p>${esc(s.text)}</p></li>`;
   const label = mmss(s.t);
   const where = PLATFORM[video.platform] ?? 'its platform';
+  if (!watchUrl(video, s.t)) return `<li><p>${esc(s.text)} <span class="ts">${label}</span></p></li>`;
   return `<li><p>${esc(s.text)} <a class="ts" href="${esc(watchUrl(video, s.t))}" target="_blank" rel="noopener" aria-label="Open the video at ${label} on ${esc(where)}">${label}</a></p></li>`;
 }
 
@@ -122,8 +144,10 @@ export function renderDetail(r) {
   const multi = r.components.length > 1;
   const n = r.nutrition;
   const where = PLATFORM[r.video.platform] ?? 'the original site';
-  const creator = r.creator.url
-    ? `<a href="${esc(r.creator.url)}" target="_blank" rel="noopener">${esc(r.creator.name)}</a>`
+  const creatorUrl = safeUrl(r.creator.url);
+  const videoUrl = safeUrl(r.video.url);
+  const creator = creatorUrl
+    ? `<a href="${esc(creatorUrl)}" target="_blank" rel="noopener">${esc(r.creator.name)}</a>`
     : esc(r.creator.name);
   const macros = n
     ? [['calories', 'kcal'], ['protein_g', 'protein g'], ['carbs_g', 'carbs g'], ['fat_g', 'fat g']]
@@ -133,7 +157,7 @@ export function renderDetail(r) {
   <header class="rd-head">
     <span class="badge ${esc(r.status)}">${r.status === 'partial' ? 'Partial recipe: some details are missing' : 'Full recipe from the video'}</span>
     <h3 class="rd-title">${esc(r.title)}</h3>
-    <p class="rd-by">by ${creator} · <a href="${esc(r.video.url)}" target="_blank" rel="noopener">Watch on ${esc(where)}</a></p>
+    <p class="rd-by">by ${creator}${videoUrl ? ` · <a href="${esc(videoUrl)}" target="_blank" rel="noopener">Watch on ${esc(where)}</a>` : ''}</p>
     <p class="rd-summary">${esc(r.summary)}</p>
     <ul class="rd-tags" aria-label="Tags">${(r.tags ?? []).map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
     <dl class="rd-facts">

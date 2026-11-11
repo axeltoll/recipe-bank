@@ -50,6 +50,7 @@ Other commands:
 npm run dev        # restarts on server/lib changes
 npm run validate   # checks every recipes/*.json (contract + JSON Schema) and data/queue.json; add -- --json for a report
 npm test           # all node:test suites: lib/, API, scripts, static build, dashboard wiring, feature modules, website
+npm run check      # npm test, npm run validate and npm run build in one go; see CONTRIBUTING.md
 npm run build      # static copy in dist/ (read-only: no queueing, no saving, no pack import)
 npm run migrate    # bring recipe files up to the current contract version (dry run; add -- --write)
 npm run packs -- export banana-milk --out my.recipe-pack.json   # or: import my.recipe-pack.json [--write]

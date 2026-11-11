@@ -10,6 +10,7 @@ npm run dev        # same, restarts on server/lib changes
 npm run validate   # checks every recipes/*.json (contract, then JSON Schema) and data/queue.json; add -- --json for a report
 npm test           # node:test: lib/, API on a random port, scripts, static build, dashboard wiring, feature modules, website
 npm run build      # read-only static copy in dist/
+npm run check      # test, validate and build in one go (CONTRIBUTING.md)
 npm run migrate    # dry run; `npm run migrate -- --write` upgrades recipe files to SCHEMA_VERSION (`--stamp` adds "schema")
 npm run packs      # export / import recipe packs (scripts/pack.mjs; import is a dry run without --write)
 npm run doctor     # optional tools for the Recipe Agent
@@ -25,7 +26,7 @@ No dependencies. Node ≥ 22 (built-in `fetch`, `node:test`, `import.meta.dirnam
 | Path | What |
 |---|---|
 | `recipes/<id>.json` | One file per analyzed recipe. **The data.** The filename must equal `id`. |
-| `data/queue.json` | Videos waiting for analysis (`queued` → `analyzing` → removed once the recipe file lands; `failed` if analysis is impossible). |
+| `data/queue.json` | Videos waiting for analysis (`queued` → `analyzing` → removed once the recipe file lands; `failed` if analysis is impossible). `scripts/queue.mjs` also writes `updatedAt` and, for `failed`, `failureReason` (agent/QUEUE.md). |
 | `lib/video.mjs` | URL parsing, embed and thumbnail URLs, and the `PLATFORMS` table (ids, labels, embed capability). Shared by the server, validator and browser (served at `/lib/`). |
 | `lib/video-resolver.mjs` | Server-only short-link resolution (fb.watch, pin.it, vm/vt.tiktok.com): HEAD requests, at most three same-platform redirects. |
 | `lib/recipe.mjs` | Recipe contract (`validateRecipe`, `SCHEMA_VERSION`). The enforced source of truth for the format below. |
@@ -49,7 +50,7 @@ No dependencies. Node ≥ 22 (built-in `fetch`, `node:test`, `import.meta.dirnam
 | `scripts/smoke.mjs`, `scripts/device-check.mjs`, `scripts/browser/` | Browser checks; their selectors are in `scripts/browser/selectors.mjs`. |
 | `site/` | Public website (static home page, docs, changelog). Not the dashboard. `npm run site` previews it on port 4790; `site/README.md` has the rules. Its showcase data (`site/data/showcase.js`) is generated from three recipe files: after editing one of them, run `npm run site:data`, or `npm test` fails. What the site says about a feature comes from `site/data/features.json` (`status`: `shipped`, `next` or `planned`): when a feature merges, change its status there and run `npm run site:sync`, or `npm test` fails. |
 
-API: `GET /api/recipes` → `{recipes, invalid}` · `GET /api/queue` · `POST /api/queue {url, note, allowWeb?}` (web pages require `allowWeb: true`; short links are resolved first; 409 if the video is already a recipe or queued; best-effort oEmbed title) · `DELETE /api/queue/<id>` · `POST /api/packs/import {pack, include?}` (JSON content type required; creates new recipe files only, never overwrites; duplicates by video are skipped). `RECIPE_BANK_DIR` points the server and scripts at another folder holding `recipes/` and `data/` (tests use a temp one).
+API: `GET /api/recipes` → `{recipes, invalid}` · `GET /api/queue` · `POST /api/queue {url, note, allowWeb?}` (web pages require `allowWeb: true`; short links are resolved first; 409 if the video is already a recipe or queued; best-effort oEmbed title) · `DELETE /api/queue/<id>` · `POST /api/packs/import {pack, include?}` (JSON content type required; creates new recipe files only, never overwrites; duplicates by video are skipped). `RECIPE_BANK_DIR` points the server and scripts at another folder holding `recipes/` and `data/` (tests use a temp one). Every POST, PUT and DELETE must be sent as `application/json` (415 otherwise) and may not come from another website: a foreign `Origin`, a cross-site `Sec-Fetch-Site` or a `Host` that is not loopback (or listed in `RECIPE_BANK_HOSTS`) gets 403 (`writeRefusal` in `server.mjs`).
 
 Recipe writes (local server only; the static build stays read-only): `POST /api/recipes <recipe>` creates `recipes/<id>.json` → 201 `{recipe, dequeued}` · `PUT /api/recipes/<id> <recipe>` replaces it → 200. Both need a JSON content type (415 otherwise), run `validateRecipe` (400 `{error, problems}`), refuse a duplicate id or video (409 `{error, recipeId}`; PUT answers 404 for an unknown id), write atomically as two-space JSON with a trailing newline, and remove the queue entry for the recipe's video.
 

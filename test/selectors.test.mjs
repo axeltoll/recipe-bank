@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { SELECTORS, PAGES } from '../scripts/browser/selectors.mjs';
+import { SELECTORS, PAGES, TEXT } from '../scripts/browser/selectors.mjs';
 
 const PUBLIC = resolve(import.meta.dirname, '..', 'public');
 let markup = await readFile(join(PUBLIC, 'index.html'), 'utf8');
@@ -40,6 +40,13 @@ test('every selector the browser checks use names something the dashboard render
     for (const cls of classes) assert.ok(hasClass(cls), `${name}: .${cls} is never rendered`);
     for (const attr of attrs) assert.ok(markup.includes(attr), `${name}: [${attr}] is never rendered`);
   }
+});
+
+test('the copy the checks read back is still in the views', async () => {
+  const add = await readFile(join(PUBLIC, 'ui', 'add.js'), 'utf8');
+  assert.ok(add.includes(`'${TEXT.unsupportedLink}'`), 'public/ui/add.js still says TEXT.unsupportedLink');
+  const smoke = await readFile(resolve(PUBLIC, '..', 'scripts', 'smoke.mjs'), 'utf8');
+  assert.ok(!smoke.includes(TEXT.unsupportedLink), 'scripts/smoke.mjs reads the text from TEXT, not a copy');
 });
 
 test('parameterised selectors match the hashes and attributes the views write', () => {

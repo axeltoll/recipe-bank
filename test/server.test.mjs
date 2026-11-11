@@ -48,12 +48,11 @@ after(async () => {
   await rm(tmp, { recursive: true, force: true });
 });
 
+// Every write is sent as JSON, like the dashboard does; the server refuses anything else (see server-guard.test.mjs).
 async function call(method, path, body, { raw = false } = {}) {
   const init = { method, headers: {} };
-  if (body !== undefined) {
-    init.headers['content-type'] = 'application/json';
-    init.body = raw ? body : JSON.stringify(body);
-  }
+  if (method !== 'GET') init.headers['content-type'] = 'application/json';
+  if (body !== undefined) init.body = raw ? body : JSON.stringify(body);
   const res = await fetch(base + path, init);
   const text = await res.text();
   let json = null;
@@ -122,7 +121,7 @@ test('POST /api/queue rejects bad input with 400 and changes nothing', async () 
   for (const [body, raw] of bad) {
     const r = await call('POST', '/api/queue', body, { raw });
     assert.equal(r.status, 400, JSON.stringify(body));
-    // Every supported source is named (the list grew with the more-platforms lane).
+    // Every supported source is named (built from PLATFORMS in lib/video.mjs).
     assert.match(r.json.error, /YouTube, TikTok, Instagram, Facebook, Pinterest or X/);
   }
   assert.equal((await readQueue()).length, 3);

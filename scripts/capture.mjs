@@ -2,13 +2,20 @@
 import { createHash } from 'node:crypto';
 import { homedir } from 'node:os';
 import path from 'node:path';
-import { existsSync, realpathSync } from 'node:fs';
+import { existsSync, realpathSync, statSync } from 'node:fs';
 import { mkdir, readFile, readdir, writeFile, stat } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import { parseVideoUrl } from '../lib/video.mjs';
+import { parseVideoUrl, PLATFORMS } from '../lib/video.mjs';
 import { detectTools, runCommand } from './local-tools.mjs';
 
 export const ROOT = path.resolve(import.meta.dirname, '..');
+
+// "YouTube, TikTok, Instagram, Facebook, Pinterest or X": every source lib/video.mjs parses without the
+// web-page opt-in. Whether yt-dlp can fetch a given post is up to yt-dlp and the platform.
+export const SOURCES = (() => {
+  const labels = PLATFORMS.filter((p) => p.id !== 'web').map((p) => p.label);
+  return `${labels.slice(0, -1).join(', ')} or ${labels.at(-1)}`;
+})();
 
 // videoKey's colon is not portable to Windows filenames; short URLs use a hash.
 export function captureKey(video) {
@@ -49,14 +56,46 @@ function physicalPath(folder) {
   return path.join(realpathSync(parent), ...suffix);
 }
 
-export function assertPrivateCaptureDir(folder, repoRoots = [ROOT]) {
+/**
+ * The identity of an existing directory: device and inode (exact, as bigints). Two spellings of one folder
+ * have the same identity: letter case on a case-insensitive volume (macOS, Windows), a symlink, a bind
+ * mount. Throws when the path does not exist.
+ */
+export function directoryIdentity(folder) {
+  const s = statSync(folder, { bigint: true });
+  return `${s.dev}:${s.ino}`;
+}
+
+/** Identities of the folder and each of its ancestors that exist, nearest first. */
+function ancestorIdentities(folder, identify) {
+  const ids = [];
+  let current = path.resolve(folder);
+  for (;;) {
+    try { ids.push(identify(current)); } catch { /* does not exist (yet) */ }
+    const next = path.dirname(current);
+    if (next === current) return ids;
+    current = next;
+  }
+}
+
+const INSIDE_REPOSITORY = 'Refusing a capture directory inside the repository. Set RECIPE_BANK_CAPTURE_DIR outside all checkouts.';
+
+/**
+ * Throws unless `folder` is outside every repository root. Compared three ways: by spelling, by the
+ * physical path (symlinks resolved), and by identity, so that /Users/me/Dev/Recipe-Bank on a
+ * case-insensitive volume is still recognised as /Users/me/dev/recipe-bank. `identify` is for tests.
+ */
+export function assertPrivateCaptureDir(folder, repoRoots = [ROOT], { identify = directoryIdentity } = {}) {
   const requested = path.resolve(folder);
   const physical = physicalPath(requested);
+  const rootIds = new Set();
   for (const root of repoRoots) {
     const absoluteRoot = path.resolve(root);
-    if (isInside(requested, absoluteRoot) || isInside(physical, physicalPath(absoluteRoot))) {
-      throw new Error('Refusing a capture directory inside the repository. Set RECIPE_BANK_CAPTURE_DIR outside all checkouts.');
-    }
+    if (isInside(requested, absoluteRoot) || isInside(physical, physicalPath(absoluteRoot))) throw new Error(INSIDE_REPOSITORY);
+    try { rootIds.add(identify(absoluteRoot)); } catch { /* a root that does not exist contains nothing */ }
+  }
+  for (const id of [...ancestorIdentities(requested, identify), ...ancestorIdentities(physical, identify)]) {
+    if (rootIds.has(id)) throw new Error(INSIDE_REPOSITORY);
   }
   return requested;
 }
@@ -88,31 +127,76 @@ export async function repositoryRoots({ root = ROOT, info = stat, read = readFil
   return [...new Set(roots)];
 }
 
-// Pure command planning; commands and arguments stay separate (never a shell).
-export function buildCapturePlan({ video, captureDir, tools = {}, modelPath = null, transcribe = false }) {
+/** How long each step may run before it is stopped and recorded as failed, in milliseconds. */
+export const STEP_TIMEOUTS = Object.freeze({
+  metadata: 2 * 60_000,
+  captions: 2 * 60_000,
+  audio: 10 * 60_000,
+  transcribe: 30 * 60_000,
+  video: 15 * 60_000,
+  frames: 5 * 60_000,
+  ocr: 60_000, // per frame
+});
+
+/** Placeholder in the captions step, replaced by captionLanguages() once the video's language is known. */
+export const CAPTION_LANGS = '<caption-languages>';
+
+const LANGUAGE = /^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/i;
+
+/**
+ * yt-dlp's --sub-langs for a video whose language is `language` (from its info JSON). Only the original
+ * language: the creator's own captions and the automatic captions in that language ("en", "en-GB",
+ * "en-orig"). Never "all": on YouTube that is every automatic translation, a hundred or more files,
+ * fetched one by one until the platform rate-limits the capture, and a translation is no source for
+ * the creator's amounts. Without a known language only the "-orig" automatic track is asked for.
+ */
+export function captionLanguages(language) {
+  if (typeof language !== 'string' || !LANGUAGE.test(language)) return '.*-orig';
+  const base = language.split('-')[0].toLowerCase();
+  return `${base},${base}-.*`;
+}
+
+/** True for a caption file name the capture asked for: `source.<lang>.vtt|srt` in the original language. */
+export function isOriginalCaption(name, language) {
+  const m = /^source\.(.+)\.(?:vtt|srt)$/i.exec(name);
+  if (!m) return false;
+  const lang = m[1].toLowerCase();
+  if (typeof language !== 'string' || !LANGUAGE.test(language)) return lang.endsWith('-orig');
+  const base = language.split('-')[0].toLowerCase();
+  return lang === base || lang.startsWith(`${base}-`);
+}
+
+// Pure command planning; commands and arguments stay separate (never a shell). yt-dlp writes into the
+// capture folder through -P, so the folder name is never read as an output template (a "%" in it would be).
+export function buildCapturePlan({ video, captureDir, tools = {}, modelPath = null, transcribe = false, timeouts = STEP_TIMEOUTS }) {
   const p = path.join;
   const commands = [];
   const warnings = [];
-  const add = (id, tool, args, when = 'always') => commands.push({ id, command: tools[tool], args, when });
-  const common = ['--ignore-config', '--no-playlist', '--no-progress', '--no-overwrites'];
-  const captionTemplate = p(captureDir, 'source.%(ext)s');
+  const add = (id, tool, args, when = 'always') => commands.push({ id, command: tools[tool], args, when, timeout: timeouts[id] ?? 0 });
+  const common = ['--ignore-config', '--no-playlist', '--no-progress', '--no-overwrites', '-P', captureDir];
   if (tools['yt-dlp']) {
     add('metadata', 'yt-dlp', [...common, '--skip-download', '--write-info-json', '--write-description',
-      '--write-subs', '--write-auto-subs', '--sub-langs', 'all,-live_chat', '--sub-format', 'vtt/srt/best',
-      '-o', captionTemplate, '--', video.url]);
+      '-o', 'source.%(ext)s', '--', video.url]);
+    add('captions', 'yt-dlp', [...common, '--skip-download', '--write-subs', '--write-auto-subs',
+      '--sub-langs', CAPTION_LANGS, '--sub-format', 'vtt/srt/best', '-o', 'source.%(ext)s', '--', video.url]);
     const fallback = transcribe ? 'always' : 'no-captions';
     const stt = tools['whisper-ctranslate2'] ? 'whisper-ctranslate2' : tools.whisper ? 'whisper' : null;
     if (stt && modelPath && tools.ffmpeg) {
       add('audio', 'yt-dlp', [...common, '-f', 'bestaudio/best', '-x', '--audio-format', 'wav',
-        '-o', p(captureDir, 'audio.%(ext)s'), '--', video.url], fallback);
-      add('transcribe', stt, [p(captureDir, 'audio.wav'), '--model', modelPath,
-        ...(stt === 'whisper-ctranslate2' ? ['--local_files_only', 'True'] : []),
+        '-o', 'audio.%(ext)s', '--', video.url], fallback);
+      // whisper-ctranslate2 takes a local CTranslate2 model folder through --model_directory (its --model
+      // only accepts model names); openai-whisper takes a name or a checkpoint file through --model.
+      const model = stt === 'whisper-ctranslate2'
+        ? ['--model_directory', modelPath, '--local_files_only', 'True']
+        : ['--model', modelPath];
+      add('transcribe', stt, [p(captureDir, 'audio.wav'), ...model,
         '--device', 'cpu', '--output_format', 'json', '--output_dir', captureDir], fallback);
     } else {
       warnings.push('Local transcription needs ffmpeg, whisper-ctranslate2 or whisper, and RECIPE_BANK_STT_MODEL pointing to an existing local model.');
     }
     if (tools.ffmpeg) {
-      add('video', 'yt-dlp', [...common, '-f', 'best[ext=mp4]/best', '-o', p(captureDir, 'video.%(ext)s'), '--', video.url]);
+      // Real pixels for OCR: up to 1080p video merged with audio by ffmpeg, not the 360p pre-merged file.
+      add('video', 'yt-dlp', [...common, '-f', 'bv*[height<=1080]+ba/b', '-o', 'video.%(ext)s', '--', video.url]);
       add('frames', 'ffmpeg', ['-nostdin', '-n', '-i', '<downloaded-video>', '-vf', 'fps=1/10,scale=1280:-2',
         '-frames:v', '60', p(captureDir, 'frame-%03d.jpg')]);
       if (tools.tesseract) {
@@ -121,6 +205,16 @@ export function buildCapturePlan({ video, captureDir, tools = {}, modelPath = nu
     } else warnings.push('ffmpeg missing: keyframe extraction and local transcription are unavailable.');
   } else warnings.push('yt-dlp missing: no platform content can be captured. Install it and retry.');
   return { video, captureDir, commands, warnings, transcribe };
+}
+
+/** The video's language from the captured info JSON, or null. */
+async function videoLanguage(dir) {
+  try {
+    const info = JSON.parse(await readFile(path.join(dir, 'source.info.json'), 'utf8'));
+    return typeof info?.language === 'string' && LANGUAGE.test(info.language) ? info.language : null;
+  } catch {
+    return null;
+  }
 }
 
 export function formatCommand(command) {
@@ -136,9 +230,11 @@ export function hasCaptionText(text) {
   });
 }
 
-async function usableCaptions(dir) {
+// Only captions in the video's own language count: a machine translation must not stand in for the
+// creator's words and suppress local transcription.
+async function usableCaptions(dir, language) {
   for (const name of await readdir(dir)) {
-    if (/^source\..+\.(vtt|srt)$/i.test(name) && hasCaptionText(await readFile(path.join(dir, name), 'utf8'))) return true;
+    if (isOriginalCaption(name, language) && hasCaptionText(await readFile(path.join(dir, name), 'utf8'))) return true;
   }
   return false;
 }
@@ -147,10 +243,10 @@ export async function runCapturePlan(plan, { run = runCommand, repoRoots = [ROOT
   assertPrivateCaptureDir(plan.captureDir, repoRoots);
   await mkdir(plan.captureDir, { recursive: true, mode: 0o700 });
   assertPrivateCaptureDir(plan.captureDir, repoRoots);
-  const report = { video: plan.video, warnings: plan.warnings, results: [] };
+  const report = { video: plan.video, warnings: plan.warnings, language: null, results: [] };
   const successful = new Set();
   const execute = async (spec, args = spec.args) => {
-    const result = await run(spec.command, args, { cwd: plan.captureDir });
+    const result = await run(spec.command, args, { cwd: plan.captureDir, timeout: spec.timeout ?? 0 });
     const ok = result.status === 0 && !result.error;
     if (ok) successful.add(spec.id);
     report.results.push({ id: spec.id, args, status: ok ? 'ok' : 'failed', code: result.status ?? null, error: result.error?.message });
@@ -159,7 +255,13 @@ export async function runCapturePlan(plan, { run = runCommand, repoRoots = [ROOT
   };
   for (const spec of plan.commands) {
     assertPrivateCaptureDir(plan.captureDir, repoRoots);
-    if (spec.when === 'no-captions' && await usableCaptions(plan.captureDir)) {
+    if (spec.id === 'captions') {
+      report.language = await videoLanguage(plan.captureDir);
+      const langs = captionLanguages(report.language);
+      await execute(spec, spec.args.map((arg) => (arg === CAPTION_LANGS ? langs : arg)));
+      continue;
+    }
+    if (spec.when === 'no-captions' && await usableCaptions(plan.captureDir, report.language)) {
       report.results.push({ id: spec.id, status: 'skipped', reason: 'Usable captions exist; read them before requesting transcription.' });
       continue;
     }
@@ -196,7 +298,7 @@ export async function captureMain(args, { env = process.env, lookup, run = runCo
   }
   const video = parseVideoUrl(urls[0]);
   if (!video || !/^https?:\/\//i.test(urls[0])) {
-    error('Use a supported YouTube, TikTok or Instagram video URL.');
+    error(`Use a supported ${SOURCES} video URL.`);
     return 1;
   }
   try {
