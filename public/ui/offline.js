@@ -20,9 +20,8 @@ export function setupOffline() {
     try {
       if (on) {
         await navigator.serviceWorker.register('/sw.js');
-        // The worker answers from its cache first and refreshes in the background (public/sw.js), so say so.
-        note.textContent = 'On. Recipes open without a connection once they have loaded. Videos still need one. '
-          + 'A recipe added since your last visit shows up after a second reload.';
+        // The worker asks the network for recipes first and keeps a copy for offline use (public/sw.js).
+        note.textContent = 'On. Recipes open without a connection once they have loaded. Videos still need one.';
       } else {
         const regs = await navigator.serviceWorker.getRegistrations();
         await Promise.all(regs.map((r) => r.unregister()));

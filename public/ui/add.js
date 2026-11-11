@@ -15,8 +15,8 @@ function describe(video, raw) {
   return video.id ? `✓ ${label} video` : `✓ ${label} short link (resolved when it is queued)`;
 }
 
-/** `rerender` redraws the current route after the queue changed. */
-export function setupAdd({ rerender }) {
+/** `rerender` redraws the current route after the queue changed; `reload` re-reads recipes and queue. */
+export function setupAdd({ rerender, reload }) {
   const dlg = $('#add-dialog');
   const url = $('#add-url');
   const web = $('#add-web');
@@ -68,6 +68,8 @@ export function setupAdd({ rerender }) {
       });
       const body = await res.json();
       if (res.status === 409 && body.recipeId) {
+        // The recipe may have been written after this page loaded: load it before opening it.
+        if (!state.recipes.some((r) => r.id === body.recipeId)) await reload?.().catch(() => {});
         dlg.close();
         location.hash = recipeHash(body.recipeId);
         toast('That one is already in the bank');

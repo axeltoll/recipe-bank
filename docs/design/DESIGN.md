@@ -252,7 +252,7 @@ A step that states a duration in figures ("simmer for 10 minutes", "3-4 mins", "
 
 ## Offline (behind a switch)
 
-`public/sw.js` is a cache-first service worker for the app shell and the recipe data. It is **off by default**. The footer switch "Keep recipes for offline use" registers it and stores `rb:offline`; switching it off unregisters the worker and deletes its caches. Videos and thumbnails are not cached.
+`public/sw.js` is a service worker that serves the app shell cache first and the recipe data network first, with the cached copy when offline. It is **off by default**. The footer switch "Keep recipes for offline use" registers it and stores `rb:offline`; switching it off unregisters the worker and deletes its caches. Videos and thumbnails are not cached.
 
 ## Browser storage
 

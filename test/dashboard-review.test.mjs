@@ -113,3 +113,40 @@ test('steps are numbered across the parts on the recipe page, as in cook mode', 
   const steps = flattenSteps({ components: [{ name: 'A', steps: [{ text: 'a1' }, { text: 'a2' }] }, { name: 'B', steps: [{ text: 'b1' }] }] });
   assert.deepEqual(steps.map((s) => s.n), [1, 2, 3]);
 });
+
+test('cook mode: a refused wake lock turns the switch off for the session, so returning to the tab does not retake it', async () => {
+  const cook = await read('public', 'ui', 'cook.js');
+  const request = cook.slice(cook.indexOf('async function requestWake'), cook.indexOf('function releaseWake'));
+  const refused = request.slice(request.indexOf('} catch {'));
+  assert.match(refused, /wakeWanted = false;/, 'the visibility handler checks wakeWanted, so it must follow the switch');
+  assert.doesNotMatch(refused, /store\.set/, 'a refusal is not the reader\'s choice: the next session asks again');
+  assert.match(cook.slice(cook.indexOf('export function openCook'), cook.indexOf('session = {')), /wakeWanted = store\.get\(WAKE_KEY, true\) !== false/);
+  // Without the Wake Lock API the switch is rendered off, not checked and then snapped off.
+  assert.match(cook, /id="cook-wake-on"\$\{wakeWanted && 'wakeLock' in navigator \? ' checked' : ''\}/);
+});
+
+test('add: a 409 for a recipe this page has not loaded yet reloads before opening it', async () => {
+  const add = await read('public', 'ui', 'add.js');
+  const app = await read('public', 'app.js');
+  const conflict = add.slice(add.indexOf('if (res.status === 409 && body.recipeId)'), add.indexOf("toast('That one is already in the bank')"));
+  assert.ok(conflict.indexOf('await reload') >= 0 && conflict.indexOf('await reload') < conflict.indexOf('location.hash ='),
+    'reload() runs before the hash changes');
+  assert.match(app, /setupAdd\(\{ rerender: [^}]*\}?, reload \}\)/, 'the dashboard hands reload to the dialog');
+});
+
+test('home: turning a chip off redraws the chips, so a chip past the limit shown only while on goes away', () => {
+  const click = home.slice(home.indexOf("$('#chips').addEventListener('click'"), home.indexOf("if (e.target.closest('#more'))"));
+  assert.match(click, /if \(!state\.keys\.has\(k\)\) \{[\s\S]*?renderChips\(\);/);
+});
+
+test('recipe page: a damaged checklist in storage cannot throw, and a view that throws shows an error state', async () => {
+  const app = await read('public', 'app.js');
+  for (const file of ['recipe.js', 'home.js', 'cook.js', 'queue.js', 'core.js']) {
+    assert.doesNotMatch(await read('public', 'ui', file), /new Set\(store\.get\(/, `${file}: a stored value is checked before it is iterated`);
+  }
+  assert.match(recipeJs, /const checked = new Set\(Array\.isArray\(saved\) \? saved\.filter\(\(k\) => typeof k === 'string'\) : \[\]\);/);
+  // Same fallback as a feature route: the hash has changed, so the old view must not stay on screen.
+  assert.match(app, /if \(next\.name === 'recipe'\) detail = renderDetail\(next, renderRecipe\);/);
+  assert.match(app, /else if \(next\.name === 'queue'\) detail = renderDetail\(next, renderQueued\);/);
+  assert.match(app, /function renderDetail\(next, render\) \{\s*try \{\s*return render\(next\.id\);\s*\} catch \(e\) \{\s*return renderFailed\(next, e\);/);
+});

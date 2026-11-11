@@ -3,15 +3,16 @@
 //   import { mount } from '/features/week-plan.mjs';
 //   const plan = mount(document.querySelector('#week'), { recipes });
 //
-// Persists to localStorage ('rb:week-plan') and fires 'rb:plan-change' { plan, source }.
+// Persists to localStorage ('rb:week-plan') and fires 'rb:plan-change' { plan, source } with the plan that was stored.
 
 import {
   DAYS, DAY_LABELS, ANY_DAY_LABEL, emptyPlan, normalizePlan, addToPlan, removeFromPlan, moveInPlan, planByDay,
 } from '../../lib/plan.mjs';
-import { esc, makeStore, ensureStylesheet, emit } from './shared.mjs';
+import { esc, makeStore, ensureStylesheet, emit, renderNotice } from './shared.mjs';
 
 export const PLAN_KEY = 'rb:week-plan';
 export const PLAN_EVENT = 'rb:plan-change';
+export const UNSAVED_NOTICE = 'Storage unavailable or unreadable. The week plan was not changed.';
 
 /** The stored plan (never throws). Pass `recipes` to drop recipes that are no longer in the bank. */
 export function readPlan({ key = PLAN_KEY, storage, recipes } = {}) {
@@ -27,10 +28,12 @@ export function writePlan(plan, { key = PLAN_KEY, storage } = {}) {
 /**
  * Add a recipe to the stored week from anywhere (e.g. an "Add to week" button on a recipe page).
  * Mounted week plans and shopping lists update through the 'rb:plan-change' event.
+ * Returns the plan that is stored now: the previous one, and no event, when storage did not keep the change.
  */
 export function addRecipeToWeek(recipeId, day = null, { key = PLAN_KEY, storage, target = globalThis.document } = {}) {
-  const plan = addToPlan(readPlan({ key, storage }), recipeId, day);
-  writePlan(plan, { key, storage });
+  const previous = readPlan({ key, storage });
+  const plan = addToPlan(previous, recipeId, day);
+  if (!writePlan(plan, { key, storage })) return previous;
   if (target) emit(target, PLAN_EVENT, { plan, source: 'addRecipeToWeek' });
   return plan;
 }
@@ -43,7 +46,7 @@ const dayOptions = (selected) =>
  * The week plan as HTML. Pure: used by mount() and by the tests.
  * `href(recipe)` makes the link for a planned recipe.
  */
-export function renderWeekPlan(plan, recipes, { href = (r) => `#/r/${encodeURIComponent(r.id)}`, showEmptyDays = true, title = 'Week plan' } = {}) {
+export function renderWeekPlan(plan, recipes, { href = (r) => `#/r/${encodeURIComponent(r.id)}`, showEmptyDays = true, title = 'Week plan', notice = '' } = {}) {
   const byId = new Map((recipes ?? []).map((r) => [r.id, r]));
   const p = normalizePlan(plan, [...byId.keys()]);
   const byDay = planByDay(p);
@@ -77,6 +80,7 @@ export function renderWeekPlan(plan, recipes, { href = (r) => `#/r/${encodeURICo
         <p class="rbf-muted" data-count>${count === 0 ? 'Nothing planned yet' : `${count} ${count === 1 ? 'meal' : 'meals'} planned`}</p>
         ${count ? '<button type="button" class="rbf-btn rbf-btn-quiet" data-clear>Clear week</button>' : ''}
       </header>
+      ${notice ? renderNotice(notice) : ''}
       <form class="rbf-add" data-add>
         <label><span>Recipe</span>
           <select name="recipe" required>
@@ -105,12 +109,18 @@ export function mount(el, options = {}) {
   // Kept unfiltered: a recipe that isn't loaded (yet) is hidden when rendering, never dropped from storage.
   let plan = normalizePlan(opts.plan ?? readPlan({ key: opts.storageKey, storage: opts.storage }));
 
-  const render = () => {
-    el.innerHTML = renderWeekPlan(plan, recipes, opts);
+  const render = (notice = '') => {
+    el.innerHTML = renderWeekPlan(plan, recipes, { ...opts, notice });
   };
+  // A change that storage did not keep is not applied: the plan on screen, the event and the
+  // stored plan stay the same, and a notice says why.
   const commit = (next) => {
-    plan = normalizePlan(next);
-    if (opts.persist) writePlan(plan, { key: opts.storageKey, storage: opts.storage });
+    const candidate = normalizePlan(next);
+    if (opts.persist && !writePlan(candidate, { key: opts.storageKey, storage: opts.storage })) {
+      render(UNSAVED_NOTICE);
+      return;
+    }
+    plan = candidate;
     render();
     opts.onChange?.(plan);
     emit(el, PLAN_EVENT, { plan, source: token });
