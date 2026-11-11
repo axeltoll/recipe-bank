@@ -114,7 +114,9 @@ cd recipe-bank
 npm start</code></pre>
             </div>
             <p>The dashboard opens at <code>http://127.0.0.1:4780</code>. Set the <code>PORT</code> and <code>HOST</code> environment variables to change the address. <code>npm run dev</code> does the same and restarts when the server or the shared library changes.</p>
-            <p>By default the server listens on <code>127.0.0.1</code>, so only your own machine can reach it. The server has no login. If you set <code>HOST</code> to an address other devices can reach, anyone on that network can add to the queue and remove from it, so keep it on a network you trust.</p>
+            <p>By default the server listens on <code>127.0.0.1</code>, so only your own machine can reach it. Changes (adding to the queue, removing from it, saving a recipe, importing a pack) are accepted only when the request is addressed to a loopback name such as <code>127.0.0.1</code> from your own machine, to the exact address in <code>HOST</code>, or to a name listed in <code>RECIPE_BANK_HOSTS</code> (comma-separated, such as <code>kitchen.lan</code>).</p>
+            <p>To use the dashboard from other devices, set <code>HOST</code> to the address they will open, such as <code>192.168.1.20</code>, or list the names they use in <code>RECIPE_BANK_HOSTS</code>. <code>HOST=0.0.0.0</code> or <code>HOST=::</code> listens on every interface but allows no name by itself: other devices can open the dashboard, and Add video, removing from the queue and every other change fail with a 403 until their name is in <code>RECIPE_BANK_HOSTS</code>. A loopback name only counts for requests from your own machine.</p>
+            <p>The server has no login. Anyone who can reach it under an allowed name can add to the queue and remove from it, so keep it on a network you trust.</p>
 
             <h2 id="data">Where your data lives</h2>
             <div class="table-scroll">
@@ -125,11 +127,12 @@ npm start</code></pre>
                 <tbody>
                   <tr><td><code>recipes/&lt;id&gt;.json</code></td><td>One file per recipe. This is the data. The file name equals the recipe's <code>id</code>.</td></tr>
                   <tr><td><code>data/queue.json</code></td><td>Videos waiting for analysis.</td></tr>
-                  <tr><td>Your browser</td><td>Only conveniences: the filters you last used and the ingredients you ticked.</td></tr>
+                  <tr><td>Your browser</td><td>What you set in the dashboard: the theme, the filters you last used, ticked ingredients and shopping items, the week plan, the pantry, the household profile and the food budget. It stays in that browser and is in no file.</td></tr>
                 </tbody>
               </table>
             </div>
-            <p>There is no database. Back up the two paths above and you have backed up everything.</p>
+            <p>The two paths are inside the repository unless you set <code>RECIPE_BANK_DIR</code> to another folder holding <code>recipes/</code> and <code>data/</code>. Then that folder is your bank: the server, <code>npm run validate</code> and the queue helper read and write it, not the repository.</p>
+            <p>There is no database. Back up <code>recipes/</code> and <code>data/queue.json</code> in the folder your bank is in and you have backed up every file Recipe Bank writes. What a browser keeps is not in those files.</p>
 
             <h2 id="check">Check your files</h2>
             <div class="table-scroll">
@@ -147,6 +150,7 @@ npm start</code></pre>
             <h2 id="static">Host a read-only copy</h2>
             <p><code>npm run build</code> writes a static copy of the dashboard to <code>dist/</code>. Any static host can serve it. The copy is read-only: it cannot change the queue, so Add video copies a request message instead of queueing.</p>
             <p>The repository also has <code>npm run deploy</code>, which builds and then publishes <code>dist/</code> to a Cloudflare Pages project with wrangler. It needs your own Cloudflare account and project.</p>
+            <p>Both always use the recipes and the queue in the repository. They ignore <code>RECIPE_BANK_DIR</code>, so a bank kept in another folder is never published by accident.</p>
 
             <h2 id="tools">Optional capture tools</h2>
             <!-- gen:status:private-captures -->
