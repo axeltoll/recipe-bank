@@ -115,3 +115,14 @@ test('ratio rounding, zero spend and currencies with different precision', () =>
   assert.throws(() => periodOf('1900-02-29', 'month'));
   assert.equal(periodOf('2000-02-29', 'month').end, '2000-02-29');
 });
+
+test('summary() without `today` uses the local calendar date, like the dates shops are saved with', (t) => {
+  const tz = process.env.TZ;
+  process.env.TZ = 'Asia/Tokyo'; // UTC+9, no daylight saving
+  t.after(() => { if (tz === undefined) delete process.env.TZ; else process.env.TZ = tz; });
+  t.mock.timers.enable({ apis: ['Date'], now: Date.parse('2026-03-31T16:00:00Z') }); // 1 April, 01:00 in Tokyo
+  const monthly = { period: 'month', amount: '100.00', currency: 'SEK' };
+  const s = summary(monthly, [{ date: '2026-04-01', total: '10.00', currency: 'SEK' }]);
+  assert.equal(s.key, '2026-04');
+  assert.equal(s.spendMinor, 1000);
+});
