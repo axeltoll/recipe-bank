@@ -91,6 +91,26 @@ test('short links keep their https host and path and use them as their unresolve
   assert.equal(videoKey(null), '');
 });
 
+test('share links people paste: X /i/web/status, TikTok /t/ and Facebook /share/r|v/', () => {
+  for (const input of ['https://x.com/i/web/status/12345', 'https://twitter.com/i/web/status/12345?s=20',
+    'https://mobile.x.com/i/web/status/12345/', 'https://x.com/i/web/status/12345/video/1']) {
+    assert.deepEqual(parseVideoUrl(input), { platform: 'x', id: '12345', url: 'https://x.com/i/web/status/12345' }, input);
+    assert.equal(videoKey(parseVideoUrl(input)), videoKey(parseVideoUrl('https://x.com/kitchen/status/12345')), input);
+  }
+  // A short link has no id yet: lib/video-resolver.mjs follows it.
+  for (const [input, platform, url] of [
+    ['https://www.tiktok.com/t/ZTAbC123/', 'tiktok', 'https://www.tiktok.com/t/ZTAbC123/'],
+    ['https://tiktok.com/t/ZTAbC123?_r=1', 'tiktok', 'https://www.tiktok.com/t/ZTAbC123'],
+    ['https://www.facebook.com/share/r/1AbC23/', 'facebook', 'https://www.facebook.com/share/r/1AbC23/'],
+    ['https://m.facebook.com/share/v/1AbC23?mibextid=x', 'facebook', 'https://www.facebook.com/share/v/1AbC23'],
+  ]) assert.deepEqual(parseVideoUrl(input), { platform, id: null, url }, input);
+  for (const input of ['https://x.com/i/web/status/abc', 'https://x.com/i/web/12345', 'https://www.tiktok.com/t/',
+    'https://www.tiktok.com/t/AbC/other', 'https://www.facebook.com/share/r/', 'https://www.facebook.com/share/x/AbC/',
+    'https://www.facebook.com/share/r/AbC/other', 'https://l.facebook.com/share/r/AbC/']) {
+    assert.equal(parseVideoUrl(input), null, input);
+  }
+});
+
 test('rejects dangerous schemes, userinfo, look-alikes and unsupported hosts', () => {
   for (const input of [
     'javascript:alert(1)', 'data:text/html,video',
