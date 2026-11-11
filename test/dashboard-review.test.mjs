@@ -113,3 +113,14 @@ test('steps are numbered across the parts on the recipe page, as in cook mode', 
   const steps = flattenSteps({ components: [{ name: 'A', steps: [{ text: 'a1' }, { text: 'a2' }] }, { name: 'B', steps: [{ text: 'b1' }] }] });
   assert.deepEqual(steps.map((s) => s.n), [1, 2, 3]);
 });
+
+test('cook mode: a refused wake lock turns the switch off for the session, so returning to the tab does not retake it', async () => {
+  const cook = await read('public', 'ui', 'cook.js');
+  const request = cook.slice(cook.indexOf('async function requestWake'), cook.indexOf('function releaseWake'));
+  const refused = request.slice(request.indexOf('} catch {'));
+  assert.match(refused, /wakeWanted = false;/, 'the visibility handler checks wakeWanted, so it must follow the switch');
+  assert.doesNotMatch(refused, /store\.set/, 'a refusal is not the reader\'s choice: the next session asks again');
+  assert.match(cook.slice(cook.indexOf('export function openCook'), cook.indexOf('session = {')), /wakeWanted = store\.get\(WAKE_KEY, true\) !== false/);
+  // Without the Wake Lock API the switch is rendered off, not checked and then snapped off.
+  assert.match(cook, /id="cook-wake-on"\$\{wakeWanted && 'wakeLock' in navigator \? ' checked' : ''\}/);
+});

@@ -20,6 +20,7 @@ let wakeWanted = store.get(WAKE_KEY, true) !== false;
 export function openCook(recipe, opts = {}) {
   const steps = flattenSteps(recipe);
   if (!dlg || !steps.length || session) return;
+  wakeWanted = store.get(WAKE_KEY, true) !== false; // the reader's choice, even if the last session's lock failed
   session = {
     recipe,
     steps,
@@ -71,7 +72,7 @@ function renderShell() {
     <div class="cook-bar">
       <p class="cook-recipe">${esc(recipe.title)}</p>
       <label class="switch" for="cook-wake-on">
-        <input type="checkbox" role="switch" id="cook-wake-on"${wakeWanted ? ' checked' : ''}>
+        <input type="checkbox" role="switch" id="cook-wake-on"${wakeWanted && 'wakeLock' in navigator ? ' checked' : ''}>
         <span>Keep screen on</span>
       </label>
       <button class="btn btn-quiet icon-btn" type="button" id="cook-close" aria-label="Exit cook mode">${icon('close')}</button>
@@ -252,6 +253,9 @@ async function requestWake() {
     if (current) current.checked = true;
     sayWake('');
   } catch {
+    // The switch shows off, so off it is: coming back to the tab must not take the lock again on its own.
+    // Only this session: the next cook session asks again, as the reader chose.
+    wakeWanted = false;
     const current = $('#cook-wake-on');
     if (current) current.checked = false;
     sayWake("Couldn't keep the screen on. Battery saver may be blocking it.");
