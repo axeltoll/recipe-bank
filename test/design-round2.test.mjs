@@ -117,8 +117,13 @@ test('running text is capped with --measure-text', () => {
 });
 
 test('below desktop the header collapses to its nav row, and sticky offsets use --head-h', () => {
-  assert.match(block(css, '.topbar'), /top:\s*calc\(-1 \* var\(--bar-h\)\)/);
+  // Under a notch the safe-area padding scrolls away with the brand row, and the stuck nav row carries the inset.
+  assert.match(block(css, '.topbar'), /top:\s*calc\(-1 \* \(var\(--bar-h\) \+ env\(safe-area-inset-top, 0px\)\)\)/);
+  assert.match(block(css, '.topbar'), /padding-top:\s*env\(safe-area-inset-top\)/);
   assert.match(block(css, '.nav'), /min-height:\s*var\(--nav-h\)/);
+  assert.match(block(css, '.nav'), /padding-top:\s*env\(safe-area-inset-top, 0px\)/);
+  assert.match(light.get('--head-h'), /^calc\(48px \+ env\(safe-area-inset-top, 0px\)\)$/, 'the part that stays includes the inset');
+  assert.match(css, /--head-h:\s*calc\(64px \+ env\(safe-area-inset-top, 0px\)\)/);
   assert.match(block(css, '.brand'), /min-height:\s*var\(--bar-h\)/);
   assert.match(block(css, 'html'), /scroll-padding-top:\s*calc\(var\(--head-h\)/);
   const sticky = [...noComments(css).matchAll(/position:\s*sticky;\s*top:\s*([^;]+);/g)].map((m) => m[1]);

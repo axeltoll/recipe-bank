@@ -84,8 +84,9 @@
   --content-max: 1760px;
   --bar-h: 56px;
   --nav-h: 48px;
-  /* --head-h is the part of the header that stays on screen (the nav row below desktop, the whole bar from desktop). */
-  --head-h: 48px;
+  /* --head-h is the part of the header that stays on screen (the nav row below desktop, the whole bar from desktop),
+     with the top safe area under a notch. */
+  --head-h: calc(48px + env(safe-area-inset-top, 0px));
   --media-w: 280px;
 }
 
@@ -160,7 +161,7 @@
   :root { --gutter: 24px; --bar-h: 64px; }
 }
 @media (min-width: 1280px) {
-  :root { --gutter: 32px; --media-w: 300px; --head-h: 64px; }
+  :root { --gutter: 32px; --media-w: 300px; --head-h: calc(64px + env(safe-area-inset-top, 0px)); }
 }
 @media (min-width: 1920px) {
   :root { --gutter: 48px; --media-w: 400px; }
@@ -273,9 +274,11 @@ main:focus-visible { outline: none; box-shadow: none; }
 @keyframes pulse { 50% { opacity: 0.3; } }
 
 /* ---------- shell ---------- */
-/* Below desktop the header is two rows and collapses: the brand row scrolls away, the nav row stays (P1, T1). */
+/* Below desktop the header is two rows and collapses: the brand row scrolls away, the nav row stays (P1, T1).
+   Under a notch (viewport-fit=cover) the safe-area padding scrolls away with the brand row, and the nav row
+   carries the same inset, so the stuck row clears the notch and no slice of the brand row stays on screen. */
 .topbar {
-  position: sticky; top: calc(-1 * var(--bar-h)); z-index: var(--z-bar);
+  position: sticky; top: calc(-1 * (var(--bar-h) + env(safe-area-inset-top, 0px))); z-index: var(--z-bar);
   padding-top: env(safe-area-inset-top);
   padding-inline: max(var(--gutter), env(safe-area-inset-left), env(safe-area-inset-right), calc((100% - var(--content-max)) / 2));
   background: var(--surface);
@@ -295,7 +298,7 @@ main:focus-visible { outline: none; box-shadow: none; }
 .nav {
   order: 10; flex: 1 0 100%;
   display: flex; gap: var(--s-1); min-height: var(--nav-h); overflow-x: auto; overscroll-behavior-x: contain;
-  margin-inline: calc(-1 * var(--s-2)); padding-bottom: var(--s-1);
+  margin-inline: calc(-1 * var(--s-2)); padding-top: env(safe-area-inset-top, 0px); padding-bottom: var(--s-1);
   scrollbar-width: none;
 }
 .nav a {
@@ -955,7 +958,7 @@ main[data-view='new'] .feature-page, main[data-view='edit'] .feature-page { widt
 @media (min-width: 1280px) {
   /* The header is one row and stays whole. */
   .topbar { top: 0; }
-  .nav { order: 0; flex: 0 1 auto; min-height: 0; margin-inline: var(--s-2) 0; padding-bottom: 0; }
+  .nav { order: 0; flex: 0 1 auto; min-height: 0; margin-inline: var(--s-2) 0; padding-block: 0; }
 
   /* Feature pages with two parts (week plan + shopping list, household + budget) go side by side. */
   .feature-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
