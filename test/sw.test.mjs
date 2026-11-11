@@ -204,3 +204,24 @@ test('the manifest is valid and its icons exist', async () => {
   assert.ok(manifest.icons.length > 0);
   for (const icon of manifest.icons) assert.ok(await exists(fileFor(icon.src)), icon.src);
 });
+
+test('recipes are network first: a save or an import shows at once, offline falls back to the cache or an empty list', async () => {
+  const online = loadWorker({
+    fetch: async () => ({ ok: true, clone() { return this; }, tag: 'LIVE' }),
+    caches: { open: async () => ({ match: async () => 'STALE', put: async () => {} }) },
+  });
+  assert.equal((await dispatchFetch(online.listeners, 'GET', '/api/recipes').responded).tag, 'LIVE');
+
+  const stale = loadWorker({
+    fetch: async () => { throw new Error('offline'); },
+    caches: { open: async () => ({ match: async () => 'STALE', put: async () => {} }) },
+  });
+  assert.equal(await dispatchFetch(stale.listeners, 'GET', '/api/recipes.json').responded, 'STALE');
+
+  const empty = loadWorker({
+    fetch: async () => { throw new Error('offline'); },
+    caches: { open: async () => ({ match: async () => undefined, put: async () => {} }) },
+  });
+  const res = await dispatchFetch(empty.listeners, 'GET', '/api/recipes').responded;
+  assert.deepEqual(await res.json(), { recipes: [], invalid: [] });
+});
