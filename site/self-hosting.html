@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Self-hosting guide · Recipe Bank</title>
+  <meta name="description" content="How to run Recipe Bank on your own machine: what you need, how to start it, where the data lives, how a recipe file is written, and how to host a read-only copy.">
+  <meta name="theme-color" content="#f8f4ee">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Recipe Bank">
+  <meta property="og:title" content="Self-hosting guide · Recipe Bank">
+  <meta property="og:description" content="Run Recipe Bank on your own machine with Node.js 22 and nothing else.">
+  <meta name="twitter:card" content="summary">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <script src="js/theme.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,650;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/site.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="inner">
+      <a class="logo" href="index.html">
+        <svg class="logo-mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect class="m-bg" width="32" height="32" rx="8"/><path class="m-fg" d="M9 20c0-5 3-9 7-9s7 4 7 9z"/><rect class="m-fg" x="7" y="20" width="18" height="3" rx="1.5"/></svg>
+        <span>Recipe Bank</span>
+      </a>
+      <nav class="site-nav" id="site-nav" aria-label="Sections">
+        <ul>
+          <li><a href="index.html#how">How it works</a></li>
+          <li><a href="index.html#showcase">Showcase</a></li>
+          <li><a href="index.html#features">Features</a></li>
+          <li><a href="self-hosting.html" aria-current="page">Self-hosting</a></li>
+          <li><a href="index.html#roadmap">Roadmap</a></li>
+          <li><a href="index.html#faq">FAQ</a></li>
+        </ul>
+      </nav>
+      <button class="icon-btn theme-toggle" id="theme-toggle" type="button" aria-label="Switch theme">
+        <svg class="i-sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
+        <svg class="i-moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 14.2A8 8 0 0 1 9.8 4a8 8 0 1 0 10.2 10.2z"/></svg>
+      </button>
+      <a class="btn btn-primary btn-small header-cta" href="https://github.com/axeltoll/recipe-bank">
+        <svg class="i-star" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>
+        <span><span class="cta-long">Star on </span>GitHub</span>
+      </a>
+      <button class="icon-btn nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+    </div>
+    <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+  </header>
+
+  <main id="main">
+    <section class="band page-head" aria-labelledby="page-title">
+      <div class="inner">
+        <p class="eyebrow">Self-hosting guide</p>
+        <h1 id="page-title">Run Recipe Bank <em>on your own machine.</em></h1>
+        <p class="lede">Everything below describes the repository as it is today. Where something is only planned, it says so.</p>
+      </div>
+    </section>
+
+    <section class="band doc-band" aria-label="Guide">
+      <div class="inner">
+        <div class="doc">
+          <nav class="toc" aria-label="On this page">
+            <h2>On this page</h2>
+            <ol>
+              <li><a href="#need">What you need</a></li>
+              <li><a href="#start">Start it</a></li>
+              <li><a href="#data">Where your data lives</a></li>
+              <li><a href="#add">Add a video</a></li>
+              <li><a href="#write">Write the recipe</a></li>
+              <li><a href="#check">Check your files</a></li>
+              <li><a href="#static">Host a read-only copy</a></li>
+              <li><a href="#planned">What is planned</a></li>
+            </ol>
+          </nav>
+
+          <div class="prose">
+            <h2 id="need">What you need</h2>
+            <ul>
+              <li>Node.js 22 or newer.</li>
+              <li>Git, to clone the repository.</li>
+              <li>A current browser.</li>
+            </ul>
+            <p>There is no install step. Recipe Bank has no dependencies, so there is nothing for <code>npm install</code> to fetch.</p>
+
+            <h2 id="start">Start it</h2>
+            <div class="code-card">
+              <div class="code-head">
+                <span>Terminal</span>
+                <button type="button" class="btn btn-small btn-ghost" data-copy-from="start-commands" hidden>Copy</button>
+                <span class="code-status" data-copy-status role="status"></span>
+              </div>
+              <pre tabindex="0" aria-label="Commands to start Recipe Bank"><code id="start-commands">git clone https://github.com/axeltoll/recipe-bank.git
+cd recipe-bank
+npm start</code></pre>
+            </div>
+            <p>The dashboard opens at <code>http://127.0.0.1:4780</code>. Set the <code>PORT</code> and <code>HOST</code> environment variables to change the address. <code>npm run dev</code> does the same and restarts when the server or the shared library changes.</p>
+            <p>By default the server listens on <code>127.0.0.1</code>, so only your own machine can reach it. The server has no login. If you set <code>HOST</code> to an address other devices can reach, anyone on that network can add to the queue and remove from it, so keep it on a network you trust.</p>
+
+            <h2 id="data">Where your data lives</h2>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr><th scope="col">Path</th><th scope="col">What it holds</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>recipes/&lt;id&gt;.json</code></td><td>One file per recipe. This is the data. The file name equals the recipe's <code>id</code>.</td></tr>
+                  <tr><td><code>data/queue.json</code></td><td>Videos waiting for analysis.</td></tr>
+                  <tr><td>Your browser</td><td>Only conveniences: the filters you last used and the ingredients you ticked.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>There is no database. Back up the two paths above and you have backed up everything.</p>
+
+            <h2 id="add">Add a video</h2>
+            <p>Press Add video on the dashboard and paste a link to a YouTube video or Short, a TikTok or an Instagram Reel. The video joins the queue. If it is already a recipe or already queued, the dashboard tells you instead of adding it twice.</p>
+
+            <h2 id="write">Write the recipe</h2>
+            <p>A recipe is one JSON file in <code>recipes/</code>. The format is documented in <a href="https://github.com/axeltoll/recipe-bank/blob/main/CLAUDE.md">CLAUDE.md</a> and enforced by <code>lib/recipe.mjs</code>. Today you write that file yourself, or you ask a coding agent that reads CLAUDE.md to write it from the video. The packaged Recipe Agent that does this from a link is planned, not shipped.</p>
+            <p>The rules that matter more than the format:</p>
+            <ol>
+              <li>Never invent an amount. An amount is the creator's own words. If the video does not say, the amount is empty and its basis is <code>unstated</code>.</li>
+              <li>Steps come from the video. If part of the method is missing, mark the recipe <code>partial</code> and list what is missing under <code>gaps</code>.</li>
+              <li>Give every ingredient a short filter key, lowercase and singular, and reuse the keys that already exist.</li>
+              <li>Add a timestamp in seconds to each step where you can. The dashboard turns it into a play from here button.</li>
+              <li>Keep transcripts, captions and frames out of the repository. They are the creators' own content.</li>
+            </ol>
+            <p>When the recipe file exists, remove the matching entry from <code>data/queue.json</code>. The dashboard already hides queue entries whose video is in <code>recipes/</code>. You are responsible for following each platform's terms when you capture a video.</p>
+
+            <h2 id="check">Check your files</h2>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr><th scope="col">Command</th><th scope="col">What it does</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>npm run validate</code></td><td>Checks every recipe file and the queue against the contract. Run it before you commit.</td></tr>
+                  <tr><td><code>npm test</code></td><td>Runs the tests on Node's built-in test runner.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h2 id="static">Host a read-only copy</h2>
+            <p><code>npm run build</code> writes a static copy of the dashboard to <code>dist/</code>. Any static host can serve it. The copy is read-only: it cannot change the queue, so Add video copies a request message instead of queueing.</p>
+            <p>The repository also has <code>npm run deploy</code>, which builds and then publishes <code>dist/</code> to a Cloudflare Pages project with wrangler. It needs your own Cloudflare account and project.</p>
+
+            <h2 id="planned">What is planned</h2>
+            <p>These are on the roadmap and not in the repository yet:</p>
+            <ul>
+              <li>A Recipe Agent definition with entry files for common coding agents, and the video analysis packaged as a reusable skill.</li>
+              <li>A self-hosting document in the repository and a setup check for the optional tools the agent needs, such as ffmpeg, yt-dlp, a local speech-to-text engine and tesseract. The dashboard keeps working without any of them.</li>
+              <li>A form to add and edit recipes in the dashboard, and queueing from the static copy.</li>
+            </ul>
+            <div class="cta-row">
+              <a class="btn btn-primary" data-cta="primary" href="https://github.com/axeltoll/recipe-bank">
+                <svg class="i-star" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>
+                <span>Star and run it from GitHub</span>
+              </a>
+              <a class="btn btn-ghost" href="https://github.com/axeltoll/recipe-bank/blob/main/ROADMAP.md">Read the roadmap</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <div class="footer-brand">
+        <a class="logo" href="index.html">
+          <svg class="logo-mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect class="m-bg" width="32" height="32" rx="8"/><path class="m-fg" d="M9 20c0-5 3-9 7-9s7 4 7 9z"/><rect class="m-fg" x="7" y="20" width="18" height="3" rx="1.5"/></svg>
+          <span>Recipe Bank</span>
+        </a>
+        <p>Open source under the MIT license. The videos belong to their creators; Recipe Bank only links to and embeds them.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer">
+        <ul>
+          <li><a href="https://github.com/axeltoll/recipe-bank">GitHub</a></li>
+          <li><a href="self-hosting.html" aria-current="page">Self-hosting guide</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+          <li><a href="https://github.com/axeltoll/recipe-bank/blob/main/ROADMAP.md">Roadmap</a></li>
+          <li><a href="https://github.com/axeltoll/recipe-bank/blob/main/LICENSE">License</a></li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

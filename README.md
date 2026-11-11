@@ -44,6 +44,8 @@ npm run dev        # restarts on server/lib changes
 npm run validate   # checks every recipes/*.json and data/queue.json
 npm test           # URL parsing and recipe-contract tests
 npm run build      # static copy in dist/ (read-only: "Add video" copies a request instead of queueing)
+npm run site       # previews the public website in site/ at http://127.0.0.1:4790
+npm run site:data  # regenerates site/data/showcase.js from the showcased recipe files
 ```
 
 ## Project layout
@@ -55,7 +57,8 @@ npm run build      # static copy in dist/ (read-only: "Add video" copies a reque
 | `lib/` | Video-URL parsing and the recipe contract, shared by the server, the validator and the browser. |
 | `server.mjs` | Static files plus the JSON API (`/api/recipes`, `/api/queue`). |
 | `public/` | The dashboard. |
-| `scripts/` | Validator and static build. |
+| `site/` | The public website for the project (static, separate from the dashboard). See [site/README.md](site/README.md). |
+| `scripts/` | Validator, static build, and the website's preview server and sample-data generator. |
 | `test/` | `node:test` suites. |
 
 ## Plans

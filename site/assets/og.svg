@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <!-- Source artwork for the social preview image. Social platforms do not read SVG: export this file to
+       og.png (1200 x 630) and reference that from og:image. See site/README.md, "What a deploy needs". -->
+  <title>Recipe Bank: turn recipe videos into exact ingredients and steps</title>
+  <defs>
+    <pattern id="t" width="20" height="20" patternUnits="userSpaceOnUse"><rect x="2" y="2" width="16" height="16" rx="3" fill="#2b241e"/></pattern>
+    <pattern id="a" width="20" height="20" patternUnits="userSpaceOnUse"><rect x="2" y="2" width="16" height="16" rx="3" fill="#c2410c"/></pattern>
+  </defs>
+  <rect width="1200" height="630" fill="#f8f4ee"/>
+  <g transform="translate(80 86)">
+    <rect width="56" height="56" rx="14" fill="#c2410c"/>
+    <path d="M15.75 35c0-8.75 5.25-15.75 12.25-15.75S40.25 26.25 40.25 35z" fill="#fff7ed"/>
+    <rect x="12.25" y="35" width="31.5" height="5.25" rx="2.6" fill="#fff7ed"/>
+    <text x="76" y="40" font-family="Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" fill="#1f1a16">Recipe Bank</text>
+  </g>
+  <text font-family="Georgia, 'Times New Roman', serif" font-size="68" font-weight="700" fill="#1f1a16">
+    <tspan x="80" y="290">Turn any recipe video</tspan>
+    <tspan x="80" y="372" fill="#b03a0a" font-style="italic" font-weight="400">into exact ingredients</tspan>
+    <tspan x="80" y="454" fill="#b03a0a" font-style="italic" font-weight="400">and steps.</tspan>
+  </text>
+  <text x="80" y="540" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="#4a423b">Open source · MIT licensed · runs on your machine</text>
+  <!-- the recipe shape of the hero mark, 18 x 26 tiles -->
+  <g transform="translate(790 55)">
+    <g fill="url(#t)">
+      <rect x="20" y="0" width="320" height="20"/>
+      <rect x="20" y="500" width="320" height="20"/>
+      <rect x="0" y="20" width="20" height="480"/>
+      <rect x="340" y="20" width="20" height="480"/>
+      <rect x="60" y="60" width="180" height="40"/>
+      <rect x="120" y="140" width="160" height="40"/>
+      <rect x="120" y="220" width="120" height="40"/>
+      <rect x="120" y="300" width="180" height="40"/>
+      <rect x="60" y="380" width="40" height="40"/>
+      <rect x="120" y="380" width="100" height="40"/>
+    </g>
+    <g fill="url(#a)">
+      <rect x="60" y="140" width="40" height="40"/>
+      <rect x="60" y="220" width="40" height="40"/>
+      <rect x="60" y="300" width="40" height="40"/>
+    </g>
+  </g>
+</svg>
