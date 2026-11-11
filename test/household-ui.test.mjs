@@ -170,3 +170,15 @@ test('overflow is shown without dropping shops, and hostile textarea notes stay 
   assert.match(html, /Remove shop 1/); assert.match(html, /Invalid shop/);
   assert.ok(!html.includes('<script>')); assert.ok(html.includes('&lt;/textarea&gt;'));
 });
+
+test('both currency inputs accept a lowercase code, which the submit handler upper-cases', () => {
+  const html = renderBudget(defaultBudget(), [], { today });
+  const patterns = [...html.matchAll(/<input name="currency" pattern="([^"]+)"/g)].map((m) => m[1]);
+  assert.equal(patterns.length, 2, 'budget settings and record a shop');
+  for (const p of patterns) {
+    // The browser checks the whole value against the pattern (with the v flag).
+    const re = new RegExp(`^(?:${p})$`, 'v');
+    for (const ok of ['SEK', 'sek', 'Eur']) assert.ok(re.test(ok), `${p} accepts ${ok}`);
+    for (const bad of ['SE', 'SEK1', 'S3K', 'kr ']) assert.ok(!re.test(bad), `${p} refuses ${bad}`);
+  }
+});

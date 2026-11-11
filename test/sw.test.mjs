@@ -58,6 +58,12 @@ test('policy: recipes and shell are cached, the queue is network-first, everythi
   assert.equal(p('GET', '/'), 'shell');
   assert.equal(p('GET', '/styles.css'), 'shell');
   assert.equal(p('GET', '/lib/video.mjs'), 'shell');
+  assert.equal(p('GET', '/app.js?v=2'), 'shell', 'the query string does not matter');
+  // Same-origin paths outside SHELL are not cache first: only the precached shell is.
+  assert.equal(p('GET', '/not-in-the-shell.js'), 'network');
+  assert.equal(p('GET', '/features/unknown-feature.js'), 'network');
+  assert.equal(p('GET', '/recipes/gochujang-chicken-thighs.json'), 'network');
+  assert.equal(p('GET', '/api/whatever'), 'network');
   assert.equal(p('POST', '/api/queue'), 'network');
   assert.equal(p('DELETE', '/api/queue/abc'), 'network');
   assert.equal(p('GET', 'https://i.ytimg.com/vi/mhNQ8y5ud0A/hqdefault.jpg'), 'network');

@@ -45,6 +45,8 @@
   background: var(--_surface); color: var(--_fg); font: inherit; font-weight: 600; white-space: nowrap; cursor: pointer;
 }
 .rbf-shop .rbf-btn-quiet { border-color: transparent; background: transparent; color: var(--_fg-2); }
+/* The display above would otherwise show a hidden button (Untick all with nothing ticked). */
+.rbf-shop [hidden] { display: none !important; }
 .rbf-shop :focus-visible { outline: 2px solid var(--_focus); outline-offset: 2px; }
 @media (hover: hover) {
   .rbf-shop .rbf-btn:hover { background: var(--_inset); }
