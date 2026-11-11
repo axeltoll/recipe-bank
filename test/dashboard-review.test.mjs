@@ -138,3 +138,15 @@ test('home: turning a chip off redraws the chips, so a chip past the limit shown
   const click = home.slice(home.indexOf("$('#chips').addEventListener('click'"), home.indexOf("if (e.target.closest('#more'))"));
   assert.match(click, /if \(!state\.keys\.has\(k\)\) \{[\s\S]*?renderChips\(\);/);
 });
+
+test('recipe page: a damaged checklist in storage cannot throw, and a view that throws shows an error state', async () => {
+  const app = await read('public', 'app.js');
+  for (const file of ['recipe.js', 'home.js', 'cook.js', 'queue.js', 'core.js']) {
+    assert.doesNotMatch(await read('public', 'ui', file), /new Set\(store\.get\(/, `${file}: a stored value is checked before it is iterated`);
+  }
+  assert.match(recipeJs, /const checked = new Set\(Array\.isArray\(saved\) \? saved\.filter\(\(k\) => typeof k === 'string'\) : \[\]\);/);
+  // Same fallback as a feature route: the hash has changed, so the old view must not stay on screen.
+  assert.match(app, /if \(next\.name === 'recipe'\) detail = renderDetail\(next, renderRecipe\);/);
+  assert.match(app, /else if \(next\.name === 'queue'\) detail = renderDetail\(next, renderQueued\);/);
+  assert.match(app, /function renderDetail\(next, render\) \{\s*try \{\s*return render\(next\.id\);\s*\} catch \(e\) \{\s*return renderFailed\(next, e\);/);
+});

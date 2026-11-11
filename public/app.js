@@ -45,6 +45,17 @@ function renderNav(activeName) {
     : '';
 }
 
+/** What a view that threw shows instead, so the route never stays on the previous view. */
+function renderFailed(next, e) {
+  console.error(e);
+  view.innerHTML = stateBlock({
+    glyph: 'alert',
+    title: 'This page could not be shown',
+    actions: '<a class="btn btn-primary" href="#/">All recipes</a>',
+  });
+  return { name: next.name, layout: 'message', param: next.param };
+}
+
 function renderCustom(next) {
   const def = hub.route(next.name);
   document.title = `${def.title ?? def.label ?? next.name} · Recipe Bank`;
@@ -52,15 +63,18 @@ function renderCustom(next) {
   try {
     def.render(view, next.param, rb);
   } catch (e) {
-    console.error(e);
-    view.innerHTML = stateBlock({
-      glyph: 'alert',
-      title: 'This page could not be shown',
-      actions: '<a class="btn btn-primary" href="#/">All recipes</a>',
-    });
-    return { name: next.name, layout: 'message', param: next.param };
+    return renderFailed(next, e);
   }
   return { name: next.name, layout: def.layout, param: next.param };
+}
+
+/** The recipe and queue views, with the same fallback as a feature route. */
+function renderDetail(next, render) {
+  try {
+    return render(next.id);
+  } catch (e) {
+    return renderFailed(next, e);
+  }
 }
 
 function route() {
@@ -70,8 +84,8 @@ function route() {
   teardownHome();
 
   let detail;
-  if (next.name === 'recipe') detail = renderRecipe(next.id);
-  else if (next.name === 'queue') detail = renderQueued(next.id);
+  if (next.name === 'recipe') detail = renderDetail(next, renderRecipe);
+  else if (next.name === 'queue') detail = renderDetail(next, renderQueued);
   else if (next.custom) detail = renderCustom(next);
   else detail = renderHome();
 

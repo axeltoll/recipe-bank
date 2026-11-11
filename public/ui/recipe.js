@@ -41,7 +41,9 @@ export function renderRecipe(id) {
   if (!r) return renderMissing('recipe');
   document.title = `${r.title} · Recipe Bank`;
 
-  const checked = new Set(store.get(`rb:checked:${r.id}`, []));
+  // Only a list of keys is a saved checklist; anything else in storage (an object, a number) starts empty.
+  const saved = store.get(`rb:checked:${r.id}`, []);
+  const checked = new Set(Array.isArray(saved) ? saved.filter((k) => typeof k === 'string') : []);
   const multi = r.components.length > 1;
   const partial = r.status === 'partial';
   const steps = stepCount(r);
