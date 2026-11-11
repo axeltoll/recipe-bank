@@ -1,6 +1,7 @@
 // The browser checks must never leave Chrome running or its profile on disk, and their static server
 // must never serve a file outside dist/. A fake "Chrome" (a small Node script) stands in for the browser:
-// it records its pid and profile folder, then prints the DevTools line after a chosen delay.
+// it starts a child of its own (as Chrome starts renderer and GPU processes), records both pids and its profile
+// folder, then prints the DevTools line after a chosen delay.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { request as httpRequest } from 'node:http';
@@ -10,7 +11,7 @@ import { chmod, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { launch } from '../scripts/browser/cdp.mjs';
+import { launch, killTree } from '../scripts/browser/cdp.mjs';
 import { staticServer, listen, stop } from '../scripts/browser/support.mjs';
 import { ROOT } from './helpers/bank.mjs';
 
@@ -65,8 +66,10 @@ async function fakeBrowser(t) {
   const executable = join(dir, 'fake-chrome');
   await writeFile(executable, `#!${process.execPath}
 const { writeFileSync } = require('node:fs');
+const { spawn } = require('node:child_process');
 const profile = process.argv.find((a) => a.startsWith('--user-data-dir='))?.slice('--user-data-dir='.length);
-writeFileSync(process.env.FAKE_CHROME_OUT, JSON.stringify({ pid: process.pid, profile }));
+const renderer = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], { stdio: 'ignore' });
+writeFileSync(process.env.FAKE_CHROME_OUT, JSON.stringify({ pid: process.pid, renderer: renderer.pid, profile }));
 setTimeout(() => process.stderr.write('DevTools listening on ws://127.0.0.1:9/devtools/browser/fake\\n'), Number(process.env.FAKE_CHROME_DELAY || 0));
 setInterval(() => {}, 1000);
 `);
@@ -88,6 +91,11 @@ function gone(pid) {
   }
 }
 
+/** A failing run must not leave the fake's child behind. */
+function reap(pid) {
+  try { process.kill(pid, 'SIGKILL'); } catch { /* gone, as it should be */ }
+}
+
 async function eventually(check, ms = 5000) {
   const deadline = Date.now() + ms;
   while (!check()) {
@@ -107,10 +115,12 @@ test('a failed start kills the browser, removes its profile and its process guar
   t.after(() => { delete process.env.FAKE_CHROME_OUT; delete process.env.FAKE_CHROME_DELAY; });
   // Nothing listens on port 9, so the DevTools connection fails after the browser has started.
   await assert.rejects(launch({ executable: fake.executable, graceMs: 200 }), /DevTools WebSocket/);
-  const { pid, profile } = JSON.parse(await readFile(fake.out, 'utf8'));
+  const { pid, renderer, profile } = JSON.parse(await readFile(fake.out, 'utf8'));
+  t.after(() => reap(renderer));
   assert.match(profile, /recipe-bank-chrome-/);
   assert.equal(existsSync(profile), false, 'profile removed');
   assert.ok(await eventually(() => gone(pid)), 'browser killed');
+  assert.ok(await eventually(() => gone(renderer)), 'browser child process killed');
   for (const e of GUARDS) assert.equal(process.listenerCount(e), before[e], `${e} guard removed`);
 });
 
@@ -143,8 +153,9 @@ const wait = setInterval(async () => {
   const timer = setTimeout(() => child.kill('SIGKILL'), 20_000);
   const code = await new Promise((ok) => child.on('exit', (c, s) => ok(c ?? s)));
   clearTimeout(timer);
-  const { pid, profile } = JSON.parse(await readFile(fake.out, 'utf8'));
-  return { code, stderr, pid, profile };
+  const { pid, renderer, profile } = JSON.parse(await readFile(fake.out, 'utf8'));
+  t.after(() => reap(renderer));
+  return { code, stderr, pid, renderer, profile };
 }
 
 test('an uncaught exception kills the browser, removes the profile and exits 1', { skip }, async (t) => {
@@ -153,6 +164,7 @@ test('an uncaught exception kills the browser, removes the profile and exits 1',
   assert.match(r.stderr, /boom in a listener/);
   assert.equal(existsSync(r.profile), false, 'profile removed');
   assert.ok(await eventually(() => gone(r.pid)), 'browser killed');
+  assert.ok(await eventually(() => gone(r.renderer)), 'browser child process killed');
 });
 
 test('an unhandled rejection kills the browser, removes the profile and exits 1', { skip }, async (t) => {
@@ -160,6 +172,7 @@ test('an unhandled rejection kills the browser, removes the profile and exits 1'
   assert.equal(r.code, 1, r.stderr);
   assert.equal(existsSync(r.profile), false, 'profile removed');
   assert.ok(await eventually(() => gone(r.pid)), 'browser killed');
+  assert.ok(await eventually(() => gone(r.renderer)), 'browser child process killed');
 });
 
 test('process.exit() still kills the browser and removes the profile', { skip }, async (t) => {
@@ -167,6 +180,7 @@ test('process.exit() still kills the browser and removes the profile', { skip },
   assert.equal(r.code, 3, r.stderr);
   assert.equal(existsSync(r.profile), false, 'profile removed');
   assert.ok(await eventually(() => gone(r.pid)), 'browser killed');
+  assert.ok(await eventually(() => gone(r.renderer)), 'browser child process killed');
 });
 
 test('Ctrl-C kills the browser, removes the profile and exits 130', { skip }, async (t) => {
@@ -174,4 +188,16 @@ test('Ctrl-C kills the browser, removes the profile and exits 130', { skip }, as
   assert.equal(r.code, 130, r.stderr);
   assert.equal(existsSync(r.profile), false, 'profile removed');
   assert.ok(await eventually(() => gone(r.pid)), 'browser killed');
+  assert.ok(await eventually(() => gone(r.renderer)), 'browser child process killed');
+});
+
+test('killTree kills the process group on POSIX and the whole tree on Windows', () => {
+  const kills = [], runs = [];
+  killTree(42, { platform: 'linux', kill: (pid, signal) => kills.push([pid, signal]), run: () => assert.fail() });
+  assert.deepEqual(kills, [[-42, 'SIGKILL']]);
+  killTree(42, { platform: 'darwin', kill: (pid, signal) => { kills.push([pid, signal]); if (pid < 0) throw new Error('ESRCH'); } });
+  assert.deepEqual(kills.slice(1), [[-42, 'SIGKILL'], [42, 'SIGKILL']], 'falls back to the pid when there is no group');
+  killTree(42, { platform: 'win32', kill: () => assert.fail(), run: (cmd, args) => runs.push([cmd, ...args]) });
+  assert.deepEqual(runs, [['taskkill', '/pid', '42', '/t', '/f']]);
+  killTree(undefined, { kill: () => assert.fail(), run: () => assert.fail() });
 });

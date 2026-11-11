@@ -3,7 +3,7 @@ import { accessSync, constants, rmSync } from 'node:fs';
 import { mkdtemp, rm, writeFile, mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, join, win32 } from 'node:path';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 
 export function findChrome({ env = process.env, platform = process.platform, exists = (file) => {
   try { accessSync(file, platform === 'win32' ? constants.F_OK : constants.X_OK); return true; } catch { return false; }
@@ -116,10 +116,28 @@ export function interceptor({ sessionId, send, origins, exceptions }) {
   };
 }
 
+/**
+ * Kill the browser and every process it started (renderer, GPU, utility). Synchronous, so the 'exit' guard can
+ * use it. POSIX: Chrome runs in its own process group (spawned detached), and the whole group gets SIGKILL;
+ * the group outlives its leader, so this also reaps children of a parent that has already exited. Windows:
+ * taskkill /t walks the tree.
+ */
+export function killTree(pid, { platform = process.platform, kill = process.kill, run = spawnSync } = {}) {
+  if (!pid) return;
+  if (platform === 'win32') {
+    run('taskkill', ['/pid', String(pid), '/t', '/f'], { stdio: 'ignore', windowsHide: true });
+    return;
+  }
+  try { kill(-pid, 'SIGKILL'); } catch {
+    try { kill(pid, 'SIGKILL'); } catch { /* already gone */ }
+  }
+}
+
 const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * Start Chrome with a throw-away profile. Until close() has finished, the browser and its profile are
+ * Start Chrome with a throw-away profile. Until close() has finished, the browser (with every process it started)
+ * and its profile are
  * cleaned up on every way out: close(), a failed start, Ctrl-C or SIGTERM (a second one too), an uncaught
  * exception or unhandled rejection anywhere in the process (exit code 1), and, as a last resort,
  * process.exit() (a synchronous kill and profile removal in the 'exit' event).
@@ -136,7 +154,7 @@ export async function launch({ headed = false, executable = findChrome(), graceM
   };
   const onExit = () => {
     // Synchronous only: the event loop is gone.
-    try { if (alive()) child.kill('SIGKILL'); } catch { /* already gone */ }
+    try { killTree(child?.pid); } catch { /* already gone */ }
     try { rmSync(profile, { recursive: true, force: true }); } catch { /* best effort */ }
   };
   const guards = [['SIGINT', onSignal], ['SIGTERM', onSignal], ['uncaughtException', onFatal], ['unhandledRejection', onFatal], ['exit', onExit]];
@@ -146,7 +164,7 @@ export async function launch({ headed = false, executable = findChrome(), graceM
     const errors = [];
     const step = async (fn) => { try { await fn(); } catch (e) { errors.push(e); } };
     await step(async () => {
-      if (!alive()) return;
+      if (!alive()) { killTree(child?.pid); return; }
       const exited = new Promise((resolve) => child.once('exit', resolve));
       // Ask Chrome to quit, so its renderer and GPU processes go with it; SIGKILL if it does not in time.
       if (connection && !connection.closed) connection.send('Browser.close').catch(() => {});
@@ -154,9 +172,11 @@ export async function launch({ headed = false, executable = findChrome(), graceM
       const quit = await Promise.race([exited.then(() => true), new Promise((resolve) => { timer = setTimeout(resolve, graceMs, false); })]);
       clearTimeout(timer);
       if (!quit && alive()) {
-        child.kill('SIGKILL');
+        killTree(child.pid);
         await exited;
       }
+      // Children that outlived a clean parent exit (or a parent that was killed) go too.
+      killTree(child.pid);
     });
     await step(() => connection?.close());
     await step(() => rm(profile, { recursive: true, force: true, maxRetries: 3 }));
@@ -170,7 +190,7 @@ export async function launch({ headed = false, executable = findChrome(), graceM
       '--disable-component-update', '--disable-sync', '--disable-extensions',
       // Also prevent DNS/preconnect traffic before request interception is installed.
       '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost, EXCLUDE 127.0.0.1', 'about:blank',
-    ], { stdio: ['ignore', 'ignore', 'pipe'] });
+    ], { stdio: ['ignore', 'ignore', 'pipe'], detached: process.platform !== 'win32', windowsHide: true });
     const url = await new Promise((resolve, reject) => {
       const parser = new StderrParser();
       const timer = setTimeout(() => finish(new Error('Chrome startup timed out')), 15_000);
