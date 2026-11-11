@@ -220,7 +220,7 @@ export function mount(el, options = {}) {
   let list;
 
   // ---- purchase option: state is only read when opts.household is on ----
-  const followHousehold = !options.profile;
+  let followHousehold = !options.profile; // a profile passed in (at mount or through update) is kept
   let purchase = null;
   let profile = null;
   let pantry = null;
@@ -368,7 +368,12 @@ export function mount(el, options = {}) {
       opts = { ...opts, ...next };
       if (next.recipes) recipes = next.recipes;
       if (next.plan) plan = normalizePlan(next.plan);
-      if (next.profile) profile = normalizeProfile(next.profile); // purchase option
+      // purchase option: a profile given here is kept (household events no longer replace it);
+      // profile: null follows the stored household again.
+      if (Object.hasOwn(next, 'profile')) {
+        followHousehold = !next.profile;
+        profile = next.profile ? normalizeProfile(next.profile) : null;
+      }
       if (next.pantry) pantry = normalizePantry(next.pantry); // purchase option
       render();
     },

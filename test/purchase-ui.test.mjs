@@ -244,3 +244,24 @@ test('a stored ticked value that is not an array counts as nothing ticked instea
     });
   }
 });
+
+test('update({ profile }) keeps that profile, and update({ pantry: [] }) empties the pantry', async () => {
+  await withFakeDom((doc) => {
+    const mem = memory();
+    const el = fakeElement();
+    const shop = ui.mount(el, { recipes: [alpha, beta], plan: week, storage: mem, css: false, household: true });
+    assert.equal(shop.getPurchase().servings, 2);
+    shop.update({ profile: oneAdult });
+    assert.equal(shop.getPurchase().servings, 1);
+    doc.dispatchEvent(new CustomEvent('recipe-bank:household-change', { detail: { profile: family } }));
+    assert.equal(shop.getPurchase().servings, 1, 'a profile given through update() is not replaced by household events');
+    shop.update({ profile: null });
+    doc.dispatchEvent(new CustomEvent('recipe-bank:household-change', { detail: { profile: family } }));
+    assert.equal(shop.getPurchase().servings, 2.6, 'profile: null follows the household again');
+
+    shop.update({ pantry: [] });
+    assert.deepEqual(shop.getPantry(), []);
+    assert.deepEqual(shop.getPurchase().leftOut, []);
+    shop.destroy();
+  });
+});
