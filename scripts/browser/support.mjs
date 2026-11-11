@@ -1,0 +1,107 @@
+import { createServer } from 'node:http';
+import { readFile } from 'node:fs/promises';
+import { extname, resolve, sep } from 'node:path';
+import { spawn } from 'node:child_process';
+import { server } from '../../server.mjs';
+import { findChrome, launch } from './cdp.mjs';
+
+export const ROOT = resolve(import.meta.dirname, '../..');
+const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon' };
+
+export async function listen(server) {
+  await new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', () => { server.off('error', reject); resolve(); });
+  });
+  return `http://127.0.0.1:${server.address().port}`;
+}
+export async function stop(server) {
+  if (!server.listening) return;
+  const closed = new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  server.closeAllConnections();
+  await closed;
+}
+export function staticServer(root = resolve(ROOT, 'dist')) {
+  return createServer(async (req, res) => {
+    try {
+      const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+      const file = resolve(root, `.${pathname === '/' ? '/index.html' : pathname}`);
+      if (!file.startsWith(root + sep)) { res.writeHead(403).end(); return; }
+      const data = await readFile(file);
+      res.writeHead(200, { 'content-type': TYPES[extname(file)] ?? 'application/octet-stream' }).end(data);
+    } catch { res.writeHead(404).end(); }
+  });
+}
+export async function build() {
+  // Same entry point as npm run build, without a platform-dependent npm executable.
+  await new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, ['scripts/build-static.mjs'], { cwd: ROOT, stdio: 'inherit' });
+    child.once('error', reject);
+    child.once('exit', (code) => code === 0 ? resolve() : reject(new Error(`Static build exited ${code}`)));
+  });
+}
+export function options(args = process.argv.slice(2)) {
+  const result = { headed: false, only: null };
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === '--headed') result.headed = true;
+    else if (args[i] === '--only' && args[i + 1]) result.only = args[++i];
+    else throw new Error(`Unknown or incomplete option: ${args[i]}`);
+  }
+  return result;
+}
+export function browserAvailable() {
+  if (findChrome()) return true;
+  const message = 'No Chrome or Chromium found. Install a system browser or set CHROME_PATH.';
+  if (process.env.SMOKE_REQUIRED === '1') throw new Error(`${message} SMOKE_REQUIRED=1 makes this a failure.`);
+  console.log(`SKIP: ${message}`);
+  return false;
+}
+export function assertClean(page) {
+  const errors = page.console.filter((entry) => entry.type === 'error').map((entry) => entry.text);
+  if (errors.length || page.exceptions.length) throw new Error(JSON.stringify({ consoleErrors: errors, exceptions: page.exceptions }, null, 2));
+}
+export async function withBrowser(run, { headed = false } = {}) {
+  let browser, staticSite, failure;
+  // The browser's own guards (cdp.mjs launch) kill Chrome and remove its profile on every way out;
+  // these handlers also stop the two local servers. Both stay installed until cleanup has finished,
+  // so a second Ctrl-C during cleanup does not cut it short.
+  let cleanupPromise;
+  const cleanup = () => cleanupPromise ??= (async () => {
+    const results = await Promise.allSettled([
+      browser?.close(), stop(server), staticSite ? stop(staticSite) : undefined,
+    ]);
+    const failed = results.find((r) => r.status === 'rejected');
+    if (failed) throw failed.reason;
+  })();
+  const onSignal = () => { cleanup().catch(() => {}).finally(() => process.exit(130)); };
+  process.on('SIGINT', onSignal);
+  process.on('SIGTERM', onSignal);
+  try {
+    const live = await listen(server);
+    const origins = [live];
+    browser = await launch({ headed });
+    if (!browser) throw new Error('Browser disappeared after discovery');
+    await browser.page.localOnly(origins);
+    const startStatic = async () => {
+      if (staticSite) throw new Error('Static server already started');
+      await build();
+      staticSite = staticServer();
+      const origin = await listen(staticSite);
+      origins.push(origin);
+      await browser.page.localOnly(origins);
+      return origin;
+    };
+    await run(browser.page, origins, startStatic);
+  } catch (e) {
+    failure = e;
+  }
+  try {
+    await cleanup();
+  } catch (e) {
+    failure ??= e; // a cleanup error never hides the check that failed
+  } finally {
+    process.off('SIGINT', onSignal);
+    process.off('SIGTERM', onSignal);
+  }
+  if (failure) throw failure;
+}
