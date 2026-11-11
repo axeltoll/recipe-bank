@@ -1,66 +1,25 @@
-import { parseVideoUrl, embedUrl, thumbnailUrl } from '/lib/video.mjs';
-import { ingredientKeys, matchesFilter } from '/lib/filter.mjs';
+// Recipe Bank dashboard: boot, data loading, the hash router and the API handed to feature modules.
+// Views live in ui/, logic that needs no DOM in /lib/ (filtering: /lib/filter.mjs through /lib/catalog.mjs).
+// Contracts: docs/design/DESIGN.md and MOUNT-POINTS.md. Feature modules are listed in features/index.js.
+import { parseRoute } from '/lib/nav.mjs';
+import { sortRecipes } from '/lib/catalog.mjs';
+import { esc } from '/lib/format.mjs';
+import {
+  $, $$, view, state, store, STATIC, apiPath, hub, emit, mount, icon, toast, copy, renderStats, restoreFilters,
+} from './ui/core.js';
+import { renderHome, refresh, teardownHome } from './ui/home.js';
+import { renderRecipe } from './ui/recipe.js';
+import { renderQueued } from './ui/queue.js';
+import { renderLoading, renderError, stateBlock } from './ui/states.js';
+import { closeCook } from './ui/cook.js';
+import { setupAdd } from './ui/add.js';
+import { setupTheme } from './ui/theme.js';
+import { setupOffline } from './ui/offline.js';
 
-const $ = (sel, root = document) => root.querySelector(sel);
-const view = $('#view');
-// The Cloudflare Pages copy (scripts/build-static.mjs) has no server: it reads JSON files and can't change the queue.
-const STATIC = document.documentElement.dataset.static === '1';
-const apiPath = (name) => (STATIC ? `/api/${name}.json` : `/api/${name}`);
-
-const state = {
-  recipes: [],
-  invalid: [],
-  queue: [],
-  q: '',
-  keys: new Set(),
-  mode: 'all', // 'all' = recipe must contain every selected ingredient; 'any' = at least one
-  showAllChips: false,
-};
-
-const PLATFORM = { youtube: 'YouTube', tiktok: 'TikTok', instagram: 'Instagram' };
-const BASIS_LABEL = {
-  'on-screen': 'shown on screen',
-  spoken: 'said in the video',
-  description: 'from the video description',
-  unstated: 'amount not given',
-};
-
-// ---------- utils ----------
-const esc = (s) =>
-  String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-const mmss = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
-const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
-const store = {
-  get(k, fallback) {
-    try { return JSON.parse(localStorage.getItem(k)) ?? fallback; } catch { return fallback; }
-  },
-  set(k, v) {
-    try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* storage unavailable */ }
-  },
-};
-
-function toast(msg) {
-  const el = $('#toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toast.t);
-  toast.t = setTimeout(() => el.classList.remove('show'), 2600);
-}
-
-async function copy(text, done = 'Copied') {
-  try {
-    await navigator.clipboard.writeText(text);
-    toast(done);
-  } catch {
-    prompt('Copy this:', text);
-  }
-}
-
-const recipeKeys = ingredientKeys;
-const stepCount = (r) => r.components.reduce((n, c) => n + c.steps.length, 0);
-
-// Search + Has all / Has any live in lib/filter.mjs (also: without, tags, nutrition; see public/features/).
-const matches = (r) => matchesFilter(r, state);
+let booted = false;
+let featuresInstalled = false;
+let current = { name: null };
+let homeScroll = 0;
 
 // ---------- data ----------
 async function load() {
@@ -132,6 +91,12 @@ function route() {
   emit('view', { ...detail, root: view });
 }
 
+/** Re-read recipes and queue (after a feature wrote a recipe file) and update the header count. */
+async function reload() {
+  await load();
+  renderStats();
+}
+
 // ---------- the API feature modules receive (docs/design/MOUNT-POINTS.md) ----------
 const rb = {
   version: 1,
@@ -163,6 +128,7 @@ const rb = {
     return off;
   },
   navigate(hash) { location.hash = hash; },
+  reload,
   store,
   toast,
   copy,

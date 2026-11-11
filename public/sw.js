@@ -9,10 +9,12 @@
 //
 // Bump VERSION when the list of shell files changes.
 
-const VERSION = 'v1';
+const VERSION = 'v2';
 const SHELL_CACHE = `recipe-bank-shell-${VERSION}`;
 const DATA_CACHE = `recipe-bank-data-${VERSION}`;
 
+// Every file the dashboard loads: app.js and its static imports, every feature installed from
+// features/index.js with its imports, and the stylesheets the features add. test/sw.test.mjs checks this.
 const SHELL = [
   '/',
   '/styles.css',
@@ -29,12 +31,44 @@ const SHELL = [
   '/ui/theme.js',
   '/ui/offline.js',
   '/features/index.js',
+  '/features/filters-feature.js',
+  '/features/scale-feature.js',
+  '/features/plan-feature.js',
+  '/features/household-feature.js',
+  '/features/packs-feature.js',
+  '/features/editor-feature.js',
+  '/features/household-target.js',
+  '/features/shared.mjs',
+  '/features/filters.mjs',
+  '/features/scale.mjs',
+  '/features/week-plan.mjs',
+  '/features/shopping-list.mjs',
+  '/features/household.mjs',
+  '/features/budget.mjs',
+  '/features/packs.mjs',
+  '/features/recipe-editor.mjs',
+  '/features/filters.css',
+  '/features/scale.css',
+  '/features/week-plan.css',
+  '/features/shopping-list.css',
+  '/features/household.css',
+  '/features/budget.css',
+  '/features/packs.css',
+  '/features/recipe-editor.css',
   '/lib/video.mjs',
   '/lib/recipe.mjs',
   '/lib/format.mjs',
   '/lib/catalog.mjs',
+  '/lib/filter.mjs',
   '/lib/nav.mjs',
   '/lib/hub.mjs',
+  '/lib/plan.mjs',
+  '/lib/scale.mjs',
+  '/lib/household.mjs',
+  '/lib/budget.mjs',
+  '/lib/pack.mjs',
+  '/lib/migrate.mjs',
+  '/lib/draft.mjs',
 ];
 
 // The local server serves /api/recipes; the static build serves /api/recipes.json.

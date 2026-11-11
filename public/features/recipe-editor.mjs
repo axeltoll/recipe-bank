@@ -15,11 +15,12 @@
 import {
   emptyDraft, draftFromRecipe, recipeFromDraft, checkDraft, slugify, parseTimestamp, formatRecipe,
   emptyIngredient, emptyStep, emptyComponent, problemField, BASES, STATUSES,
-} from '/lib/draft.mjs';
-import { parseVideoUrl, videoKey, embedUrl } from '/lib/video.mjs';
+} from '../../lib/draft.mjs';
+import { parseVideoUrl, videoKey, embedUrl, PLATFORMS } from '../../lib/video.mjs';
+import { esc } from './shared.mjs';
 
 const STATIC = typeof document !== 'undefined' && document.documentElement.dataset.static === '1';
-const PLATFORM = { youtube: 'YouTube', tiktok: 'TikTok', instagram: 'Instagram' };
+const PLATFORM = Object.fromEntries(PLATFORMS.map(({ id, label }) => [id, label]));
 const BASIS_LABEL = {
   'on-screen': 'shown on screen',
   spoken: 'said in the video',
@@ -28,9 +29,6 @@ const BASIS_LABEL = {
 };
 const STATUS_LABEL = { analyzed: 'Full recipe', partial: 'Partial recipe' };
 const NUTRIENTS = [['calories', 'Calories (kcal)'], ['protein_g', 'Protein (g)'], ['carbs_g', 'Carbs (g)'], ['fat_g', 'Fat (g)']];
-
-const esc = (s) =>
-  String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
 function ensureStyles() {
   if (document.querySelector('link[data-recipe-editor-css]')) return;

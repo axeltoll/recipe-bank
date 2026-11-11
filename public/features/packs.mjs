@@ -7,9 +7,9 @@ import {
   exportPack, serializePack, packFileName, packLink, packFromLink, hasPackLink, readPack, planImport,
   packFromRead, PackError, MAX_PACK_CHARS,
 } from '../../lib/pack.mjs';
+import { esc, ensureStylesheet } from './shared.mjs';
 
-export const esc = (s) =>
-  String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+export { esc };
 
 const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
 const IMPORTABLE = new Set(['new', 'conflict']);
@@ -120,6 +120,7 @@ export function mount(element, options = {}) {
   };
   let destroyed = false;
 
+  ensureStylesheet(new URL('./packs.css', import.meta.url).href);
   element.classList.add('rb-packs');
   element.innerHTML = `
     <section class="pk-section" aria-labelledby="${uid}-share">

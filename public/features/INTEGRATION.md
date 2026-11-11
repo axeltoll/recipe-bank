@@ -1,6 +1,6 @@
 # Feature modules: integration guide
 
-Four self-contained UI modules for the dashboard. None of them is wired into `public/app.js` yet: the dashboard is being redesigned, so the redesign decides where they go. Each one:
+Four self-contained UI modules for the dashboard. The dashboard mounts them through small installers listed in `features/index.js` (`filters-feature.js`, `scale-feature.js`, `plan-feature.js`; see section 5 of `docs/design/MOUNT-POINTS.md`), and `public/styles.css` maps their `--rbf-*` properties to the design tokens. They also work on any other page. Each one:
 
 - is a plain ES module with a `mount(element, options)` function that renders into `element` and returns a small controller (`update`, `destroy`, …);
 - loads its own small stylesheet next to it (pass `css: false` to skip that and style it yourself);
@@ -103,7 +103,7 @@ mount(document.querySelector('#more-filters'), {
 const list = state.recipes.filter((r) => matchesFilter(r, { ...state, ...extra }));
 ```
 
-The dashboard's own search and *Has all* / *Has any* already run through `matchesFilter` (`public/app.js` imports it from `/lib/filter.mjs`), so merging the extra fields into the same object is all that is needed.
+The dashboard's own search and *Has all* / *Has any* already run through `matchesFilter` (`lib/catalog.mjs` delegates to `/lib/filter.mjs`), so merging the extra fields into the same object is all that is needed. In the dashboard, `filters-feature.js` mounts one section per filter mount point (`sections: ['without']` and so on) with one shared state, and registers each section with `rb.addFilter`.
 
 Options: `recipes` (required); `filter` (initial; default the stored one); `persist` (default `true`, in `'rb:filters-extra'`); `storageKey`; `sections` (any of `'without'`, `'tags'`, `'nutrition'`; default all three); `limit` (chips before "Show all", default 16); `css`; `onChange(filter)`.
 

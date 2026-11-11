@@ -80,11 +80,15 @@
   <dialog class="modal" id="add-dialog" aria-labelledby="add-title">
     <form id="add-form" method="dialog">
       <h2 id="add-title">Add a recipe video</h2>
-      <p class="muted" id="add-intro">Paste a YouTube Short, TikTok or Instagram Reel. It joins the queue, and the research agent writes up the ingredients and steps.</p>
+      <p class="muted" id="add-intro">Paste a video link from YouTube, TikTok, Instagram, Facebook, Pinterest or X. It joins the queue, and the research agent writes up the ingredients and steps.</p>
       <label for="add-url">Video link</label>
       <input id="add-url" name="url" type="url" inputmode="url" autocomplete="off" enterkeyhint="go" required
              placeholder="https://www.youtube.com/shorts/…" aria-describedby="add-detect add-error">
       <p class="field-hint" id="add-detect" aria-live="polite"></p>
+      <label class="switch" for="add-web">
+        <input type="checkbox" id="add-web" name="allowWeb">
+        <span>It's a web page with a video on it (any other HTTPS site)</span>
+      </label>
       <label for="add-note">Note for the agent <span class="muted">(optional)</span></label>
       <textarea id="add-note" name="note" rows="2" maxlength="500" placeholder="e.g. I want the sauce quantities"></textarea>
       <p class="form-error" id="add-error" role="alert"></p>

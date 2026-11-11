@@ -1,46 +1,70 @@
-// Brings every recipes/*.json up to the current contract version (lib/schema.mjs).
-//   npm run migrate              dry run: lists what would change
-//   npm run migrate -- --write   rewrites the files that need it, then validates them
-// Files already at the current version are never touched.
-import { readFile, readdir, writeFile } from 'node:fs/promises';
+// Upgrades recipes/*.json to the current contract version (lib/migrate.mjs).
+//
+//   npm run migrate                    dry run: print what would change, write nothing
+//   npm run migrate -- --write         save the changed files
+//   add --stamp                        also add "schema": <current> to files without it
+//
+// Changed files are rewritten as 2-space JSON, so a written file may also change layout.
+// Each result is checked with validateRecipe before it is written. Exit code 1 on any problem.
+// RECIPE_BANK_DIR points at another data folder (one holding recipes/), e.g. for tests.
+
+import { readFile, readdir, rename, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { migrateRecipe, SCHEMA_VERSION } from '../lib/schema.mjs';
-import { validateRecipe } from '../lib/recipe.mjs';
+import { migrate } from '../lib/migrate.mjs';
+import { SCHEMA_VERSION, validateRecipe } from '../lib/recipe.mjs';
 
-const ROOT = resolve(import.meta.dirname, '..');
-const DIR = join(ROOT, 'recipes');
-const write = process.argv.includes('--write');
+const OPTIONS = ['--write', '--stamp'];
+const args = process.argv.slice(2);
+const unknown = args.filter((a) => !OPTIONS.includes(a));
+if (unknown.length) {
+  console.error(`Unknown argument: ${unknown.join(' ')}\nUsage: node scripts/migrate.mjs [--write] [--stamp]`);
+  process.exit(2);
+}
+const write = args.includes('--write');
+const stamp = args.includes('--stamp');
 
+const DIR = join(resolve(process.env.RECIPE_BANK_DIR ?? join(import.meta.dirname, '..')), 'recipes');
+const files = (await readdir(DIR)).filter((f) => f.endsWith('.json')).sort();
 let changed = 0;
 let problems = 0;
-for (const f of (await readdir(DIR)).filter((f) => f.endsWith('.json')).sort()) {
-  let r;
+const fail = (f, msg) => { problems++; console.error(`✗ ${f}: ${msg}`); };
+
+for (const f of files) {
+  let recipe;
   try {
-    r = JSON.parse(await readFile(join(DIR, f), 'utf8'));
+    recipe = JSON.parse(await readFile(join(DIR, f), 'utf8'));
   } catch (e) {
-    console.error(`✗ ${f}: invalid JSON (${e.message})`);
-    problems++;
+    fail(f, `invalid JSON (${e.message})`);
     continue;
   }
-  let out;
+  let result;
   try {
-    out = migrateRecipe(r);
+    result = migrate(recipe, { stamp });
   } catch (e) {
-    console.error(`✗ ${f}: ${e.message}`);
-    problems++;
+    fail(f, e.message);
     continue;
   }
-  if (!out.changed) continue;
-  changed++;
-  const errs = validateRecipe(out.recipe, f.slice(0, -5));
+  if (!result.changes.length) continue;
+  const errs = validateRecipe(result.recipe, f.slice(0, -5));
   if (errs.length) {
-    problems++;
-    console.error(`✗ ${f}: schema ${out.from} → ${out.to} gives an invalid recipe:\n  ${errs.join('\n  ')}`);
+    fail(f, `the migrated recipe would be invalid: ${errs.join('; ')}`);
     continue;
   }
-  if (write) await writeFile(join(DIR, f), JSON.stringify(out.recipe, null, 2) + '\n');
-  console.log(`${write ? '✓ migrated' : '· would migrate'} ${f}: schema ${out.from} → ${out.to}`);
+  changed++;
+  console.log(`${write ? '✓' : '→'} ${f}`);
+  for (const c of result.changes) console.log(`    ${c}`);
+  if (write) {
+    const tmp = join(DIR, `${f}.${process.pid}.tmp`);
+    await writeFile(tmp, JSON.stringify(result.recipe, null, 2) + '\n');
+    await rename(tmp, join(DIR, f));
+  }
 }
 
-console.log(`${changed} file(s) ${write ? 'migrated' : 'to migrate'}; current schema is ${SCHEMA_VERSION}.${!write && changed ? ' Run with --write to apply.' : ''}`);
-if (problems) process.exit(1);
+const summary = `${files.length} recipe(s), contract version ${SCHEMA_VERSION}: `;
+if (!changed) console.log(summary + 'nothing to migrate.');
+else if (write) console.log(summary + `${changed} file(s) updated.`);
+else console.log(summary + `${changed} file(s) would change. Run again with --write to save.`);
+if (problems) {
+  console.error(`${problems} problem(s).`);
+  process.exitCode = 1;
+}

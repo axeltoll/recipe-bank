@@ -2,7 +2,7 @@
 import { embedUrl } from '/lib/video.mjs';
 import { esc, mmss, formatDate } from '/lib/format.mjs';
 import { ingredientKeys, stepCount, macros, shoppingList } from '/lib/catalog.mjs';
-import { $, $$, view, state, store, PLATFORM, emit, icon, copy, isPhone, reducedMotion } from './core.js';
+import { $, $$, view, state, store, STATIC, PLATFORM, emit, icon, copy, isPhone, reducedMotion } from './core.js';
 import { renderMissing } from './states.js';
 import { openCook } from './cook.js';
 
@@ -75,6 +75,7 @@ export function renderRecipe(id) {
         ${steps ? `<button class="btn btn-primary" type="button" id="cook-open">${icon('pot')}<span>Start cooking</span></button>` : ''}
         <button class="btn" type="button" id="copy-list">${icon('copy')}<span>Copy list</span></button>
         <button class="btn btn-quiet" type="button" id="print">${icon('print')}<span>Print</span></button>
+        <a class="btn btn-quiet recipe-edit" href="#/edit/${esc(encodeURIComponent(r.id))}">${STATIC ? 'Edit a copy' : 'Edit'}</a>
         <div class="mount" id="mount-recipe-actions" data-mount="recipe-actions"></div>
       </div>
 

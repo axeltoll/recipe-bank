@@ -1,86 +1,141 @@
-// Recipe packs from the command line (logic in lib/pack.mjs).
+// Recipe packs from the command line (format and rules: lib/pack.mjs, public/features/PACKS.md).
 //
-//   npm run packs -- export                          every recipe, as JSON on stdout
-//   npm run packs -- export banana-milk cold-pan-chicken --title "Weeknight" --out weeknight.pack.json
-//   npm run packs -- export banana-milk --link https://example.org/   a shareable link instead of a file
-//   npm run packs -- import weeknight.pack.json      dry run: what would be added, skipped or renamed
-//   npm run packs -- import weeknight.pack.json --write
-//   npm run packs -- import "https://example.org/#/import/eyJ…" --write
+//   npm run packs -- export <id…> [--title "…"] [--out file.json] [--link] [--base URL]
+//   npm run packs -- export --all [--out file.json]
+//   npm run packs -- import <file.json | pack link> [--write]
 //
-// Import never overwrites: a recipe for a video that is already in the bank is skipped,
-// and an id that is taken by a different video gets -2, -3, … appended.
+// export prints the pack (or writes it to --out; --link prints a #pack= link instead).
+// import is a dry run unless --write, and only ever creates new recipe files.
+// RECIPE_BANK_DIR points at another data folder (one holding recipes/), e.g. for tests.
+
 import { readFile, writeFile } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
-import { loadRecipes } from '../server.mjs';
-import { validateRecipe } from '../lib/recipe.mjs';
-import { createPack, readPack, planImport, packLink, packFromLink, LINK_PREFIX, PackError } from '../lib/pack.mjs';
+import { join } from 'node:path';
+import { loadRecipes, dataPaths } from '../server.mjs';
+import {
+  exportPack, serializePack, packLink, packFromLink, hasPackLink, readPack, planImport, applyImport, PackError,
+} from '../lib/pack.mjs';
 
-const ROOT = resolve(import.meta.dirname, '..');
-const RECIPES = join(ROOT, 'recipes');
-const [cmd, ...rest] = process.argv.slice(2);
+const { recipesDir: RECIPES_DIR } = dataPaths();
+const USAGE = `Usage:
+  node scripts/pack.mjs export <id…> [--title "…"] [--out file.json] [--link] [--base URL]
+  node scripts/pack.mjs export --all [--out file.json]
+  node scripts/pack.mjs import <file.json | pack link> [--write]`;
 
-function option(name) {
-  const i = rest.indexOf(name);
-  if (i < 0) return null;
-  const v = rest[i + 1];
-  rest.splice(i, 2);
-  return v ?? null;
+function parseArgs(argv) {
+  const flags = new Set(['--all', '--link', '--write']);
+  const values = new Set(['--title', '--out', '--base']);
+  const opts = { _: [] };
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (flags.has(a)) opts[a.slice(2)] = true;
+    else if (values.has(a)) {
+      if (i + 1 >= argv.length) usage(`${a} needs a value`);
+      opts[a.slice(2)] = argv[++i];
+    } else if (a.startsWith('--')) usage(`unknown option ${a}`);
+    else opts._.push(a);
+  }
+  return opts;
 }
-const flag = (name) => {
-  const i = rest.indexOf(name);
-  if (i >= 0) rest.splice(i, 1);
-  return i >= 0;
-};
 
-async function exportPack() {
-  const title = option('--title') ?? 'Recipe pack';
-  const out = option('--out');
-  const link = option('--link');
-  const { recipes } = await loadRecipes(RECIPES);
-  const ids = rest;
-  const missing = ids.filter((id) => !recipes.some((r) => r.id === id));
-  if (missing.length) throw new Error(`Not in the bank: ${missing.join(', ')}`);
-  const chosen = ids.length ? ids.map((id) => recipes.find((r) => r.id === id)) : recipes;
-  const pack = createPack(chosen, { title });
-  if (link) {
-    console.log(packLink(pack, link));
-  } else if (out) {
-    await writeFile(out, JSON.stringify(pack, null, 2) + '\n');
-    console.error(`wrote ${out}: ${pack.recipes.length} recipe(s)`);
+function usage(msg) {
+  console.error(`${msg}\n${USAGE}`);
+  process.exit(2);
+}
+
+const [command, ...rest] = process.argv.slice(2);
+const opts = parseArgs(rest);
+
+if (command === 'export') await exportCommand();
+else if (command === 'import') await importCommand();
+else usage(command ? `unknown command ${command}` : 'missing command');
+
+async function exportCommand() {
+  const { recipes } = await loadRecipes(RECIPES_DIR);
+  let picked;
+  if (opts.all) {
+    if (opts._.length) usage('use either --all or recipe ids');
+    picked = recipes;
   } else {
-    console.log(JSON.stringify(pack, null, 2));
+    if (!opts._.length) usage('name at least one recipe id, or --all');
+    const byId = new Map(recipes.map((r) => [r.id, r]));
+    const missing = opts._.filter((id) => !byId.has(id));
+    if (missing.length) {
+      console.error(`Not in the bank (or invalid): ${missing.join(', ')}`);
+      process.exit(1);
+    }
+    picked = [...new Set(opts._)].map((id) => byId.get(id));
+  }
+  let pack;
+  try {
+    pack = exportPack(picked, { title: opts.title });
+    if (opts.link) {
+      console.log(packLink(pack, opts.base ?? 'http://127.0.0.1:4780/'));
+      return;
+    }
+  } catch (e) {
+    if (!(e instanceof PackError)) throw e;
+    console.error(e.message);
+    process.exit(1);
+  }
+  if (opts.out) {
+    await writeFile(opts.out, serializePack(pack));
+    console.error(`✓ ${pack.recipes.length} recipe(s) → ${opts.out}`);
+  } else {
+    process.stdout.write(serializePack(pack));
   }
 }
 
-async function importPack() {
-  const write = flag('--write');
-  const source = rest[0];
-  if (!source) throw new Error('Usage: npm run packs -- import <file.json | link> [--write]');
-  const pack = source.includes(LINK_PREFIX) ? packFromLink(source) : readPack(await readFile(source, 'utf8'));
-  const { recipes: existing } = await loadRecipes(RECIPES);
-  const plan = planImport(pack.recipes, existing);
-
-  console.log(`Pack "${pack.title}"${pack.created ? ` (${pack.created})` : ''}: ${pack.recipes.length} valid recipe(s), ${pack.invalid.length} invalid.`);
-  for (const bad of pack.invalid) console.log(`  ✗ invalid #${bad.index}${bad.id ? ` ${bad.id}` : ''}: ${bad.errors.join('; ')}`);
-  for (const d of plan.duplicates) console.log(`  = skip ${d.id}: same video as ${d.existing}`);
-  for (const r of plan.renamed) console.log(`  ~ rename ${r.from} → ${r.to} (id already used by another video)`);
-  for (const r of plan.add) {
-    const errs = validateRecipe(r, r.id);
-    if (errs.length) throw new Error(`${r.id}: ${errs.join('; ')}`);
-    if (write) await writeFile(join(RECIPES, `${r.id}.json`), JSON.stringify(r, null, 2) + '\n');
-    console.log(`  ${write ? '+ added' : '+ would add'} recipes/${r.id}.json`);
+async function importCommand() {
+  if (opts._.length !== 1) usage('name one pack file or link');
+  const [source] = opts._;
+  let read;
+  if (hasPackLink(source) && !source.toLowerCase().endsWith('.json')) {
+    read = packFromLink(source);
+  } else {
+    let text;
+    try {
+      text = await readFile(source, 'utf8');
+    } catch (e) {
+      console.error(`Cannot read ${source}: ${e.message}`);
+      process.exit(1);
+    }
+    read = readPack(text); // refuses text over MAX_PACK_CHARS
   }
-  if (!write && plan.add.length) console.log('Dry run. Add --write to write the files, then run npm run validate.');
-}
-
-try {
-  if (cmd === 'export') await exportPack();
-  else if (cmd === 'import') await importPack();
-  else {
-    console.error('Usage: npm run packs -- export [id …] [--title T] [--out file] [--link base-url]\n       npm run packs -- import <file | link> [--write]');
-    process.exit(2);
+  if (!read.ok) {
+    console.error(`✗ ${read.errors.join(' ')}`);
+    process.exit(1);
   }
-} catch (e) {
-  console.error(e instanceof PackError ? e.message : `✗ ${e.message}`);
-  process.exit(1);
+
+  const { recipes, invalid } = await loadRecipes(RECIPES_DIR);
+  const plan = planImport(read, [...recipes, ...invalid.map((i) => ({ id: i.file.slice(0, -5) }))]);
+  console.log(`Pack "${plan.title}"${plan.exported ? ` (exported ${plan.exported})` : ''}: ${plan.items.length} recipe(s)`);
+  for (const item of plan.items) {
+    const label = {
+      new: `+ new        ${item.id}`,
+      conflict: `+ renamed    ${item.packId} → ${item.id} (that id is taken by another video)`,
+      duplicate: `= duplicate  ${item.id ?? `#${item.index + 1}`} (same video as ${item.duplicateOf}${item.inBank ? '' : ', earlier in this pack'})`,
+      invalid: `✗ invalid    ${item.id ?? `#${item.index + 1}`}: ${item.problems.slice(0, 3).join('; ')}`,
+    }[item.status];
+    console.log(`  ${label}`);
+  }
+
+  const { files } = applyImport(plan);
+  if (!opts.write) {
+    console.log(files.length
+      ? `Dry run: ${files.length} recipe file(s) would be created. Run again with --write to create them.`
+      : 'Nothing to import.');
+    return;
+  }
+  let created = 0;
+  for (const f of files) {
+    try {
+      await writeFile(join(RECIPES_DIR, `${f.id}.json`), f.contents, { flag: 'wx' });
+      created++;
+      console.log(`✓ recipes/${f.id}.json`);
+    } catch (e) {
+      if (e.code !== 'EEXIST') throw e;
+      console.error(`! recipes/${f.id}.json already exists; left untouched`);
+    }
+  }
+  console.log(`${created} recipe file(s) created. Run npm run validate, then commit them.`);
 }

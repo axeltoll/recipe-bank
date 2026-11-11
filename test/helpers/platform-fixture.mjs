@@ -9,7 +9,8 @@ const root = new URL('../../', import.meta.url);
 export async function platformFixture(t) {
   const dir = await mkdtemp(join(tmpdir(), 'recipe-bank-platforms-'));
   t.after(() => rm(dir, { recursive: true, force: true }));
-  for (const path of ['server.mjs', 'lib', 'scripts']) {
+  // scripts/validate.mjs also reads schema/recipe.schema.json, so the copy needs it too.
+  for (const path of ['server.mjs', 'lib', 'scripts', 'schema']) {
     await cp(new URL(path, root), join(dir, path), { recursive: true });
   }
   await mkdir(join(dir, 'recipes'));

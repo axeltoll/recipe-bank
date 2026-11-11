@@ -92,6 +92,33 @@ test('every module the dashboard imports statically is precached', async () => {
   assert.ok(seen.size > 10, 'the crawl found the ui and lib modules');
 });
 
+test('every feature module, everything it imports and every stylesheet it adds is precached', async () => {
+  const { api } = loadWorker();
+  const shell = new Set(api.SHELL);
+  const index = await readFile(fileFor('/features/index.js'), 'utf8');
+  const loaders = [...index.replace(/^\s*\/\/.*$/gm, '').matchAll(/\bimport\(\s*['"]([^'"]+)['"]\s*\)/g)]
+    .map((m) => join('/features', m[1]));
+  assert.ok(loaders.length >= 6, 'features/index.js lists the features');
+  const seen = new Set();
+  const todo = ['/features/index.js', ...loaders];
+  while (todo.length) {
+    const urlPath = todo.pop();
+    if (seen.has(urlPath)) continue;
+    seen.add(urlPath);
+    assert.ok(shell.has(urlPath), `${urlPath} is loaded by a feature but not in SHELL`);
+    if (urlPath.endsWith('.css')) continue;
+    // Strip block and line comments: examples in comments are not imports.
+    const text = (await readFile(fileFor(urlPath), 'utf8')).replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+    for (const m of text.matchAll(/\bfrom\s+['"]([^'"]+)['"]/g)) {
+      todo.push(m[1].startsWith('/') ? m[1] : join(dirname(urlPath), m[1]));
+    }
+    for (const m of text.matchAll(/new URL\(\s*['"](\.\/[^'"]+\.css)['"]\s*,\s*import\.meta\.url\s*\)/g)) {
+      todo.push(join(dirname(urlPath), m[1]));
+    }
+  }
+  assert.ok([...seen].some((p) => p.endsWith('.css')), 'the crawl found the feature stylesheets');
+});
+
 test('writes and other origins never go through the worker', () => {
   const { listeners } = loadWorker();
   assert.equal(dispatchFetch(listeners, 'POST', '/api/queue').responded, undefined);

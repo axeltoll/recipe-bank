@@ -634,6 +634,102 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
 .form-error { margin: 0; color: var(--danger); font-size: var(--text-sm); }
 .form-error:empty { display: none; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: var(--s-2); margin-top: var(--s-3); }
+.modal .switch { margin-top: 0; font-weight: 500; }
+.modal .switch input { width: 22px; min-height: 0; padding: 0; flex: none; }
+
+/* ---------- feature modules (public/features/) ---------- */
+/* The one place where the modules' own custom properties are mapped to the design tokens.
+   `:root` in front outranks the defaults each module sets on its own root class, whatever order
+   the stylesheets load in, so both themes and every token change reach the modules from here. */
+:root .rbf-week, :root .rbf-shop, :root .rbf-scale, :root .rbf-filters {
+  --rbf-fg: var(--ink);
+  --rbf-muted: var(--muted);
+  --rbf-line: var(--line-strong);
+  --rbf-surface: var(--surface);
+  --rbf-accent: var(--accent);
+  --rbf-accent-ink: var(--accent-ink);
+  --rbf-accent-soft: var(--accent-soft);
+  --rbf-warn: var(--warn);
+  --rbf-radius: var(--r-md);
+  --rbf-gap: var(--s-3);
+}
+:root .rb-household, :root .rb-budget {
+  --rb-text: var(--ink);
+  --rb-surface: var(--surface);
+  --rb-input: var(--bg);
+  --rb-border: var(--line-strong);
+  --rb-muted: var(--muted);
+  --rb-accent: var(--accent);
+  --rb-on-accent: var(--accent-ink);
+  --rb-focus: var(--focus);
+  --rb-danger: var(--danger);
+  --rb-radius: var(--r-lg);
+  --rb-control-radius: var(--r-md);
+  --rb-space-zero: 0;
+  --rb-space-xs: var(--s-1);
+  --rb-space-sm: var(--s-2);
+  --rb-space-md: var(--s-4);
+  --rb-space-lg: var(--s-5);
+  --rb-font: var(--font-body);
+}
+:root .re {
+  --re-bg: var(--surface);
+  --re-bg-2: var(--surface-2);
+  --re-ink: var(--ink);
+  --re-ink-2: var(--ink-2);
+  --re-muted: var(--muted);
+  --re-line: var(--line-strong);
+  --re-accent: var(--accent);
+  --re-accent-ink: var(--accent-ink);
+  --re-accent-soft: var(--accent-soft);
+  --re-ok: var(--ok);
+  --re-ok-soft: var(--ok-soft);
+  --re-warn: var(--warn);
+  --re-warn-soft: var(--warn-soft);
+  --re-danger: var(--danger);
+  --re-focus: var(--focus);
+  --re-radius: var(--r-lg);
+  --re-radius-sm: var(--r-md);
+  --re-s1: var(--s-1);
+  --re-s2: var(--s-2);
+  --re-s3: var(--s-3);
+  --re-s4: var(--s-4);
+  --re-s5: var(--s-5);
+  --re-s6: var(--s-6);
+  --re-target: var(--tap);
+}
+:root .rb-packs {
+  --pk-bg: var(--surface);
+  --pk-bg-2: var(--surface-2);
+  --pk-ink: var(--ink);
+  --pk-muted: var(--muted);
+  --pk-line: var(--line-strong);
+  --pk-accent: var(--accent);
+  --pk-accent-ink: var(--accent-ink);
+  --pk-ok: var(--ok);
+  --pk-ok-soft: var(--ok-soft);
+  --pk-warn: var(--warn);
+  --pk-warn-soft: var(--warn-soft);
+  --pk-info: var(--info);
+  --pk-info-soft: var(--info-soft);
+  --pk-radius: var(--r-md);
+  --pk-s1: var(--s-1);
+  --pk-s2: var(--s-2);
+  --pk-s3: var(--s-3);
+  --pk-s4: var(--s-4);
+  --pk-s5: var(--s-5);
+}
+
+/* Feature routes (#/plan, #/household, #/packs, #/new, #/edit) share one page frame. */
+.feature-page { display: grid; gap: var(--s-5); min-width: 0; }
+.feature-head h1 { margin: 0; font: 650 var(--text-2xl) / var(--lh-tight) var(--font-display); }
+.feature-head p { margin: var(--s-2) 0 0; max-width: var(--measure); color: var(--muted); }
+.feature-cols { display: grid; gap: var(--s-5); align-items: start; min-width: 0; }
+.feature-cols > * { min-width: 0; }
+.feature-note { margin: 0; color: var(--ink-2); }
+/* The filter mounts sit inside the dashboard's filter panel, whose "Clear all" and chips already cover clearing. */
+.filter-group .rbf-foot { display: none; }
+.scale-household { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin: var(--s-2) 0 0; color: var(--muted); font-size: var(--text-sm); }
 
 .toast {
   position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); z-index: var(--z-toast);
@@ -699,6 +795,9 @@ main[data-layout='message'] > .state { max-width: 640px; margin: var(--s-7) auto
 
 /* ---------- desktop: 1280px ---------- */
 @media (min-width: 1280px) {
+  /* Feature pages with two parts (week plan + shopping list, household + budget) go side by side. */
+  .feature-cols { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+
   /* Filter rail beside the grid. */
   .home { grid-template-columns: 300px minmax(0, 1fr); column-gap: var(--s-6); align-items: start; }
   .home-head { grid-column: 1 / -1; }

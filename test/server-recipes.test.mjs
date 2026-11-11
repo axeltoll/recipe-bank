@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { cp, mkdtemp, readFile, readdir, rm, writeFile, mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
-import { createRecipeServer } from '../server.mjs';
+import { createApp } from '../server.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 let dir;
@@ -31,7 +31,7 @@ before(async () => {
       addedAt: '2026-11-11T10:05:00.000Z', addedBy: 'dashboard', status: 'queued',
     },
   ], null, 2) + '\n');
-  server = createRecipeServer({ dataDir: dir });
+  server = createApp({ dataDir: dir, oembed: null });
   await new Promise((ok) => server.listen(0, '127.0.0.1', ok));
   base = `http://127.0.0.1:${server.address().port}`;
 });
@@ -178,6 +178,19 @@ test('PUT /api/recipes/<id> refuses a contract problem with 400 and leaves the f
   assert.equal(res.status, 400);
   assert.ok((await res.json()).problems.includes('components must be a non-empty array'));
   assert.equal(await readRecipe('test-toast'), before);
+});
+
+test('recipe writes require a JSON content type (no cross-site form posts)', async () => {
+  for (const [method, path, body] of [
+    ['POST', '/api/recipes', recipe({ id: 'form-toast', video: { platform: 'youtube', id: 'TestVideo07', url: 'https://www.youtube.com/shorts/TestVideo07' } })],
+    ['PUT', '/api/recipes/test-toast', recipe({ title: 'Form post' })],
+  ]) {
+    const res = await fetch(base + path, { method, headers: { 'content-type': 'text/plain' }, body: JSON.stringify(body) });
+    assert.equal(res.status, 415, `${method} ${path}`);
+    assert.match((await res.json()).error, /application\/json/);
+  }
+  await assert.rejects(readRecipe('form-toast'));
+  assert.equal(JSON.parse(await readRecipe('test-toast')).title, 'Better Test Toast');
 });
 
 test('writes leave no temp files behind', async () => {

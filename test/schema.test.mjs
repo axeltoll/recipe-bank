@@ -1,149 +1,255 @@
+// Cross-checks schema/recipe.schema.json against the enforced contract in lib/recipe.mjs:
+// every need(...) rule in validateRecipe has a matching schema rule, and good and bad
+// fixtures (plus every real recipe file) are judged the same way by both.
+
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { validateRecipe } from '../lib/recipe.mjs';
-import { SCHEMA_VERSION, MIGRATIONS, schemaVersion, migrateRecipe, recipeJsonSchema } from '../lib/schema.mjs';
+import { validateRecipe, STATUSES, BASES, SLUG, DATE, SCHEMA_VERSION } from '../lib/recipe.mjs';
+import { PLATFORMS } from '../lib/video.mjs';
+import { validateSchema, SUPPORTED_KEYWORDS } from '../lib/json-schema.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
+const schema = JSON.parse(await readFile(join(ROOT, 'schema', 'recipe.schema.json'), 'utf8'));
+const contractSource = await readFile(join(ROOT, 'lib', 'recipe.mjs'), 'utf8');
 
-// A small JSON Schema checker for the keywords schema/recipe.schema.json uses (no dependencies).
-function is(type, v) {
-  switch (type) {
-    case 'null': return v === null;
-    case 'string': return typeof v === 'string';
-    case 'number': return typeof v === 'number' && Number.isFinite(v);
-    case 'integer': return Number.isInteger(v);
-    case 'boolean': return typeof v === 'boolean';
-    case 'array': return Array.isArray(v);
-    case 'object': return v !== null && typeof v === 'object' && !Array.isArray(v);
-    default: throw new Error(`unsupported type ${type}`);
-  }
-}
-const KNOWN = new Set(['$schema', '$id', 'title', 'description', '$defs', '$ref', 'type', 'enum', 'const', 'minLength', 'pattern',
-  'minimum', 'maximum', 'minItems', 'items', 'required', 'properties', 'allOf', 'oneOf', 'if', 'then', 'else']);
-function check(schema, value, root, path = '$', errs = []) {
-  for (const k of Object.keys(schema)) if (!KNOWN.has(k)) throw new Error(`checker does not know keyword ${k}`);
-  if (schema.$ref) return check(schema.$ref.split('/').slice(1).reduce((s, p) => s[p], root), value, root, path, errs);
-  if (schema.type != null && ![].concat(schema.type).some((t) => is(t, value))) {
-    errs.push(`${path}: expected ${schema.type}`);
-    return errs;
-  }
-  if (schema.enum && !schema.enum.includes(value)) errs.push(`${path}: not one of ${schema.enum}`);
-  if ('const' in schema && value !== schema.const) errs.push(`${path}: not ${schema.const}`);
-  if (typeof value === 'string') {
-    if (schema.minLength != null && value.length < schema.minLength) errs.push(`${path}: too short`);
-    if (schema.pattern != null && !new RegExp(schema.pattern, 'u').test(value)) errs.push(`${path}: pattern`);
-  }
-  if (typeof value === 'number') {
-    if (schema.minimum != null && value < schema.minimum) errs.push(`${path}: below minimum`);
-    if (schema.maximum != null && value > schema.maximum) errs.push(`${path}: above maximum`);
-  }
-  if (Array.isArray(value)) {
-    if (schema.minItems != null && value.length < schema.minItems) errs.push(`${path}: too few items`);
-    if (schema.items) value.forEach((v, i) => check(schema.items, v, root, `${path}[${i}]`, errs));
-  }
-  if (is('object', value)) {
-    for (const k of schema.required ?? []) if (!(k in value)) errs.push(`${path}.${k}: required`);
-    for (const [k, s] of Object.entries(schema.properties ?? {})) if (k in value) check(s, value[k], root, `${path}.${k}`, errs);
-  }
-  for (const s of schema.allOf ?? []) check(s, value, root, path, errs);
-  if (schema.oneOf) {
-    const passing = schema.oneOf.filter((s) => check(s, value, root, path, []).length === 0).length;
-    if (passing !== 1) errs.push(`${path}: matches ${passing} of oneOf`);
-  }
-  if (schema.if) {
-    const branch = check(schema.if, value, root, path, []).length === 0 ? schema.then : schema.else;
-    if (branch) check(branch, value, root, path, errs);
-  }
-  return errs;
-}
+const at = (pointer) =>
+  pointer.split('/').slice(1).reduce((node, k) => node?.[k.replace(/~1/g, '/').replace(/~0/g, '~')], schema);
+const schemaOk = (r) => validateSchema(schema, r).length === 0;
+const contractOk = (r, fileId) => validateRecipe(r, fileId).length === 0;
 
-const SCHEMA = recipeJsonSchema();
-const valid = () => ({
-  id: 'x', title: 'X', status: 'analyzed', summary: 's', analyzed: '2026-10-12',
+const good = () => ({
+  schema: 1,
+  id: 'good-recipe',
+  title: 'Good recipe',
+  status: 'analyzed',
+  video: { platform: 'youtube', id: 'mhNQ8y5ud0A', url: 'https://www.youtube.com/shorts/mhNQ8y5ud0A' },
+  creator: { name: 'A creator', handle: '@creator', url: 'https://www.youtube.com/@creator' },
+  uploaded: '2026-02-11',
+  analyzed: '2026-10-02',
+  summary: 'Two plain sentences.',
+  serves: '2',
+  tags: ['chicken', 'pan sauce'],
+  components: [{
+    name: 'Chicken',
+    ingredients: [
+      { item: 'Chicken thighs', key: 'chicken', amount: '2 per person', basis: 'spoken', note: 'skin on' },
+      { item: 'Salt', key: 'salt', amount: null, basis: 'unstated' },
+    ],
+    steps: [{ text: 'Salt the chicken.', t: 10 }, { text: 'Cook it.' }],
+  }],
+  nutrition: { per: 'serving', basis: 'description', calories: 500, protein_g: 40, carbs_g: null, fat_g: 20.5, note: 'From the description.' },
+  notes: ['A note.'],
+  gaps: [],
+  source: { evidence: 'captions', quantity_basis: 'Spoken.' },
+});
+const mutate = (fn) => () => { const r = good(); fn(r); return r; };
+
+const minimal = () => ({
+  id: 'good-recipe', title: 'Minimal', status: 'analyzed',
   video: { platform: 'youtube', id: 'mhNQ8y5ud0A', url: 'https://youtu.be/mhNQ8y5ud0A' },
-  creator: { name: 'c' }, tags: [],
-  components: [{ name: 'a', steps: [{ text: 'Do it.', t: 3 }], ingredients: [{ item: 'Salt', key: 'salt', amount: null, basis: 'unstated' }] }],
+  creator: { name: 'C' }, analyzed: '2026-10-02', summary: 'S.', tags: [],
+  components: [{ name: 'All', ingredients: [], steps: [] }],
 });
 
-test('schema/recipe.schema.json is the current export of lib/schema.mjs (run npm run schema)', async () => {
-  const file = JSON.parse(await readFile(join(ROOT, 'schema', 'recipe.schema.json'), 'utf8'));
-  assert.deepEqual(file, SCHEMA);
+// One entry per need(...) line in validateRecipe. `line` is a fragment of that source line,
+// `expect` a fragment of the message it produces, `schema` the JSON pointer(s) of the matching
+// schema rule (null when the rule cannot be expressed), `bad` a recipe that breaks the rule.
+const RULES = [
+  { line: 'not a JSON object', expect: 'not a JSON object', schema: '/type', bad: () => 'a string' },
+  { line: 'schema must be', expect: 'schema must be an integer', schema: '/properties/schema/maximum', bad: mutate((r) => { r.schema = 2; }) },
+  { line: 'id must be a kebab-case slug', expect: 'id must be a kebab-case slug', schema: '/properties/id/pattern', bad: mutate((r) => { r.id = 'Not A Slug'; }) },
+  { line: 'must match filename', expect: 'must match filename', schema: null, why: 'the filename is not part of the document', fileId: 'other-name', bad: good },
+  { line: 'title is required', expect: 'title is required', schema: '/properties/title/$ref', bad: mutate((r) => { r.title = '  '; }) },
+  { line: 'status must be one of', expect: 'status must be one of', schema: '/properties/status/enum', bad: mutate((r) => { r.status = 'draft'; }) },
+  { line: 'summary is required', expect: 'summary is required', schema: '/required', bad: mutate((r) => { delete r.summary; }) },
+  { line: 'analyzed must be YYYY-MM-DD', expect: 'analyzed must be', schema: '/properties/analyzed/pattern', bad: mutate((r) => { r.analyzed = '2026-1-1'; }) },
+  { line: 'uploaded must be YYYY-MM-DD', expect: 'uploaded must be', schema: '/properties/uploaded/pattern', bad: mutate((r) => { r.uploaded = 'yesterday'; }) },
+  {
+    line: 'video.url must be', expect: 'video.url must be', exact: false,
+    schema: ['/$defs/video/properties/url/pattern', '/$defs/video/allOf/0/then/properties/url/pattern'],
+    bad: mutate((r) => { r.video.url = 'https://example.com/watch?v=mhNQ8y5ud0A'; }),
+  },
+  {
+    line: 'video.platform must be', expect: 'video.platform must be', exact: false,
+    schema: ['/$defs/video/properties/platform/enum', '/$defs/video/allOf/1/then/properties/url/pattern'],
+    bad: mutate((r) => { r.video.platform = 'tiktok'; }),
+  },
+  {
+    line: 'video.id must be "', expect: 'video.id must be', exact: false,
+    schema: '/$defs/video/allOf/0/then/properties/id/pattern',
+    bad: mutate((r) => { r.video.id = 'short'; }),
+  },
+  {
+    line: 'video.id must be null', expect: 'video.id must be null or omitted',
+    schema: '/$defs/video/allOf/6/then/properties/id/type',
+    bad: mutate((r) => { r.video = { platform: 'web', id: 'invented', url: 'https://example.com/recipe' }; }),
+  },
+  { line: 'creator.name is required', expect: 'creator.name is required', schema: '/$defs/creator/required', bad: mutate((r) => { r.creator = {}; }) },
+  { line: 'tags must be lowercase strings', expect: 'tags must be lowercase', schema: '/$defs/lowercaseText/allOf/1/pattern', bad: mutate((r) => { r.tags = ['Chicken']; }) },
+  { line: 'components must be a non-empty array', expect: 'components must be a non-empty array', schema: '/properties/components/minItems', bad: mutate((r) => { r.components = []; }) },
+  { line: '${at}.name', expect: 'components[0].name is required', schema: '/$defs/component/properties/name/$ref', bad: mutate((r) => { r.components[0].name = ''; }) },
+  { line: '${at}.ingredients', expect: 'components[0].ingredients must be an array', schema: '/$defs/component/properties/ingredients/type', bad: mutate((r) => { delete r.components[0].ingredients; }) },
+  { line: '${at}.steps', expect: 'components[0].steps must be an array', schema: '/$defs/component/properties/steps/type', bad: mutate((r) => { delete r.components[0].steps; }) },
+  { line: '${p}.item', expect: 'ingredients[0].item is required', schema: '/$defs/ingredient/properties/item/$ref', bad: mutate((r) => { r.components[0].ingredients[0].item = ''; }) },
+  { line: '${p}.key', expect: 'ingredients[0].key must be a lowercase', schema: '/$defs/ingredient/properties/key/$ref', bad: mutate((r) => { r.components[0].ingredients[0].key = 'Chicken'; }) },
+  { line: '${p}.basis', expect: 'ingredients[0].basis must be one of', schema: '/$defs/ingredient/properties/basis/enum', bad: mutate((r) => { r.components[0].ingredients[0].basis = 'guessed'; }) },
+  { line: '${p}.amount must be null', expect: 'ingredients[1].amount must be null', schema: '/$defs/ingredient/then/properties/amount/type', bad: mutate((r) => { r.components[0].ingredients[1].amount = '1 tsp'; }) },
+  { line: '${p}.amount is required', expect: 'ingredients[0].amount is required', schema: '/$defs/ingredient/else/required', bad: mutate((r) => { r.components[0].ingredients[0].amount = null; }) },
+  { line: '${p}.text', expect: 'steps[0].text is required', schema: '/$defs/step/properties/text/$ref', bad: mutate((r) => { r.components[0].steps[0].text = ' '; }) },
+  { line: '${p}.t must', expect: 'steps[0].t must be seconds', schema: '/$defs/step/properties/t/minimum', bad: mutate((r) => { r.components[0].steps[0].t = -1; }) },
+  { line: '${k} must be', expect: 'notes must be an array of strings', schema: ['/properties/notes/items/$ref', '/properties/gaps/items/$ref'], bad: mutate((r) => { r.notes = ['ok', 3]; }) },
+  { line: 'partial recipes must list gaps', expect: 'partial recipes must list gaps', schema: '/allOf/0/then/properties/gaps/minItems', bad: mutate((r) => { r.status = 'partial'; r.gaps = []; }) },
+];
+
+test('every validateRecipe rule has exactly one entry in the cross-check table', () => {
+  const lines = contractSource.split('\n').filter((l) => l.includes('need('));
+  assert.equal(lines.length, RULES.length, 'number of need(...) rules in lib/recipe.mjs');
+  for (const l of lines) {
+    const hits = RULES.filter((r) => l.includes(r.line));
+    assert.equal(hits.length, 1, `rule line should match one table entry: ${l.trim()}`);
+  }
+  for (const r of RULES) assert.ok(lines.some((l) => l.includes(r.line)), `table entry has a rule: ${r.line}`);
 });
 
-test('every real recipe passes the JSON Schema', async () => {
+for (const rule of RULES) {
+  test(`schema mirrors rule: ${rule.line}`, () => {
+    const value = rule.bad();
+    const errs = validateRecipe(value, rule.fileId ?? 'good-recipe');
+    assert.ok(errs.some((e) => e.includes(rule.expect)), `validateRecipe should say "${rule.expect}", got ${JSON.stringify(errs)}`);
+    if (rule.schema === null) {
+      assert.ok(rule.why, 'an inexpressible rule says why');
+      assert.ok(schemaOk(value), 'the document itself is valid; only the filename is wrong');
+      return;
+    }
+    for (const p of [].concat(rule.schema)) assert.notEqual(at(p), undefined, `schema has ${p}`);
+    assert.ok(!schemaOk(value), `schema should reject: ${rule.line}`);
+  });
+}
+
+test('good fixtures are accepted by both', () => {
+  const fixtures = {
+    full: good(),
+    minimal: minimal(),
+    partial: { ...minimal(), status: 'partial', gaps: ['No amounts are given.'] },
+    'no schema field': (() => { const r = good(); delete r.schema; return r; })(),
+    'null optionals': { ...good(), schema: null, uploaded: null, serves: null, nutrition: null, notes: null, source: null, gaps: null },
+    'empty component lists': { ...minimal(), components: [{ name: 'x', ingredients: [], steps: [] }] },
+    tiktok: { ...minimal(), video: { platform: 'tiktok', id: '7301234567890123456', url: 'https://www.tiktok.com/@cook/video/7301234567890123456' } },
+    'tiktok short link': { ...minimal(), video: { platform: 'tiktok', id: null, url: 'https://vm.tiktok.com/ZMabc123/' } },
+    instagram: { ...minimal(), video: { platform: 'instagram', id: 'DexeTQVzoT8', url: 'https://www.instagram.com/reel/DexeTQVzoT8/' } },
+    facebook: { ...minimal(), video: { platform: 'facebook', id: '12345', url: 'https://www.facebook.com/watch/?v=12345' } },
+    'facebook short link': { ...minimal(), video: { platform: 'facebook', id: null, url: 'https://fb.watch/AbC123/' } },
+    pinterest: { ...minimal(), video: { platform: 'pinterest', id: '12345', url: 'https://www.pinterest.com/pin/12345/' } },
+    'pinterest short link': { ...minimal(), video: { platform: 'pinterest', url: 'https://pin.it/AbC123' } },
+    x: { ...minimal(), video: { platform: 'x', id: '12345', url: 'https://x.com/kitchen/status/12345' } },
+    web: { ...minimal(), video: { platform: 'web', id: null, url: 'https://example.com/recipe-video' } },
+    'web without id': { ...minimal(), video: { platform: 'web', url: 'https://example.com/recipe-video' } },
+    'extra fields': { ...good(), favourite: true },
+  };
+  for (const [name, r] of Object.entries(fixtures)) {
+    assert.deepEqual(validateRecipe(r, 'good-recipe'), [], `contract: ${name}`);
+    assert.deepEqual(validateSchema(schema, r), [], `schema: ${name}`);
+  }
+});
+
+test('bad fixtures are rejected by both', () => {
+  const fixtures = {
+    'null': null,
+    array: [],
+    'missing video': mutate((r) => { delete r.video; })(),
+    'missing creator': mutate((r) => { delete r.creator; })(),
+    'tags not a list': mutate((r) => { r.tags = 'chicken'; })(),
+    'partial without gaps': mutate((r) => { r.status = 'partial'; delete r.gaps; })(),
+    'basis missing': mutate((r) => { delete r.components[0].ingredients[0].basis; })(),
+    'empty amount on spoken': mutate((r) => { r.components[0].ingredients[0].amount = ''; })(),
+    'empty amount on unstated': mutate((r) => { r.components[0].ingredients[1].amount = ''; })(),
+    'schema 0': mutate((r) => { r.schema = 0; })(),
+    'schema 1.5': mutate((r) => { r.schema = 1.5; })(),
+    'schema as text': mutate((r) => { r.schema = '1'; })(),
+    'web page over http': mutate((r) => { r.video = { platform: 'web', id: null, url: 'http://example.com/recipe' }; })(),
+    'x link on another host': mutate((r) => { r.video = { platform: 'x', id: '12345', url: 'https://example.com/kitchen/status/12345' }; })(),
+  };
+  for (const [name, r] of Object.entries(fixtures)) {
+    assert.ok(!contractOk(r, 'good-recipe'), `contract should reject: ${name}`);
+    assert.ok(!schemaOk(r), `schema should reject: ${name}`);
+  }
+  for (const rule of RULES.filter((r) => r.schema !== null)) {
+    const r = rule.bad();
+    assert.equal(contractOk(r, 'good-recipe'), schemaOk(r), `same verdict: ${rule.line}`);
+  }
+});
+
+test('the schema also checks optional fields that validateRecipe skips', () => {
+  const stricter = {
+    'handle without @': mutate((r) => { r.creator.handle = 'creator'; }),
+    'creator url not http': mutate((r) => { r.creator.url = 'javascript:alert(1)'; }),
+    'calories as text': mutate((r) => { r.nutrition.calories = 'lots'; }),
+    'negative protein': mutate((r) => { r.nutrition.protein_g = -5; }),
+    'nutrition without per': mutate((r) => { delete r.nutrition.per; }),
+    'nutrition basis unstated': mutate((r) => { r.nutrition.basis = 'unstated'; }),
+    'source evidence as number': mutate((r) => { r.source.evidence = 3; }),
+    'ingredient note as number': mutate((r) => { r.components[0].ingredients[0].note = 3; }),
+    'serves as number': mutate((r) => { r.serves = 4; }),
+  };
+  for (const [name, make] of Object.entries(stricter)) {
+    const r = make();
+    assert.deepEqual(validateRecipe(r, 'good-recipe'), [], `contract ignores: ${name}`);
+    assert.ok(!schemaOk(r), `schema rejects: ${name}`);
+  }
+});
+
+test('every recipe file passes the JSON Schema', async () => {
   const dir = join(ROOT, 'recipes');
-  for (const f of (await readdir(dir)).filter((f) => f.endsWith('.json'))) {
+  const files = (await readdir(dir)).filter((f) => f.endsWith('.json'));
+  assert.ok(files.length > 0);
+  for (const f of files) {
     const r = JSON.parse(await readFile(join(dir, f), 'utf8'));
-    assert.deepEqual(check(SCHEMA, r, SCHEMA), [], f);
+    assert.deepEqual(validateSchema(schema, r), [], f);
   }
-  assert.deepEqual(check(SCHEMA, valid(), SCHEMA), []);
 });
 
-test('the JSON Schema and validateRecipe reject the same broken recipes', () => {
-  const broken = {
-    'invented amount': (r) => { r.components[0].ingredients[0].amount = '1 tsp'; },
-    'missing amount': (r) => { r.components[0].ingredients[0].basis = 'spoken'; },
-    'uppercase key': (r) => { r.components[0].ingredients[0].key = 'Salt'; },
-    'bad basis': (r) => { r.components[0].ingredients[0].basis = 'guessed'; },
-    'partial without gaps': (r) => { r.status = 'partial'; },
-    'bad status': (r) => { r.status = 'done'; },
-    'bad id': (r) => { r.id = 'Not A Slug'; },
-    'no components': (r) => { r.components = []; },
-    'uppercase tag': (r) => { r.tags = ['Quick']; },
-    'negative timestamp': (r) => { r.components[0].steps[0].t = -1; },
-    'bad date': (r) => { r.analyzed = '12/10/2026'; },
-    'future schema': (r) => { r.schema = SCHEMA_VERSION + 1; },
-    'no creator name': (r) => { r.creator = {}; },
+test('schema constants match lib/recipe.mjs and lib/video.mjs', () => {
+  assert.equal(schema.$schema, 'https://json-schema.org/draft/2020-12/schema');
+  assert.deepEqual(schema.properties.status.enum, STATUSES);
+  assert.deepEqual(schema.$defs.ingredient.properties.basis.enum, BASES);
+  assert.equal(schema.properties.id.pattern, SLUG.source);
+  assert.equal(schema.properties.analyzed.pattern, DATE.source);
+  assert.equal(schema.properties.uploaded.pattern, DATE.source);
+  assert.equal(schema.properties.schema.maximum, SCHEMA_VERSION);
+  assert.deepEqual(schema.$defs.video.properties.platform.enum, PLATFORMS.map((p) => p.id));
+  const perPlatform = schema.$defs.video.allOf.map((rule) => rule.if.properties.platform.const);
+  assert.deepEqual(perPlatform, PLATFORMS.map((p) => p.id), 'one host/id rule per platform, in table order');
+});
+
+test('the schema only uses keywords the subset validator understands', () => {
+  const walk = (node, path) => {
+    if (Array.isArray(node)) return node.forEach((n, i) => walk(n, `${path}/${i}`));
+    if (!node || typeof node !== 'object') return;
+    for (const [k, v] of Object.entries(node)) {
+      assert.ok(SUPPORTED_KEYWORDS.has(k), `unsupported keyword ${path}/${k}`);
+      if (k === 'properties' || k === '$defs') for (const [name, sub] of Object.entries(v)) walk(sub, `${path}/${k}/${name}`);
+      else if (['items', 'additionalProperties', 'if', 'then', 'else', 'allOf', 'anyOf'].includes(k)) walk(v, `${path}/${k}`);
+    }
   };
-  for (const [name, breakIt] of Object.entries(broken)) {
-    const r = valid();
-    breakIt(r);
-    assert.notDeepEqual(check(SCHEMA, r, SCHEMA), [], `schema accepts: ${name}`);
-    assert.notDeepEqual(validateRecipe(r, r.id), [], `validateRecipe accepts: ${name}`);
-  }
+  walk(schema, '');
 });
 
-test('validateRecipe accepts the current schema version and nothing else', () => {
-  assert.deepEqual(validateRecipe({ ...valid(), schema: 1 }, 'x'), []);
-  for (const v of [0, 2, '1', 1.5]) {
-    assert.ok(validateRecipe({ ...valid(), schema: v }, 'x').some((e) => e.startsWith('schema')), String(v));
-  }
-});
-
-test('migrateRecipe: no-op at the current version', () => {
-  assert.equal(SCHEMA_VERSION, 1);
-  assert.deepEqual(MIGRATIONS, {});
-  const r = valid();
-  assert.equal(schemaVersion(r), 1);
-  assert.equal(schemaVersion({ schema: 3 }), 3);
-  const out = migrateRecipe(r);
-  assert.deepEqual(out, { recipe: r, from: 1, to: 1, changed: false });
-});
-
-test('migrateRecipe runs each step in order on a copy', () => {
-  const migrations = {
-    2: ({ serves, ...r }) => ({ ...r, yield: serves ?? null }),
-    3: (r) => ({ ...r, tags: [...r.tags, 'migrated'] }),
+test('the subset validator handles the keywords it claims', () => {
+  const s = {
+    $defs: { n: { type: 'integer', minimum: 1 } },
+    type: 'object',
+    required: ['a'],
+    properties: { a: { $ref: '#/$defs/n' }, b: { anyOf: [{ type: 'string', minLength: 2 }, { type: 'null' }] } },
+    additionalProperties: false,
   };
-  const r = { ...valid(), serves: '4' };
-  const out = migrateRecipe(r, { migrations, to: 3 });
-  assert.equal(out.from, 1);
-  assert.equal(out.to, 3);
-  assert.equal(out.changed, true);
-  assert.equal(out.recipe.schema, 3);
-  assert.equal(out.recipe.yield, '4');
-  assert.equal('serves' in out.recipe, false);
-  assert.deepEqual(out.recipe.tags, ['migrated']);
-  assert.equal(r.serves, '4', 'input untouched');
-  assert.deepEqual(r.tags, []);
-  assert.equal(migrateRecipe({ ...r, schema: 2 }, { migrations, to: 3 }).recipe.tags.length, 1);
-});
-
-test('migrateRecipe refuses what it cannot do', () => {
-  assert.throws(() => migrateRecipe(valid(), { migrations: {}, to: 2 }), /no migration from schema 1 to 2/);
-  assert.throws(() => migrateRecipe({ ...valid(), schema: 5 }), /newer than this copy/);
-  assert.throws(() => migrateRecipe({ ...valid(), schema: 0 }), /unknown schema version/);
-  assert.throws(() => migrateRecipe({ ...valid(), schema: 'one' }), /unknown schema version/);
+  assert.deepEqual(validateSchema(s, { a: 2 }), []);
+  assert.deepEqual(validateSchema(s, { a: 2, b: null }), []);
+  assert.equal(validateSchema(s, { a: 0 })[0].path, 'a');
+  assert.equal(validateSchema(s, {})[0].message, 'is required');
+  assert.equal(validateSchema(s, { a: 1, b: 'x' }).length, 1);
+  assert.equal(validateSchema(s, { a: 1, c: 1 })[0].path, 'c');
+  assert.throws(() => validateSchema({ oneOf: [] }, 1), /unsupported schema keyword "oneOf"/);
+  assert.throws(() => validateSchema({ $ref: 'https://example.com/x' }, 1), /only local \$ref/);
 });

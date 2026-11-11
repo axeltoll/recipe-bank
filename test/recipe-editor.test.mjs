@@ -6,13 +6,15 @@ import { readFile } from 'node:fs/promises';
 
 const read = (p) => readFile(new URL(`../public/features/${p}`, import.meta.url), 'utf8');
 
-test('the editor module exports mount, emits its events and imports only shared lib modules', async () => {
+test('the editor module exports mount, emits its events and imports only shared lib modules and the shared feature helpers', async () => {
   const src = await read('recipe-editor.mjs');
   assert.match(src, /export function mount\(element, \{ recipe, video, readOnly = STATIC, recipes \} = \{\}\)/);
   assert.match(src, /'recipe-bank:recipe-saved'/);
   assert.match(src, /'recipe-bank:editor-cancel'/);
   const imports = [...src.matchAll(/^(?:import .*|\}) from '([^']+)'/gm)].map((m) => m[1]);
-  assert.deepEqual(imports.sort(), ['/lib/draft.mjs', '/lib/video.mjs']);
+  // One helper module for every feature module (public/features/shared.mjs), plus lib/. Relative paths, like the
+  // other feature modules, so the module also imports in Node (test/feature-installers.test.mjs).
+  assert.deepEqual(imports.sort(), ['../../lib/draft.mjs', '../../lib/video.mjs', './shared.mjs']);
   assert.doesNotMatch(src, /localStorage|sessionStorage/);
   assert.doesNotMatch(src, /the creator held details back/i);
 });

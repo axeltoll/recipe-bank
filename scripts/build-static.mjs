@@ -1,13 +1,15 @@
 // Builds a static copy of the dashboard in dist/ for Cloudflare Pages (`npm run build`, deploy with `npm run deploy`).
 // The two read APIs become plain JSON files; the page is marked data-static="1", so app.js reads those files, hides
-// "Remove" and turns "Add video" into a copy-a-request for the Recipe Bank Telegram topic (there is no server to queue to).
+// "Remove", turns "Add video" into a copy-a-request message (there is no server to queue to), makes the recipe editor
+// offer "Download JSON" instead of saving, and turns pack import off. Nothing in dist/ tries to write.
 // public/features/ is copied with the rest of public/, so the feature modules work the same in the static copy.
 import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { loadQueue, loadRecipes } from '../server.mjs';
+import { loadQueue, loadRecipes, dataPaths } from '../server.mjs';
 import { videoKey } from '../lib/video.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
+const DATA = dataPaths(); // RECIPE_BANK_DIR, else this repository
 
 /**
  * Build the static site into `outDir`. Throws (without touching `outDir`) when a recipe file is invalid.
@@ -15,8 +17,8 @@ const ROOT = resolve(import.meta.dirname, '..');
  */
 export async function buildStatic({
   outDir = join(ROOT, 'dist'),
-  recipesDir = join(ROOT, 'recipes'),
-  queueFile = join(ROOT, 'data', 'queue.json'),
+  recipesDir = DATA.recipesDir,
+  queueFile = DATA.queueFile,
 } = {}) {
   const { recipes, invalid } = await loadRecipes(recipesDir);
   if (invalid.length) {

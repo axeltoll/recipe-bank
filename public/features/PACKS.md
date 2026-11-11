@@ -7,7 +7,7 @@ server are needed to share; importing writes files, so it needs the local server
 |---|---|
 | `lib/pack.mjs` | The logic: export, read, plan, apply, links. Pure, shared by browser, server and CLI. |
 | `public/features/packs.mjs` | The panel: `mount(element, options)` → `{ destroy() }`. |
-| `public/features/packs.css` | Its styles, scoped to `.rb-packs`. |
+| `public/features/packs.css` | Its styles, scoped to `.rb-packs`; the panel loads it on mount. |
 | `server.mjs` | `POST /api/packs/import`. |
 | `scripts/pack.mjs` | `export` and `import` from the command line. |
 
@@ -30,7 +30,7 @@ Each recipe keeps its own `schema` field (missing means 1); `readPack` runs it t
 
 ```js
 import { mount } from '/features/packs.mjs';
-// <link rel="stylesheet" href="/features/packs.css"> once on the page
+// mount() adds /features/packs.css to the page once
 
 const panel = mount(document.querySelector('#packs'), {
   recipes: state.recipes,                 // optional; fetched from /api/recipes(.json) when missing
@@ -53,10 +53,11 @@ The module does not touch the DOM until `mount` is called, so it can be imported
 (`test/packs-ui.test.mjs` tests its pure renderers `renderPicker` and `renderPlan`).
 `destroy()` removes its markup and every listener it added, including `hashchange`.
 
-**Routing.** Pack links look like `http://127.0.0.1:4780/#pack=<data>`. The dashboard router
-treats any hash it doesn't know as home, so the host page decides where the panel lives;
-for example, mount it on the home view (or in a dialog) when `location.hash` starts with
-`#pack=`. With `readHash` on, the panel opens that pack by itself.
+**Routing.** Pack links look like `http://127.0.0.1:4780/#pack=<data>`. In the dashboard the
+panel lives on `#/packs` ("Share" in the header). `packs-feature.js` catches a `#pack=` hash on
+first load and on `hashchange`, replaces it with `#/packs` and opens the pack in the panel
+(it mounts the panel with `readHash: false`). On another page, with `readHash` on, the panel
+opens such a link by itself.
 
 ## What import does
 

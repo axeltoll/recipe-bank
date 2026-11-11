@@ -55,12 +55,13 @@ export function renderQueued(id) {
         <div class="q-actions">
           ${recipe ? `<a class="btn btn-primary" href="${esc(recipeHash(recipe.id))}">Open the recipe</a>` : ''}
           ${x.status === 'done' ? '' : `<button class="btn" type="button" id="copy-req">${icon('copy')}<span>Copy request</span></button>`}
+          ${x.status === 'done' ? '' : `<a class="btn btn-quiet" href="#/new/${esc(encodeURIComponent(x.id))}">Write it up yourself</a>`}
           ${removable ? '<button class="btn btn-quiet btn-danger" type="button" id="remove-req">Remove from queue</button>' : ''}
         </div>
       </section>
     </article>`;
 
-  $('#copy-req')?.addEventListener('click', () => copy(analysisRequest(x), 'Request copied. Paste it in the Recipe Bank topic'));
+  $('#copy-req')?.addEventListener('click', () => copy(analysisRequest(x), 'Request copied'));
   $('#remove-req')?.addEventListener('click', async (e) => {
     if (await removeQueued(x.id, e.currentTarget)) location.hash = '#/';
   });

@@ -122,7 +122,8 @@ test('POST /api/queue rejects bad input with 400 and changes nothing', async () 
   for (const [body, raw] of bad) {
     const r = await call('POST', '/api/queue', body, { raw });
     assert.equal(r.status, 400, JSON.stringify(body));
-    assert.match(r.json.error, /YouTube, TikTok or Instagram/);
+    // Every supported source is named (the list grew with the more-platforms lane).
+    assert.match(r.json.error, /YouTube, TikTok, Instagram, Facebook, Pinterest or X/);
   }
   assert.equal((await readQueue()).length, 3);
 });

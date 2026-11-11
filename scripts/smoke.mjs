@@ -1,21 +1,16 @@
-// Selectors for the dashboard live here so a redesign has one place to update.
-export const SELECTORS = {
-  cards: '#grid .card', chips: '#chips .chip', more: '#more',
-  all: '[data-mode="all"]', any: '[data-mode="any"]', clear: '#clear', search: '#search',
-  ingredients: '.ing-list .name', steps: '.steps li', timestamp: '.ts', player: '.player iframe',
-  add: '#open-add', url: '#add-url', hint: '#add-detect', cancel: '#add-cancel',
-  card: (id) => `#grid .card[href="#/r/${id}"]`,
-  chip: (key) => `#chips .chip[data-key=${JSON.stringify(key)}]`,
-  timestampAt: (t) => `.ts[data-t="${t}"]`,
-};
+// Browser smoke test of the dashboard, live (npm start) and static (dist/). The selectors for the redesigned
+// dashboard live in scripts/browser/selectors.mjs, the one place to update after a redesign.
 import assert from 'node:assert/strict';
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { loadRecipes } from '../server.mjs';
 import { ROOT, options, browserAvailable, withBrowser, assertClean } from './browser/support.mjs';
+import { SELECTORS } from './browser/selectors.mjs';
+
+export { SELECTORS };
 
 const opts = options();
-const checks = ['grid', 'filters', 'creator', 'recipe', 'timestamp', 'queue', 'keyboard'];
+const checks = ['grid', 'filters', 'creator', 'recipe', 'timestamp', 'queue', 'keyboard', 'features'];
 if (opts.only && !checks.includes(opts.only)) throw new Error(`--only must be one of: ${checks.join(', ')}`);
 const enabled = (name) => !opts.only || opts.only === name;
 const q = JSON.stringify;
@@ -135,6 +130,29 @@ async function smoke(page, origin, label, recipes) {
     assert.equal(await page.evaluate(`document.querySelector(${q(SELECTORS.hint)}).textContent`), 'Not a supported video link yet');
     await page.click(SELECTORS.cancel);
     console.log(`PASS ${label}: unsupported link warning (no queue writes)`);
+  }
+  if (enabled('features')) {
+    // Every feature route renders, without writing anything (no save, no import is clicked).
+    await page.goto(`${origin}/#/`);
+    await page.waitFor(SELECTORS.withoutChips);
+    const nav = await page.evaluate(`Array.from(document.querySelectorAll(${q(SELECTORS.nav)}), (a) => a.textContent.trim())`);
+    assert.deepEqual(nav, ['Recipes', 'Week plan', 'Household', 'Share'], 'header navigation lists the feature routes');
+    for (const [hash, selector] of [
+      ['#/plan', SELECTORS.weekPlan], ['#/plan', SELECTORS.shoppingList],
+      ['#/household', SELECTORS.household], ['#/household', SELECTORS.budget],
+      ['#/packs', SELECTORS.packs], ['#/new', SELECTORS.editor],
+      [`#/edit/${encodeURIComponent(recipe.id)}`, SELECTORS.editor],
+      [`#/r/${encodeURIComponent(recipe.id)}`, SELECTORS.scale],
+    ]) {
+      await page.goto(`${origin}/${hash}`);
+      await page.waitFor(selector);
+    }
+    assert.ok(await page.evaluate(`Boolean(document.querySelector(${q(SELECTORS.addToWeek)}))`), 'recipe page offers Add to week');
+    await page.goto(`${origin}/#/new`);
+    await page.waitFor(SELECTORS.editorDownload);
+    const canSave = await page.evaluate(`Boolean(document.querySelector(${q(SELECTORS.editorSave)}))`);
+    assert.equal(canSave, label === 'live', 'the editor saves on the local server and only downloads on the static build');
+    console.log(`PASS ${label}: feature routes render; the static editor offers Download JSON only`);
   }
   assertClean(page);
   await page.goto(`${origin}/#/`);

@@ -136,7 +136,7 @@ export function renderHome() {
     const copyBtn = e.target.closest('[data-copy]');
     if (copyBtn) {
       const x = state.queue.find((q) => q.id === copyBtn.dataset.copy);
-      if (x) copy(analysisRequest(x), 'Request copied. Paste it in the Recipe Bank topic');
+      if (x) copy(analysisRequest(x), 'Request copied');
       return;
     }
     const removeBtn = e.target.closest('[data-remove]');

@@ -144,6 +144,7 @@ On the home view the order is `rb:grid`, then `rb:view`. A feature that filters 
 | `rb.refresh()` | Re-run all filters and redraw the grid. Call it after your filter's state changes. Does nothing off the home view. |
 | `rb.addRoute(name, def)` | Register a hash route (below). Returns a function that removes it. |
 | `rb.navigate(hash)` | Go to a hash, e.g. `rb.navigate('#/plan')`. |
+| `rb.reload()` | Re-read recipes and the queue from the API (after a feature wrote a recipe file) and update the header count. Resolves when done; navigate or `rb.refresh()` afterwards to redraw. |
 | `rb.store` | `get(key, fallback)`, `set(key, value)`, `remove(key)` over `localStorage`, JSON-encoded, never throws. Prefix keys with `rb:`. |
 | `rb.toast(text)` | Short confirmation. |
 | `rb.copy(text, doneMessage)` | Copy to the clipboard with a toast. |
@@ -186,13 +187,22 @@ rb.addRoute('plan', {
 - `render` that throws shows an error state instead of a blank page.
 - A deep link to a feature route works on first load, because features install before the first render.
 
-## 5. Suggested split for the planned features
+## 5. The installed features
 
-| Feature | Uses |
-|---|---|
-| Week plan | `addRoute('plan', …)`, `card-actions`, `recipe-actions`, `home-top`, `topbar` |
-| Combined shopping list | `addRoute('shop', …)` reading `rb.recipes()` and the plan; `rb:check` to carry ticks over; `recipe-aside` |
-| Serving scaling | `recipe-scaling` plus the `.ing-amt` hooks; `rb:view` for `name === 'recipe'` |
-| Exclude filter | `filter-exclude`, `addFilter('exclude', …)` |
-| Tag filter | `filter-tags`, `addFilter('tags', …)`, `tagCounts()` from `/lib/catalog.mjs` |
-| Nutrition filter | `filter-nutrition`, `addFilter('nutrition', …)`, `macros()` from `/lib/catalog.mjs`; recipes without stated macros have none, so decide and say whether they pass |
+`public/features/index.js` installs these, in this order. Each installer is a small `*-feature.js` file that mounts a
+self-contained module (`*.mjs`, documented in `INTEGRATION.md`, `HOUSEHOLD.md`, `EDITOR.md` and `PACKS.md`).
+
+| Installer | Module(s) | Uses |
+|---|---|---|
+| `filters-feature.js` | `filters.mjs` | `filter-exclude`, `filter-tags`, `filter-nutrition`; `addFilter('without' / 'tags' / 'nutrition', …)` over `/lib/filter.mjs`. Recipes that don't state a macro never pass an active nutrition filter, and the panel says how many state them. State in `rb:filters-extra`. |
+| `scale-feature.js` | `scale.mjs` | `recipe-scaling` plus the `.ing-amt` hooks, on `rb:view` for `name === 'recipe'`; a "Scale to your household" button when a household profile is saved |
+| `plan-feature.js` | `week-plan.mjs`, `shopping-list.mjs` | `addRoute('plan', …)` (week plan beside the combined shopping list), `card-actions` and `recipe-actions` ("Add to week") |
+| `household-feature.js` | `household.mjs`, `budget.mjs` | `addRoute('household', …)` |
+| `packs-feature.js` | `packs.mjs` | `addRoute('packs', …)`; turns a `#pack=…` link into `#/packs` and opens the pack |
+| `editor-feature.js` | `recipe-editor.mjs` | `addRoute('new', …)` (`#/new`, `#/new/<queueId>`), `addRoute('edit', …)` (`#/edit/<id>`), a "New recipe" button in `home-tools`; `rb.reload()` after a save |
+
+The modules' own custom properties (`--rbf-*`, `--rb-*`, `--re-*`, `--pk-*`) are mapped to the design tokens in one
+block of `public/styles.css` ("feature modules"), so the modules follow both themes without CSS of their own.
+
+On the static build (`rb.isStatic`) the editor is read-only and offers "Download JSON", and the packs panel shows what a
+pack holds without an Import button: nothing in `dist/` writes.

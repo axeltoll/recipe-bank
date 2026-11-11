@@ -3,6 +3,7 @@ import { plural } from '/lib/format.mjs';
 import { waiting } from '/lib/catalog.mjs';
 import { createHub, MOUNTS } from '/lib/hub.mjs';
 import { BREAKPOINTS } from '/lib/nav.mjs';
+import { PLATFORMS } from '/lib/video.mjs';
 
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -12,7 +13,14 @@ export const view = $('#view');
 export const STATIC = document.documentElement.dataset.static === '1';
 export const apiPath = (name) => (STATIC ? `/api/${name}.json` : `/api/${name}`);
 
-export const PLATFORM = { youtube: 'YouTube', tiktok: 'TikTok', instagram: 'Instagram' };
+/** Platform id → label, from the one table in lib/video.mjs. Callers fall back to a generic label for unknown ids. */
+export const PLATFORM = Object.fromEntries(PLATFORMS.map(({ id, label }) => [id, label]));
+
+/** "YouTube, TikTok, Instagram, Facebook, Pinterest or X": every source that needs no web-page opt-in. */
+export const PLATFORM_LIST = (() => {
+  const labels = PLATFORMS.filter(({ id }) => id !== 'web').map(({ label }) => label);
+  return `${labels.slice(0, -1).join(', ')} or ${labels.at(-1)}`;
+})();
 
 export const state = {
   recipes: [],

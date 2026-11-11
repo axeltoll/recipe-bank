@@ -111,11 +111,16 @@ CLI against disposable queue entries to check platform and ID consistency.
 `npm run validate` still checks the actual collection. `npm run build` copies the
 shared modules to the static export; parsing there remains offline.
 
-## Dashboard integration for the PAM
+## Dashboard integration
 
-This lane deliberately does not edit `public/app.js`, `public/index.html` or
-`public/styles.css`. The roadmap item remains open until this integration is
-complete. Apply these changes in the dashboard lane:
+Done in the round-1 merge: `public/ui/core.js` derives `PLATFORM` and the
+supported-platform copy (`PLATFORM_LIST`) from `PLATFORMS`; the Add dialog
+(`public/index.html`, `public/ui/add.js`) has the "It's a web page with a video
+on it" checkbox, passes `{ allowWeb: true }` only while it is ticked, labels web
+results as a page to check, and the static copy's request names a web source;
+`player()` keeps the link fallback; timestamps are buttons only on YouTube. The
+recipe editor takes its labels from the same table. What still needs a person
+is the visual check in step 5 below. The original checklist:
 
 1. Add `PLATFORMS` to the import from `/lib/video.mjs` in `public/app.js`. Replace
    the hard-coded `PLATFORM` object with

@@ -48,7 +48,7 @@ export default [
           { "item": "Chicken stock", "key": "chicken stock", "amount": "about 1 cup", "basis": "spoken", "note": null },
           { "item": "Lemon", "key": "lemon", "amount": "a squeeze", "basis": "spoken", "note": null },
           { "item": "Cold butter", "key": "butter", "amount": null, "basis": "unstated", "note": "It must be cold" },
-          { "item": "Parsley", "key": "parsley", "amount": "some", "basis": "spoken", "note": null }
+          { "item": "Parsley", "key": "parsley", "amount": null, "basis": "unstated", "note": null }
         ],
         "steps": [
           { "text": "Keep the browned bits (the fond) in the pan. Add the shallots, then the garlic, and stir briefly.", "t": 46 },
