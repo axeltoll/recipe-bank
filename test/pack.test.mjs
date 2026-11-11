@@ -175,7 +175,7 @@ test('HTML and control characters in titles stay plain text, bounded', () => {
   const read = readPack(wrap([makeRecipe('alpha', 1, { title: html })], { title: html }));
   assert.equal(read.title, html, 'kept as text; renderers escape it');
   assert.equal(read.entries[0].title, html);
-  assert.equal(readPack(wrap([makeRecipe('alpha', 1)], { title: 'a\u0000b‮c\n\nd' })).title, 'a b c d');
+  assert.equal(readPack(wrap([makeRecipe('alpha', 1)], { title: 'a\u0000b\u202ec\n\nd' })).title, 'a b c d');
   assert.equal(readPack(wrap([makeRecipe('alpha', 1)], { title: 'é'.repeat(400) })).title.length, MAX_TITLE_CHARS);
   assert.equal(readPack(wrap([makeRecipe('alpha', 1)], { title: 42 })).title, 'Untitled pack');
   assert.equal(readPack(wrap([makeRecipe('alpha', 1)], { exported: 'not a date' })).exported, null);
