@@ -42,3 +42,12 @@ test('the write gate is described as writeRefusal checks it', async () => {
   assert.doesNotMatch(flat(await read('CONTRIBUTING.md')), /only accepts changes sent as `application\/json` from its own origin/);
   assert.doesNotMatch(await read('docs/ARCHITECTURE.md'), /`DELETE \/api\/queue\/<id>`[^\n]*415/, 'DELETE never answers 415');
 });
+
+test('README lists household purchase amounts under "What it does" only once the dashboard shows them', async () => {
+  const plan = await read('public/features/plan-feature.js');
+  const shown = /household:\s*true/.test(plan);
+  const readme = await read('README.md');
+  const whatItDoes = /## What it does\n([\s\S]*?)\n## /.exec(readme)[1];
+  assert.equal(/Amounts for your household|how much to buy/.test(whatItDoes), shown,
+    shown ? 'the dashboard shows purchase amounts: README should say so' : '#/plan mounts the creator-words list: README must not promise purchase amounts');
+});
