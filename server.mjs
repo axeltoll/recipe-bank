@@ -10,11 +10,14 @@ import { readFile, readdir, writeFile, rename, mkdir } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { parseVideoUrl, videoKey } from './lib/video.mjs';
-import { validateRecipe } from './lib/recipe.mjs';
+import { validateRecipe, SLUG } from './lib/recipe.mjs';
+import { readPack, planImport, applyImport, MAX_PACK_CHARS } from './lib/pack.mjs';
 
 const ROOT = resolve(import.meta.dirname);
-const RECIPES_DIR = join(ROOT, 'recipes');
-const QUEUE_FILE = join(ROOT, 'data', 'queue.json');
+// RECIPE_BANK_DIR: a folder holding recipes/ and data/ to use instead of this repo's (tests use a temp folder).
+const DATA_ROOT = resolve(process.env.RECIPE_BANK_DIR ?? ROOT);
+const RECIPES_DIR = join(DATA_ROOT, 'recipes');
+const QUEUE_FILE = join(DATA_ROOT, 'data', 'queue.json');
 const PORT = Number(process.env.PORT ?? 4780);
 const HOST = process.env.HOST ?? '127.0.0.1';
 
@@ -87,11 +90,11 @@ function json(res, status, body) {
   res.end(JSON.stringify(body));
 }
 
-async function readBody(req) {
+async function readBody(req, max = 10_000) {
   let raw = '';
   for await (const chunk of req) {
     raw += chunk;
-    if (raw.length > 10_000) throw Object.assign(new Error('Body too large'), { status: 413 });
+    if (raw.length > max) throw Object.assign(new Error('Body too large'), { status: 413 });
   }
   try {
     return JSON.parse(raw || '{}');

@@ -18,6 +18,7 @@ Me, first: I save a lot of cooking videos and could never find the one I wanted,
 - **Shopping list.** Copy a recipe's ingredients as a shopping list, or print the recipe.
 - **Honest amounts.** Amounts are the creator's own words ("1 can", "about 1 cup"). When a video doesn't say, the recipe says "amount not given" instead of guessing, and recipes with a withheld method are marked *partial* with the gaps listed.
 - **Queue new videos.** Paste a video link to add it to the queue for analysis.
+- **Recipe packs.** Share a few recipes as one file or a link, and import someone else's: recipes whose video you already have are skipped, and nothing is overwritten.
 - **Credit.** Every recipe links back to the creator and the original video. Videos are embedded from the platform, never re-hosted.
 
 Built and tested, waiting to be placed in the dashboard's new design (see [`public/features/INTEGRATION.md`](public/features/INTEGRATION.md)):
@@ -32,7 +33,7 @@ Built and tested, waiting to be placed in the dashboard's new design (see [`publ
 - Node.js 22 and nothing else: no runtime dependencies, no framework, no build step for development.
 - `node:http` server with a small JSON API (`server.mjs`).
 - Vanilla ES-module dashboard with light and dark themes (`public/`).
-- A recipe schema with a validator (`lib/recipe.mjs`, `npm run validate`) and tests on the built-in `node:test` runner.
+- A versioned recipe contract with a validator (`lib/recipe.mjs`, `npm run validate`), a JSON Schema of the full file format (`schema/recipe.schema.json`), migrations between contract versions (`lib/migrate.mjs`) and tests on the built-in `node:test` runner.
 - Static export for Cloudflare Pages (`npm run build`).
 
 ## Run it
@@ -56,6 +57,8 @@ npm run schema     # regenerate schema/recipe.schema.json from lib/schema.mjs
 npm run migrate    # bring recipe files up to the current contract version (dry run; add -- --write)
 npm run packs -- export banana-milk --out my.pack.json    # or: import my.pack.json [--write]
 ```
+
+Recipe packs are described in [public/features/PACKS.md](public/features/PACKS.md).
 
 ## Project layout
 

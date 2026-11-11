@@ -1,0 +1,268 @@
+/* Recipe packs panel (public/features/packs.mjs). Everything is scoped to .rb-packs.
+   Colour and spacing come only from the custom properties below, which follow the
+   dashboard's tokens (--surface, --ink, --accent, …) when they exist, so light and dark
+   themes need no extra rules. Override any --pk-* on .rb-packs or an ancestor to restyle. */
+
+.rb-packs {
+  --pk-bg: var(--surface, Canvas);
+  --pk-bg-2: var(--surface-2, Canvas);
+  --pk-ink: var(--ink, CanvasText);
+  --pk-muted: var(--muted, GrayText);
+  --pk-line: var(--line, GrayText);
+  --pk-accent: var(--accent, LinkText);
+  --pk-accent-ink: var(--accent-ink, Canvas);
+  --pk-ok: var(--ok, CanvasText);
+  --pk-ok-soft: var(--ok-soft, transparent);
+  --pk-warn: var(--warn, CanvasText);
+  --pk-warn-soft: var(--warn-soft, transparent);
+  --pk-info: var(--info, CanvasText);
+  --pk-info-soft: var(--info-soft, transparent);
+  --pk-radius: var(--radius, 12px);
+  --pk-s1: 4px;
+  --pk-s2: 8px;
+  --pk-s3: 12px;
+  --pk-s4: 16px;
+  --pk-s5: 24px;
+
+  display: grid;
+  gap: var(--pk-s5);
+  color: var(--pk-ink);
+}
+
+.rb-packs [hidden] {
+  display: none !important;
+}
+
+.rb-packs .pk-section {
+  display: grid;
+  gap: var(--pk-s3);
+  padding: var(--pk-s4);
+  background: var(--pk-bg);
+  border: 1px solid var(--pk-line);
+  border-radius: var(--pk-radius);
+  min-width: 0;
+}
+
+.rb-packs h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.rb-packs .pk-sub {
+  margin: 0;
+  color: var(--pk-muted);
+  font-size: 0.9rem;
+}
+
+.rb-packs .pk-field {
+  display: grid;
+  gap: var(--pk-s1);
+  font-size: 0.9rem;
+}
+
+.rb-packs input[type='text'],
+.rb-packs input[type='search'],
+.rb-packs input[type='url'] {
+  font: inherit;
+  font-size: max(16px, 1em);
+  min-height: 44px;
+  padding: var(--pk-s2) var(--pk-s3);
+  color: var(--pk-ink);
+  background: var(--pk-bg);
+  border: 1px solid var(--pk-line);
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.rb-packs input[type='file'] {
+  font: inherit;
+  min-height: 44px;
+}
+
+.rb-packs .pk-toolbar,
+.rb-packs .pk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--pk-s2);
+  margin: 0;
+}
+
+.rb-packs .pk-toolbar input {
+  flex: 1 1 12rem;
+}
+
+.rb-packs .pk-btn {
+  font: inherit;
+  min-height: 44px;
+  padding: 0 var(--pk-s4);
+  color: var(--pk-ink);
+  background: var(--pk-bg);
+  border: 1px solid var(--pk-line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.rb-packs .pk-primary {
+  color: var(--pk-accent-ink);
+  background: var(--pk-accent);
+  border-color: var(--pk-accent);
+}
+
+.rb-packs .pk-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rb-packs .pk-btn:focus-visible,
+.rb-packs input:focus-visible {
+  outline: 2px solid var(--pk-accent);
+  outline-offset: 2px;
+}
+
+.rb-packs .pk-list,
+.rb-packs .pk-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--pk-line);
+  border-radius: 8px;
+  max-height: 24rem;
+  overflow: auto;
+}
+
+.rb-packs .pk-list > li + li,
+.rb-packs .pk-items > li + li {
+  border-top: 1px solid var(--pk-line);
+}
+
+.rb-packs .pk-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--pk-s2);
+  min-height: 44px;
+  padding: var(--pk-s1) var(--pk-s3);
+  cursor: pointer;
+}
+
+.rb-packs .pk-row input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--pk-accent);
+}
+
+.rb-packs .pk-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.rb-packs .pk-item > .pk-sub,
+.rb-packs .pk-problems {
+  padding: 0 var(--pk-s3) var(--pk-s2) var(--pk-s5);
+}
+
+.rb-packs .pk-item > .pk-sub {
+  overflow-wrap: anywhere;
+}
+
+.rb-packs .pk-problems {
+  margin: 0;
+  color: var(--pk-warn);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.rb-packs .pk-problems li {
+  margin-inline-start: var(--pk-s4);
+}
+
+.rb-packs .pk-badge {
+  font-size: 0.75rem;
+  white-space: nowrap;
+  padding: var(--pk-s1) var(--pk-s2);
+  border-radius: 999px;
+  color: var(--pk-muted);
+  background: var(--pk-bg-2);
+}
+
+.rb-packs [data-status='new'] .pk-badge {
+  color: var(--pk-ok);
+  background: var(--pk-ok-soft);
+}
+
+.rb-packs [data-status='conflict'] .pk-badge {
+  color: var(--pk-info);
+  background: var(--pk-info-soft);
+}
+
+.rb-packs [data-status='invalid'] .pk-badge {
+  color: var(--pk-warn);
+  background: var(--pk-warn-soft);
+}
+
+.rb-packs [data-status='duplicate'] .pk-name,
+.rb-packs [data-status='invalid'] .pk-name {
+  color: var(--pk-muted);
+}
+
+.rb-packs .pk-plan {
+  display: grid;
+  gap: var(--pk-s2);
+}
+
+.rb-packs .pk-plan-title {
+  margin: 0;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.rb-packs .pk-empty {
+  padding: var(--pk-s3);
+  color: var(--pk-muted);
+}
+
+.rb-packs .pk-status {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.rb-packs .pk-status:empty {
+  display: none;
+}
+
+.rb-packs .pk-status[data-kind='ok'] {
+  color: var(--pk-ok);
+}
+
+.rb-packs .pk-status[data-kind='error'] {
+  color: var(--pk-warn);
+}
+
+.rb-packs .pk-error,
+.rb-packs .pk-note {
+  margin: 0;
+  padding: var(--pk-s3);
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.rb-packs .pk-error {
+  color: var(--pk-warn);
+  background: var(--pk-warn-soft);
+}
+
+.rb-packs .pk-note {
+  color: var(--pk-ink);
+  background: var(--pk-bg-2);
+}
+
+.rb-packs .pk-linkout {
+  width: 100%;
+}
+
+.rb-packs code {
+  font-size: 0.85em;
+  overflow-wrap: anywhere;
+}

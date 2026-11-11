@@ -34,7 +34,7 @@ No dependencies. Node ≥ 22 (built-in `fetch`, `node:test`, `import.meta.dirnam
 | `public/features/` | Self-contained UI modules (`mount(el, options)`) for the week plan, shopping list, scaling and filters; `INTEGRATION.md` explains them. |
 | `scripts/validate.mjs` | CLI validator; exits 1 on any problem. Warns about ingredient keys with no shopping-list aisle. |
 
-API: `GET /api/recipes` → `{recipes, invalid}` · `GET /api/queue` · `POST /api/queue {url, note}` (409 if the video is already a recipe or queued; best-effort oEmbed title) · `DELETE /api/queue/<id>`.
+API: `GET /api/recipes` → `{recipes, invalid}` · `GET /api/queue` · `POST /api/queue {url, note}` (409 if the video is already a recipe or queued; best-effort oEmbed title) · `DELETE /api/queue/<id>` · `POST /api/packs/import {pack, include?}` (JSON content type required; creates new recipe files only, never overwrites; duplicates by video are skipped). `RECIPE_BANK_DIR` points the server and scripts at another data folder (tests use a temp one).
 
 ## Recipe file contract (for analysis agents)
 
@@ -69,6 +69,16 @@ Rules that matter more than the format:
 3. **`key` is the shopping-level filter key**: lowercase, singular, what you'd filter by (`chicken`, not `skin-on chicken thighs`; `chicken stock` stays distinct). Reuse existing keys: `npm start`, then the chip list, or `grep -h '"key"' recipes/*.json | sort -u`. A new key also needs an aisle in `AISLE_KEYS` (`lib/plan.mjs`); `npm run validate` warns when one is missing.
 4. Add a `t` timestamp to each step where possible. The dashboard turns it into a "play from here" button.
 5. Run `npm run validate` before committing. Once the recipe file exists, remove the matching entry from `data/queue.json`. The dashboard already hides queue entries whose video is in `recipes/`.
+
+The full field reference, optional fields included, is `schema/recipe.schema.json`; `validateRecipe` stays the enforced contract.
+
+## Schema version and migration
+
+`SCHEMA_VERSION` in `lib/recipe.mjs` is the contract version (now 1). A recipe's optional `schema` field says which version it was written for; a missing field means 1, and a file newer than the code is rejected. To change the contract: bump `SCHEMA_VERSION` and the `maximum` of `schema` in the JSON Schema, add one pure step to `MIGRATIONS` in `lib/migrate.mjs`, update `validateRecipe`, the schema and its cross-check table in `test/schema.test.mjs`, then run `node scripts/migrate.mjs` (dry run) and `--write`. Written files are re-serialised as 2-space JSON.
+
+## Recipe packs
+
+A pack is one JSON file, `{ format: "recipe-bank-pack", version: 1, title, exported, recipes: [...] }`, or a link that carries it as `#pack=<base64url>` (up to 32,000 characters). Import sorts each recipe into new, conflict (same id, other video: saved as `<id>-2`), duplicate (same video: skipped) or invalid, and only ever creates files. Packs are untrusted: `lib/pack.mjs` caps sizes and refuses `__proto__`/`constructor`/`prototype` keys, and every title must still be escaped when shown. Details: `public/features/PACKS.md`.
 
 ## Analysis pipeline
 
