@@ -9,6 +9,7 @@ import { Readable } from 'node:stream';
 import { readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { createApp, createHandler, hostRefusal } from '../server.mjs';
+import { exportPack, MAX_PACK_CHARS } from '../lib/pack.mjs';
 import { makeRecipe, tempBank } from './helpers/bank.mjs';
 
 const JSON_TYPE = { 'content-type': 'application/json' };
@@ -136,4 +137,15 @@ test('a null component, ingredient or step is a 400 with problems, not a server 
     assert.equal(replaced.status, 400, `PUT, shape ${n}`);
   }
   assert.equal(JSON.parse(await readFile(join(dir, 'recipes', 'alpha.json'), 'utf8')).title, 'Recipe alpha', 'unchanged');
+});
+
+test('a pack under the character cap imports even when its UTF-8 form is far larger', async () => {
+  // 700,000 three-byte characters: well under MAX_PACK_CHARS, but about 2.1 million bytes.
+  const pack = exportPack([makeRecipe('long-notes', 20, { summary: '盐'.repeat(700_000) })]);
+  const body = Buffer.from(JSON.stringify({ pack }));
+  assert.ok(JSON.stringify(pack).length < MAX_PACK_CHARS);
+  assert.ok(body.length > MAX_PACK_CHARS + 10_000);
+  const res = await call({ url: '/api/packs/import', headers: JSON_TYPE, chunks: [body] });
+  assert.equal(res.status, 201, JSON.stringify(res.json)?.slice(0, 200));
+  assert.deepEqual(res.json.created, ['long-notes']);
 });

@@ -16,7 +16,7 @@ import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { parseVideoUrl, videoKey, PLATFORMS } from './lib/video.mjs';
 import { validateRecipe, isWebLink, SLUG } from './lib/recipe.mjs';
 import { resolveShortVideo } from './lib/video-resolver.mjs';
-import { readPack, planImport, applyImport, MAX_PACK_CHARS } from './lib/pack.mjs';
+import { readPack, planImport, applyImport, MAX_PACK_BYTES } from './lib/pack.mjs';
 
 const ROOT = resolve(import.meta.dirname);
 
@@ -389,7 +389,8 @@ export function createHandler({
     }
     if (req.method === 'POST' && path === '/api/queue') return queueRequest(req, res);
     if (req.method === 'POST' && path === '/api/packs/import') {
-      return importPack(res, await readBody(req, MAX_PACK_CHARS + 10_000));
+      // readBody counts bytes: the pack's byte ceiling, plus room for the { "pack", "include" } wrapper.
+      return importPack(res, await readBody(req, MAX_PACK_BYTES + 10_000));
     }
     const del = path.match(/^\/api\/queue\/([\w-]+)$/);
     if (req.method === 'DELETE' && del) {
