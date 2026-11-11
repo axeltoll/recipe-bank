@@ -46,6 +46,10 @@ npm test           # URL parsing and recipe-contract tests
 npm run build      # static copy in dist/ (read-only: "Add video" copies a request instead of queueing)
 ```
 
+## Analyse your own videos
+
+Use the coding agent you already have to turn a supported video link into a credited, validated recipe. Start with [SELF-HOSTING.md](SELF-HOSTING.md) for setup and optional capture tools (`npm run doctor`), then [the Recipe Agent instructions](agent/RECIPE-AGENT.md) in [`agent/`](agent/). Captured source material stays in your private data folder outside the repository.
+
 ## Project layout
 
 | Path | What |
@@ -60,7 +64,7 @@ npm run build      # static copy in dist/ (read-only: "Add video" copies a reque
 
 ## Plans
 
-See [ROADMAP.md](ROADMAP.md). Next up: a week plan with a combined shopping list, household planning with a food budget, and a self-hosted Recipe Agent that turns a video link into a recipe with the coding agent you already use.
+See [ROADMAP.md](ROADMAP.md). Next up: a week plan with a combined shopping list and household planning with a food budget. The self-hosted Recipe Agent is described above.
 
 ## License
 
