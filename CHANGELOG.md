@@ -11,7 +11,8 @@ Fixes from the review of 0.2.0.
   `javascript:` link is reported invalid; the dashboard and the website render every link from data through one
   `safeUrl()` helper. The local server refuses a `POST` or `PUT` that is not JSON, and any change with a cross-site
   `Sec-Fetch-Site` or an `Origin` that is not its own; a request without either header (curl, scripts) is allowed.
-  It also refuses a `Host` that is not a loopback name, not in `RECIPE_BANK_HOSTS` and not the `HOST` it binds to
+  On every API request, reads included (so a rebinding domain cannot read the collection), it also refuses a `Host`
+  that is not a loopback name, not in `RECIPE_BANK_HOSTS` and not the `HOST` it binds to
   (a wildcard `HOST` such as `0.0.0.0` or `::` adds no name), and a loopback or missing `Host` from another machine.
   oEmbed answers keep only plain text and an `http(s)` author link.
 - **Recipe Agent capture.** Each speech-to-text engine gets its own model flag (`--model_directory` for
