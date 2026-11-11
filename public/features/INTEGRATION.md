@@ -105,7 +105,7 @@ const list = state.recipes.filter((r) => matchesFilter(r, { ...state, ...extra }
 
 The dashboard's own search and *Has all* / *Has any* already run through `matchesFilter` (`lib/catalog.mjs` delegates to `/lib/filter.mjs`), so merging the extra fields into the same object is all that is needed. In the dashboard, `filters-feature.js` mounts one section per filter mount point (`sections: ['without']` and so on) with one shared state, and registers each section with `rb.addFilter`.
 
-Options: `recipes` (required); `filter` (initial; default the stored one); `persist` (default `true`, in `'rb:filters-extra'`); `storageKey`; `sections` (any of `'without'`, `'tags'`, `'nutrition'`; default all three); `limit` (chips before "Show all", default 16); `css`; `onChange(filter)`.
+Options: `recipes` (required); `filter` (initial; default the stored one); `persist` (default `true`, in `'rb:filters-extra'`); `storageKey`; `sections` (any of `'without'`, `'tags'`, `'nutrition'`; default all three; the summary and **Clear these** cover only these sections' fields); `limit` (chips before "Show all", default 16); `css`; `onChange(filter)`.
 
 Controller: `getFilter()`, `setFilter(filter)`, `update({ recipes, filter })`, `destroy()`.
 

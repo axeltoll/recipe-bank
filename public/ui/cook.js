@@ -1,20 +1,21 @@
 // Cook mode: one step at a time in large type, in a full-window <dialog>, laid out for a phone held in one hand.
 // Everything pressed while cooking (ingredients, watch this step, timers, Back, Next) is at the bottom; the top
 // bar holds the two things pressed once: the "Keep screen on" switch and Exit.
-import { flattenSteps } from '/lib/catalog.mjs';
+import { flattenSteps, withShownAmounts } from '/lib/catalog.mjs';
 import { clampIndex } from '/lib/nav.mjs';
 import { esc, mmss } from '/lib/format.mjs';
 import { $, $$, store, emit, icon, timerChips, paintTimers } from './core.js';
 
 const WAKE_KEY = 'rb:wake'; // false = the reader switched "Keep screen on" off; anything else = on
 const dlg = $('#cook');
-let session = null; // { recipe, steps, index, checked, onCheck, onWatch, canWatch, returnFocus, pendingWatch }
+let session = null; // { recipe, steps, index, checked, amounts, onCheck, onWatch, canWatch, returnFocus, pendingWatch }
 let wakeLock = null;
 let wakeWanted = store.get(WAKE_KEY, true) !== false;
 
 /**
  * Open cook mode for a recipe.
- * opts: { checked: Set of "ci.ii" keys shared with the page, onCheck(key, on), canWatch, onWatch(seconds), returnFocus }
+ * opts: { checked: Set of "ci.ii" keys shared with the page, onCheck(key, on),
+ *         amounts: Map of "ci.ii" → the amount the page shows when a feature scaled it, canWatch, onWatch(seconds), returnFocus }
  */
 export function openCook(recipe, opts = {}) {
   const steps = flattenSteps(recipe);
@@ -24,6 +25,7 @@ export function openCook(recipe, opts = {}) {
     steps,
     index: clampIndex(store.get(`rb:cook:${recipe.id}`, 0), steps.length),
     checked: opts.checked ?? new Set(),
+    amounts: opts.amounts ?? new Map(),
     onCheck: opts.onCheck,
     onWatch: opts.onWatch,
     canWatch: Boolean(opts.canWatch),
@@ -44,17 +46,24 @@ export function closeCook() {
 }
 
 function renderShell() {
-  const { recipe, steps, checked } = session;
+  const { recipe, steps, checked, amounts } = session;
+  // The same .ing-amt hooks as the recipe page; a scaled amount there is the scaled amount here.
+  const shown = withShownAmounts(recipe, amounts);
   const groups = recipe.components.map((c, ci) => (c.ingredients.length ? `
     <div class="cook-group" data-ci="${ci}">
       <h3>${esc(c.name)}</h3>
       <ul class="ing-list">
-        ${c.ingredients.map((i, ii) => `
+        ${c.ingredients.map((i, ii) => {
+          const amount = shown.components[ci].ingredients[ii].amount;
+          return `
           <li><label class="ing">
             <input type="checkbox" data-check="${ci}.${ii}" ${checked.has(`${ci}.${ii}`) ? 'checked' : ''}>
             <span class="ing-text"><span class="ing-name">${esc(i.item)}</span></span>
-            <span class="ing-amt${i.basis === 'unstated' ? ' unstated' : ''}">${esc(i.amount ?? 'amount not given')}</span>
-          </label></li>`).join('')}
+            <span class="ing-amt${i.basis === 'unstated' ? ' unstated' : ''}" data-ci="${ci}" data-ii="${ii}" data-key="${esc(i.key)}" data-basis="${esc(i.basis)}" data-amount="${esc(i.amount ?? '')}"${amount !== i.amount ? ' data-scaled="true"' : ''}>
+              <span class="ing-amt-text">${esc(amount ?? 'amount not given')}</span>
+            </span>
+          </label></li>`;
+        }).join('')}
       </ul>
     </div>` : '')).join('');
 

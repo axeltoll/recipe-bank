@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { validateRecipe, STATUSES, BASES, SLUG, DATE, SCHEMA_VERSION } from '../lib/recipe.mjs';
-import { PLATFORMS } from '../lib/video.mjs';
+import { PLATFORMS, parseVideoUrl } from '../lib/video.mjs';
 import { validateSchema, SUPPORTED_KEYWORDS } from '../lib/json-schema.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
@@ -73,7 +73,7 @@ const RULES = [
   },
   {
     line: 'video.platform must be', expect: 'video.platform must be', exact: false,
-    schema: ['/$defs/video/properties/platform/enum', '/$defs/video/allOf/1/then/properties/url/pattern'],
+    schema: ['/$defs/video/properties/platform/enum', '/$defs/video/allOf/1/then/anyOf/0/properties/url/pattern'],
     bad: mutate((r) => { r.video.platform = 'tiktok'; }),
   },
   {
@@ -186,6 +186,19 @@ test('bad fixtures are rejected by both', () => {
     'video url padded': mutate((r) => { r.video.url = ' https://www.youtube.com/shorts/mhNQ8y5ud0A'; })(),
     'video url upper-case scheme': mutate((r) => { r.video.url = 'HTTPS://www.youtube.com/shorts/mhNQ8y5ud0A'; })(),
     'video url javascript:': mutate((r) => { r.video.url = 'javascript://www.youtube.com/watch?v=mhNQ8y5ud0A'; })(),
+    // The per-platform patterns use the parser's host rules and URL shapes, anchored at both ends.
+    'pinterest look-alike subdomain': mutate((r) => { r.video = { platform: 'pinterest', id: '12345', url: 'https://pinterest.evil.com/pin/12345/' }; })(),
+    'pinterest look-alike domain': mutate((r) => { r.video = { platform: 'pinterest', id: '12345', url: 'https://www.pinterest.com.evil/pin/12345/' }; })(),
+    'web page on an IP address': mutate((r) => { r.video = { platform: 'web', id: null, url: 'https://127.0.0.1/recipe' }; })(),
+    'web page on localhost': mutate((r) => { r.video = { platform: 'web', id: null, url: 'https://localhost/recipe' }; })(),
+    'web page with userinfo': mutate((r) => { r.video = { platform: 'web', id: null, url: 'https://user:pass@example.com/recipe' }; })(),
+    'web page on a supported platform': mutate((r) => { r.video = { platform: 'web', id: null, url: 'https://www.youtube.com/shorts/mhNQ8y5ud0A' }; })(),
+    'youtube url with trailing junk': mutate((r) => { r.video.url = 'https://www.youtube.com/shorts/mhNQ8y5ud0Ajunk'; })(),
+    'youtube url without a video': mutate((r) => { r.video.url = 'https://www.youtube.com/@creator'; })(),
+    'tiktok url without a video': mutate((r) => { r.video = { platform: 'tiktok', id: '12345', url: 'https://www.tiktok.com/@cook' }; })(),
+    'tiktok short link with an id': mutate((r) => { r.video = { platform: 'tiktok', id: '12345', url: 'https://vm.tiktok.com/ZMabc123/' }; })(),
+    'facebook url with extra path': mutate((r) => { r.video = { platform: 'facebook', id: '12345', url: 'https://facebook.com/reel/12345/other' }; })(),
+    'x url with extra path': mutate((r) => { r.video = { platform: 'x', id: '12345', url: 'https://x.com/kitchen/status/12345/other' }; })(),
   };
   for (const [name, r] of Object.entries(fixtures)) {
     assert.ok(!contractOk(r, 'good-recipe'), `contract should reject: ${name}`);
@@ -194,6 +207,48 @@ test('bad fixtures are rejected by both', () => {
   for (const rule of RULES.filter((r) => r.schema !== null)) {
     const r = rule.bad();
     assert.equal(contractOk(r, 'good-recipe'), schemaOk(r), `same verdict: ${rule.line}`);
+  }
+});
+
+// Every pairing of these URLs with every platform, and with the parsed id or none, is judged the same
+// way by the schema and the contract. Hosts are lowercase: the schema does not fold case.
+const VIDEO_URLS = [
+  'https://www.youtube.com/shorts/mhNQ8y5ud0A', 'https://youtube.com/shorts/mhNQ8y5ud0A?si=abc',
+  'https://m.youtube.com/watch?v=mhNQ8y5ud0A&t=4', 'https://www.youtube.com/watch?feature=share&v=mhNQ8y5ud0A',
+  'https://www.youtube.com/watch?v=bad&v=mhNQ8y5ud0A', 'https://youtu.be/mhNQ8y5ud0A',
+  'https://www.youtube-nocookie.com/embed/mhNQ8y5ud0A', 'https://music.youtube.com/watch?v=mhNQ8y5ud0A',
+  'https://www.youtube.com/shorts/mhNQ8y5ud0Ajunk', 'https://www.youtube.com/garbage', 'https://www.youtube.com/watch?v=short',
+  'https://www.tiktok.com/@cook/video/7301234567890123456', 'https://www.tiktok.com/@cook/video/7301234567890123456?lang=en',
+  'https://www.tiktok.com/@cook/video/123abc', 'https://www.tiktok.com/video/abc/video/123', 'https://www.tiktok.com/@cook',
+  'https://vm.tiktok.com/ZMabc123/', 'https://vt.tiktok.com/ZMabc123', 'https://vm.tiktok.com/ZMabc123/other',
+  'https://www.tiktok.com/t/ZTabc123/', 'https://www.tiktok.com/t/',
+  'https://www.instagram.com/reel/DexeTQVzoT8/', 'https://instagram.com/p/DexeTQVzoT8/?igsh=x', 'https://www.instagram.com/explore/',
+  'https://www.facebook.com/watch/?v=12345', 'https://facebook.com/watch?v=12345&t=7', 'https://facebook.com/watch?v=abc',
+  'https://m.facebook.com/reel/12345/?igsh=abc', 'https://web.facebook.com/kitchen/videos/12345/',
+  'https://facebook.com/reel/12345/other', 'https://facebook.com/watch/other?v=12345', 'https://l.facebook.com/l.php?u=x',
+  'https://fb.watch/AbC123/', 'https://fb.watch/AbC123/other', 'https://www.facebook.com/share/r/1AbC23/',
+  'https://www.facebook.com/share/x/1AbC23/',
+  'https://www.pinterest.com/pin/12345/', 'https://br.pinterest.com/pin/12345/sent/', 'https://pinterest.co.uk/pin/12345',
+  'https://pinterest.com/pin/12345/other', 'https://pinterest.evil.com/pin/12345/', 'https://www.pinterest.com.evil/pin/12345/',
+  'https://pinterest.com.evil.example/pin/12345', 'https://evilpinterest.com/pin/12345',
+  'https://pin.it/AbC123', 'https://pin.it/AbC123/other',
+  'https://x.com/kitchen/status/12345', 'https://twitter.com/kitchen/status/12345/video/1', 'https://x.com/i/web/status/12345',
+  'https://x.com/kitchen/status/12345/other', 'https://x.com/bad-user/status/12345', 'https://x.com.evil.example/a/status/1',
+  'https://example.com/recipe-video', 'https://example.com./recipe', 'https://sub.example.co.uk/a/b?c=d#e',
+  'https://127.0.0.1/recipe', 'https://127.1/recipe', 'https://localhost/recipe', 'https://localhost./recipe',
+  'https://[::1]/recipe', 'https://user:pass@example.com/recipe', 'https://example.com@evil.example/recipe',
+  'https://example.com:8443/recipe', 'http://example.com/recipe',
+];
+
+test('schema and contract agree on every platform, URL and id pairing', () => {
+  for (const url of VIDEO_URLS) {
+    const parsedId = parseVideoUrl(url, { allowWeb: true })?.id;
+    for (const { id: platform } of PLATFORMS) {
+      for (const id of new Set([parsedId ?? '12345', null])) {
+        const r = { ...minimal(), video: { platform, id, url } };
+        assert.equal(schemaOk(r), contractOk(r, 'good-recipe'), `${platform} ${id} ${url}`);
+      }
+    }
   }
 });
 

@@ -151,12 +151,17 @@ async function readBody(req, max = QUEUE_BODY_LIMIT) {
 //   1. Sec-Fetch-Site, when the browser sends it, must say "same-origin" (or "none": typed by the user).
 //   2. Origin, when present, must be this server's own origin; Host must be a loopback name or one
 //      listed in RECIPE_BANK_HOSTS (or the HOST the server binds to). That also stops DNS rebinding.
-//   3. The body must be sent as application/json. A foreign page can only send that after a CORS
-//      preflight, which this server never grants.
-// Requests without Origin, Sec-Fetch-Site or Host (curl, scripts, tests calling the handler) pass 1 and 2.
+//   3. A POST or PUT body must be sent as application/json. A foreign page can only send that after a
+//      CORS preflight, which this server never grants. DELETE carries no body and is not a "simple"
+//      request either, so a foreign page cannot send it without that preflight; 1 and 2 still apply.
+// When the server is bound to a reachable address, a client on another machine could also claim to be
+// this one, so a loopback Host (or no Host at all) is accepted only from a loopback socket peer.
+// Requests without Origin, Sec-Fetch-Site or Host from this machine (curl, scripts, tests calling the
+// handler) pass 1 and 2.
 
 const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const LOOPBACK = /^(?:localhost|127(?:\.\d{1,3}){3}|\[::1\])$/;
+const LOOPBACK_PEER = /^(?:127(?:\.\d{1,3}){3}|::1|::ffff:127(?:\.\d{1,3}){3})$/i;
 
 const isJson = (headers) => /^application\/json\s*(?:;|$)/i.test(String(headers['content-type'] ?? '').trim());
 
@@ -181,19 +186,26 @@ export function allowedHosts(env = process.env) {
 
 /**
  * Why a state-changing request must be refused, as { status, error }, or null when it may go ahead.
- * `headers` are Node's lowercased request headers; `hosts` the extra allowed host names.
+ * `headers` are Node's lowercased request headers; `hosts` the extra allowed host names; `method` the
+ * request method; `peer` the socket's remote address (unknown when the handler is called directly).
  */
-export function writeRefusal(headers = {}, { hosts = [] } = {}) {
+export function writeRefusal(headers = {}, { hosts = [], method = 'POST', peer } = {}) {
   const site = headers['sec-fetch-site'];
   if (site != null && site !== 'same-origin' && site !== 'none') {
     return { status: 403, error: 'Refused: this request came from another website.' };
   }
+  const remote = peer != null && !LOOPBACK_PEER.test(String(peer));
   let host = null;
   if (headers.host != null) {
     host = hostName(headers.host);
+    if (host && LOOPBACK.test(host) && remote) {
+      return { status: 403, error: 'Refused: a request from another machine cannot be addressed to this machine\'s loopback name.' };
+    }
     if (!host || !(LOOPBACK.test(host) || hosts.includes(host))) {
       return { status: 403, error: 'Refused: the request is addressed to an unknown host name. Add it to RECIPE_BANK_HOSTS.' };
     }
+  } else if (remote) {
+    return { status: 403, error: 'Refused: a request from another machine must name a host listed in RECIPE_BANK_HOSTS.' };
   }
   if (headers.origin != null) {
     let origin;
@@ -206,7 +218,7 @@ export function writeRefusal(headers = {}, { hosts = [] } = {}) {
       && origin.host === String(headers.host).trim().toLowerCase();
     if (!own) return { status: 403, error: 'Refused: this request came from another website.' };
   }
-  if (!isJson(headers)) return { status: 415, error: 'Send the request as application/json.' };
+  if (String(method).toUpperCase() !== 'DELETE' && !isJson(headers)) return { status: 415, error: 'Send the request as application/json.' };
   return null;
 }
 
@@ -325,7 +337,7 @@ export function createHandler({
 
   async function api(req, res, path) {
     if (!READ_METHODS.has(req.method)) {
-      const refused = writeRefusal(req.headers ?? {}, { hosts });
+      const refused = writeRefusal(req.headers ?? {}, { hosts, method: req.method, peer: req.socket?.remoteAddress });
       if (refused) return json(res, refused.status, { error: refused.error });
     }
     if (req.method === 'GET' && path === '/api/recipes') {

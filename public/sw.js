@@ -76,7 +76,10 @@ const SHELL = [
 const RECIPES = ['/api/recipes', '/api/recipes.json'];
 const QUEUE = ['/api/queue', '/api/queue.json'];
 
-/** Which strategy a request gets: 'shell', 'recipes', 'queue' or 'network'. */
+/**
+ * Which strategy a request gets: 'shell', 'recipes', 'queue' or 'network'. Only the files in SHELL are cache first;
+ * any other same-origin path (a new or dynamic URL) goes to the network, so a stale copy can never stand in for it.
+ */
 function policy(method, url, origin) {
   if (method !== 'GET') return 'network';
   let u;
@@ -88,8 +91,7 @@ function policy(method, url, origin) {
   if (u.origin !== origin) return 'network';
   if (RECIPES.includes(u.pathname)) return 'recipes';
   if (QUEUE.includes(u.pathname)) return 'queue';
-  if (u.pathname.startsWith('/api/')) return 'network';
-  return 'shell';
+  return SHELL.includes(u.pathname) ? 'shell' : 'network';
 }
 
 const isJson = (res) => (res.headers.get('content-type') ?? '').includes('json');

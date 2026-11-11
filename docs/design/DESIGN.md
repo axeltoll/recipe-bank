@@ -102,7 +102,7 @@ Sizes are in `rem`, so the reader's browser font size scales everything. The roo
 | Motion | `--dur-1` 120ms (press), `--dur-2` 200ms (hover, toast), `--dur-3` 320ms (view, sheet, card); `--stagger` 30ms (between cards); `--ease` cubic-bezier(.2,.8,.2,1) |
 | Layers | `--z-bar` 20 (header, sticky action bar), `--z-sheet` 40 (filter sheet), `--z-toast` 60 |
 | Targets | `--tap` 44px (minimum size of every control), `--tap-lg` 56px (Back and Next in cook mode, timers there) |
-| Shell | `--gutter` (16 / 24 / 32 / 48 by breakpoint), `--content-max` 1760px, `--bar-h` (the brand row: 56 phone, 64 above), `--nav-h` 48px (the nav row), `--head-h` (the part of the header that stays on screen: 48 px below desktop, 64 px from desktop) |
+| Shell | `--gutter` (16 / 24 / 32 / 48 by breakpoint), `--content-max` 1760px, `--bar-h` (the brand row: 56 phone, 64 above), `--nav-h` 48px (the nav row), `--head-h` (the part of the header that stays on screen: 48 px below desktop, 64 px from desktop, plus the top safe area) |
 
 ## Layout contract
 
@@ -123,7 +123,7 @@ One shell for every route, at every width:
 
 - `html` paints `--bg`. `body` is transparent. Nothing in the shell has a `max-width`.
 - `header.topbar`: full-bleed, painted edge to edge. Brand, section nav, recipe count, theme button, **Add video**.
-  - **Phone and tablet:** two rows. The brand row (brand, the count from tablet, theme, Add video) scrolls away; the nav row stays stuck to the top (`top: calc(-1 * var(--bar-h))`). On a phone Add video is the plus icon alone. That leaves 48 px of header on screen instead of about 150.
+  - **Phone and tablet:** two rows. The brand row (brand, the count from tablet, theme, Add video) scrolls away; the nav row stays stuck to the top (`top: calc(-1 * (var(--bar-h) + env(safe-area-inset-top, 0px)))`). On a phone Add video is the plus icon alone. That leaves 48 px of header on screen instead of about 150. Under a notch the header's top safe-area padding scrolls away with the brand row, and the nav row pads its own top by the same inset, so the stuck row clears the notch.
   - **Desktop and wide:** one row, sticky as a whole, nav inline after the brand.
 - `main#view`: the content pane. It caps content with padding, not with a width: `padding-inline: max(var(--gutter), (100% - var(--content-max)) / 2)`.
 - `footer.footer`: full-bleed; holds the offline switch.

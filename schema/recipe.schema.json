@@ -92,7 +92,7 @@
       "properties": {
         "platform": { "enum": ["youtube", "tiktok", "instagram", "facebook", "pinterest", "x", "web"] },
         "id": {
-          "description": "The platform's video id, as parsed from url. Null or omitted only for web pages and unresolved short links (vm.tiktok.com, vt.tiktok.com, fb.watch, pin.it).",
+          "description": "The platform's video id, as parsed from url. Null or omitted only for web pages and unresolved short links (vm.tiktok.com, vt.tiktok.com, tiktok.com/t/, fb.watch, facebook.com/share/r|v/, pin.it).",
           "type": ["string", "null"]
         },
         "url": { "type": "string", "pattern": "^https?://" }
@@ -104,17 +104,29 @@
             "required": ["id"],
             "properties": {
               "id": { "type": "string", "pattern": "^[A-Za-z0-9_-]{11}$" },
-              "url": { "pattern": "^https?://(?:(?:www|m)\\.)?(?:youtube\\.com|music\\.youtube\\.com|youtube-nocookie\\.com|youtu\\.be)/" }
+              "url": { "pattern": "^https?://(?:(?:www|m)\\.)?(?:youtu\\.be/[A-Za-z0-9_-]{11}(?:[/?#]\\S*)?|(?:youtube\\.com|music\\.youtube\\.com|youtube-nocookie\\.com)/(?:(?:shorts|embed|live|v)/[A-Za-z0-9_-]{11}(?:[/?#]\\S*)?|[^?#\\s]*\\?(?:(?!v=)[^&#\\s]*&)*v=[A-Za-z0-9_-]{11}(?:[&#]\\S*)?))$" }
             }
           }
         },
         {
           "if": { "required": ["platform"], "properties": { "platform": { "const": "tiktok" } } },
           "then": {
-            "properties": {
-              "id": { "type": ["string", "null"], "pattern": "^\\d+$" },
-              "url": { "pattern": "^https?://(?:[a-z0-9-]+\\.)*tiktok\\.com/" }
-            }
+            "description": "A full video URL with its id, or an unresolved short link with no id.",
+            "anyOf": [
+              {
+                "required": ["id"],
+                "properties": {
+                  "id": { "type": "string", "pattern": "^\\d+$" },
+                  "url": { "pattern": "^https?://(?:[a-z0-9-]+\\.)*tiktok\\.com/(?:(?!video/)[^/?#\\s]+/)*video/\\d+(?:[/?#]\\S*)?$" }
+                }
+              },
+              {
+                "properties": {
+                  "id": { "type": "null" },
+                  "url": { "pattern": "^https?://(?:v[mt]\\.tiktok\\.com/[A-Za-z0-9_-]+|(?:[a-z0-9-]+\\.)*tiktok\\.com/t/[A-Za-z0-9_-]+)/?(?:[?#]\\S*)?$" }
+                }
+              }
+            ]
           }
         },
         {
@@ -123,26 +135,50 @@
             "required": ["id"],
             "properties": {
               "id": { "$ref": "#/$defs/text" },
-              "url": { "pattern": "^https?://(?:(?:www|m)\\.)?instagram\\.com/(?:reels?|p|tv)/[^/?#]+" }
+              "url": { "pattern": "^https?://(?:(?:www|m)\\.)?instagram\\.com/(?:reels?|p|tv)/[^/?#\\s]+(?:[/?#]\\S*)?$" }
             }
           }
         },
         {
           "if": { "required": ["platform"], "properties": { "platform": { "const": "facebook" } } },
           "then": {
-            "properties": {
-              "id": { "type": ["string", "null"], "pattern": "^\\d+$" },
-              "url": { "pattern": "^https?://(?:(?:(?:www|m|web)\\.)?facebook\\.com|fb\\.watch)/" }
-            }
+            "description": "A full video URL with its id, or an unresolved short link with no id.",
+            "anyOf": [
+              {
+                "required": ["id"],
+                "properties": {
+                  "id": { "type": "string", "pattern": "^\\d+$" },
+                  "url": { "pattern": "^https?://(?:(?:www|m|web)\\.)?facebook\\.com/(?:watch/?\\?(?:(?!v=)[^&#\\s]*&)*v=\\d+(?:[&#]\\S*)?|(?:reel|[^/?#\\s]+/videos)/\\d+/?(?:[?#]\\S*)?)$" }
+                }
+              },
+              {
+                "properties": {
+                  "id": { "type": "null" },
+                  "url": { "pattern": "^https?://(?:fb\\.watch/[A-Za-z0-9_-]+|(?:(?:www|m|web)\\.)?facebook\\.com/share/[rv]/[A-Za-z0-9_-]+)/?(?:[?#]\\S*)?$" }
+                }
+              }
+            ]
           }
         },
         {
           "if": { "required": ["platform"], "properties": { "platform": { "const": "pinterest" } } },
           "then": {
-            "properties": {
-              "id": { "type": ["string", "null"], "pattern": "^\\d+$" },
-              "url": { "pattern": "^https?://(?:(?:www\\.|[a-z]{2}\\.)?pinterest\\.[a-z.]+|pin\\.it)/" }
-            }
+            "description": "A full video URL with its id, or an unresolved short link with no id.",
+            "anyOf": [
+              {
+                "required": ["id"],
+                "properties": {
+                  "id": { "type": "string", "pattern": "^\\d+$" },
+                  "url": { "pattern": "^https?://(?:(?:www|[a-z]{2})\\.)?pinterest\\.(?:com|at|be|ca|ch|cl|co\\.kr|co\\.uk|com\\.au|com\\.mx|de|dk|es|fr|ie|in|it|jp|nz|ph|pt|ru|se)/pin/\\d+(?:/sent)?/?(?:[?#]\\S*)?$" }
+                }
+              },
+              {
+                "properties": {
+                  "id": { "type": "null" },
+                  "url": { "pattern": "^https?://pin\\.it/[A-Za-z0-9_-]+/?(?:[?#]\\S*)?$" }
+                }
+              }
+            ]
           }
         },
         {
@@ -151,7 +187,7 @@
             "required": ["id"],
             "properties": {
               "id": { "type": "string", "pattern": "^\\d+$" },
-              "url": { "pattern": "^https?://(?:(?:www|mobile)\\.)?(?:x|twitter)\\.com/" }
+              "url": { "pattern": "^https?://(?:(?:www|mobile)\\.)?(?:x|twitter)\\.com/(?:[A-Za-z0-9_]{1,15}|i/web)/status/\\d+(?:/(?:video|photo)/\\d+)?/?(?:[?#]\\S*)?$" }
             }
           }
         },
@@ -160,7 +196,7 @@
           "then": {
             "properties": {
               "id": { "type": "null" },
-              "url": { "pattern": "^https://" }
+              "url": { "pattern": "^https://(?!(?:[a-z0-9-]+\\.)*(?:youtube\\.com|youtube-nocookie\\.com|youtu\\.be|tiktok\\.com|instagram\\.com|facebook\\.com|fb\\.watch|pin\\.it|x\\.com|twitter\\.com)\\.?(?:[/?#]|$))(?!(?:[a-z0-9-]+\\.)*pinterest(?:[./?#]|$))(?:[a-z0-9-]+\\.)+[a-z][a-z0-9-]*\\.?(?:[/?#]\\S*)?$" }
             }
           }
         }
