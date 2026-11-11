@@ -64,7 +64,7 @@ test('web pages need a dotted public host name, not an IP literal or a single la
 
 test('an http short link is stored as https, so it can be resolved', async (t) => {
   const short = parseVideoUrl('http://vm.tiktok.com/AbC123/?si=share');
-  assert.equal(short.url, 'https://vm.tiktok.com/AbC123/');
+  assert.equal(short.url, 'https://vm.tiktok.com/AbC123');
   const target = 'https://www.tiktok.com/@kitchen/video/12345';
   t.mock.method(globalThis, 'fetch', async (url) => (url === short.url
     ? new Response(null, { status: 302, headers: { location: target } })
