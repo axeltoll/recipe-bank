@@ -9,17 +9,19 @@ import { loadQueue, loadRecipes, dataPaths } from '../server.mjs';
 import { videoKey } from '../lib/video.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
-const DATA = dataPaths(); // RECIPE_BANK_DIR, else this repository
 
 /**
  * Build the static site into `outDir`. Throws (without touching `outDir`) when a recipe file is invalid.
  * Returns { recipes, queue } counts.
+ *
+ * The data is this repository's, never RECIPE_BANK_DIR's: `npm run deploy` publishes dist/, and a shell
+ * that set the variable for a private bank must not publish that bank and its queue notes by accident.
+ * Another folder is used only when it is passed here as `dataDir` (or as `recipesDir` / `queueFile`).
  */
-export async function buildStatic({
-  outDir = join(ROOT, 'dist'),
-  recipesDir = DATA.recipesDir,
-  queueFile = DATA.queueFile,
-} = {}) {
+export async function buildStatic({ outDir = join(ROOT, 'dist'), dataDir = ROOT, recipesDir, queueFile } = {}) {
+  const data = dataPaths(dataDir);
+  recipesDir ??= data.recipesDir;
+  queueFile ??= data.queueFile;
   const { recipes, invalid } = await loadRecipes(recipesDir);
   if (invalid.length) {
     throw Object.assign(new Error(`Invalid recipe files, fix them first (npm run validate): ${invalid.map((i) => i.file).join(', ')}`), { invalid });

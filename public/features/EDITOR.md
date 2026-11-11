@@ -78,6 +78,11 @@ document.addEventListener('recipe-bank:editor-cancel', (e) => {
 });
 ```
 
+In the dashboard, `editor-feature.js` also guards the other ways out while `isDirty()` is true: closing or reloading the
+tab asks through `beforeunload`, and any route change away from the editor asks "Leave without saving?". The new view
+is already drawn by then, so **Cancel** goes back to the editor's hash and puts the same editor (form, draft and undo)
+back on the page.
+
 ## Data
 
 - **Reads**: `GET /api/recipes` (unless `recipes` is passed) for ids, video keys and ingredient keys. Nothing else is

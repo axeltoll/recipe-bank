@@ -108,6 +108,7 @@ On the recipe page each amount is rendered as:
 - `data-amount`: the creator's original words (empty when `data-basis="unstated"`). Never overwrite this attribute; restore from it.
 - To show a scaled value, set the text of `.ing-amt-text` and add `data-scaled="true"` to `.ing-amt`. The stylesheet colours scaled amounts with `--accent-text`; also say in words that amounts are scaled (the `recipe-scaling` mount is the place). Leave amounts that are not plain numbers and units untouched, and never give an unstated amount a number.
 - Each checkbox is `input[data-check="<ci>.<ii>"]`.
+- Cook mode renders the same markup. When it opens it shows the amounts the page shows (scaled ones marked `data-scaled`), and **Copy list** copies those too, so neither falls back to the file's amounts after a scale.
 
 ## 3. Events
 
