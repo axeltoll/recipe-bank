@@ -4,19 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Changelog · Recipe Bank</title>
-  <meta name="description" content="What is in the current version of Recipe Bank, and where to read the history of every change.">
-  <meta name="theme-color" content="#f8f4ee">
+  <meta name="description" content="What is in the current version of Recipe Bank, what is being merged, and where to read the history of every change.">
+  <meta name="theme-color" content="#faf6f0">
   <meta name="color-scheme" content="light dark">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Recipe Bank">
   <meta property="og:title" content="Changelog · Recipe Bank">
   <meta property="og:description" content="What is in the current version of Recipe Bank.">
   <meta name="twitter:card" content="summary">
+  <!-- gen:meta -->
+  <!-- baseUrl in data/site.json is empty. Once it is set, npm run site:sync writes canonical, og:url and og:image here. -->
+  <!-- /gen:meta -->
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <script src="js/theme.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,650;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/site.css">
   <script type="module" src="js/main.js"></script>
 </head>
@@ -29,14 +29,13 @@
         <svg class="logo-mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect class="m-bg" width="32" height="32" rx="8"/><path class="m-fg" d="M9 20c0-5 3-9 7-9s7 4 7 9z"/><rect class="m-fg" x="7" y="20" width="18" height="3" rx="1.5"/></svg>
         <span>Recipe Bank</span>
       </a>
-      <nav class="site-nav" id="site-nav" aria-label="Sections">
+      <nav class="site-nav" aria-label="Site">
         <ul>
-          <li><a href="index.html#how">How it works</a></li>
-          <li><a href="index.html#showcase">Showcase</a></li>
           <li><a href="index.html#features">Features</a></li>
-          <li><a href="self-hosting.html">Self-hosting</a></li>
+          <li><a href="index.html#how">How it works</a></li>
+          <li><a href="getting-started.html">Docs</a></li>
           <li><a href="index.html#roadmap">Roadmap</a></li>
-          <li><a href="index.html#faq">FAQ</a></li>
+          <li><a href="changelog.html" aria-current="page">Changelog</a></li>
         </ul>
       </nav>
       <button class="icon-btn theme-toggle" id="theme-toggle" type="button" aria-label="Switch theme">
@@ -47,9 +46,6 @@
         <svg class="i-star" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>
         <span><span class="cta-long">Star on </span>GitHub</span>
       </a>
-      <button class="icon-btn nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-      </button>
     </div>
     <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
   </header>
@@ -66,20 +62,38 @@
     <section class="band doc-band" aria-label="Versions">
       <div class="inner">
         <div class="doc">
+          <div class="doc-side">
+            <button class="btn btn-small docs-menu-toggle" id="docs-menu-toggle" type="button" aria-expanded="false" aria-controls="docs-nav" hidden>Docs menu</button>
+            <nav class="docs-nav" id="docs-nav" aria-label="Docs">
+              <p class="docs-nav-title">Docs</p>
+              <ul>
+                <li><a href="getting-started.html">Getting started</a></li>
+                <li><a href="recipe-format.html">Recipe format</a></li>
+                <li><a href="recipe-format-cheatsheet.html">Format cheat sheet</a></li>
+                <li><a href="how-analysis-works.html">How the analysis works</a></li>
+                <li><a href="recipe-agent.html">Recipe Agent</a></li>
+                <li><a href="self-hosting.html">Self-hosting</a></li>
+                <li><a href="contributing.html">Contributing</a></li>
+                <li><a href="changelog.html" aria-current="page">Changelog</a></li>
+              </ul>
+            </nav>
+          </div>
+
           <nav class="toc" aria-label="On this page">
-            <h2>On this page</h2>
+            <p class="toc-title">On this page</p>
             <ol>
               <li><a href="#v010">0.1.0, the current version</a></li>
               <li><a href="#site">This website</a></li>
+              <li><a href="#merging">Being merged</a></li>
               <li><a href="#next">What comes next</a></li>
             </ol>
           </nav>
 
-          <div class="prose">
-            <article class="release" aria-labelledby="v010">
+          <article class="prose">
+            <section class="release" aria-labelledby="v010">
               <span class="badge">Current</span>
               <h2 id="v010">0.1.0</h2>
-              <p>The version in the repository today.</p>
+              <p>The version on the main branch.</p>
               <ul>
                 <li>A dashboard that filters recipes by ingredient with Has all and Has any, and searches by dish or creator.</li>
                 <li>Recipe pages with the original video embedded, an ingredient checklist, steps with play from here timestamps, and nutrition where the creator states it.</li>
@@ -90,20 +104,30 @@
                 <li>A read-only static export of the dashboard.</li>
                 <li>Light and dark themes.</li>
               </ul>
-            </article>
+            </section>
 
-            <article class="release" aria-labelledby="site">
+            <section class="release" aria-labelledby="site">
               <span class="badge">Added</span>
               <h2 id="site">This website</h2>
-              <p>A public page for the project in <code>site/</code>, separate from the dashboard: what Recipe Bank is, a showcase built from three of the repository's own recipe files, a self-hosting guide and this changelog.</p>
-            </article>
+              <p>A public site for the project in <code>site/</code>, separate from the dashboard.</p>
+              <ul>
+                <li>First round: the home page, a showcase built from three of the repository's own recipe files, a self-hosting guide and this changelog.</li>
+                <li>Second round: the dashboard's design tokens, a feature list drawn from one data file with a status on every entry, docs pages for getting started, the recipe format, the analysis and the Recipe Agent, a printable cheat sheet, a contributor page, system fonts in place of web fonts, and every page usable without JavaScript.</li>
+              </ul>
+            </section>
 
-            <article class="release" aria-labelledby="next">
-              <span class="badge planned">Planned</span>
+            <section class="release" aria-labelledby="merging">
+              <span class="badge badge-next">Being merged</span>
+              <h2 id="merging">Being merged</h2>
+              <p>Work that is built on branches and is on its way into the main branch: the redesigned dashboard, the Recipe Agent, the week plan, more filters, serving scaling, the household profile and food budget, a recipe editor and recipe packs. This page does not track each merge. The <a href="index.html#features">feature list</a> does: every entry there says whether it is shipped or still being merged.</p>
+            </section>
+
+            <section class="release" aria-labelledby="next">
+              <span class="badge badge-planned">Planned</span>
               <h2 id="next">What comes next</h2>
-              <p>A week plan with a combined shopping list, more ways to filter, household planning with a food budget, and a Recipe Agent you host yourself. None of it is shipped. The order and the details are in the <a href="https://github.com/axeltoll/recipe-bank/blob/main/ROADMAP.md">roadmap</a>.</p>
-            </article>
-          </div>
+              <p>What is planned and not built is on the <a href="index.html#roadmap">roadmap section</a> of the home page. The order and the details are in the <a href="https://github.com/axeltoll/recipe-bank/blob/main/ROADMAP.md">roadmap on GitHub</a>.</p>
+            </section>
+          </article>
         </div>
       </div>
     </section>
@@ -121,8 +145,12 @@
       <nav class="footer-nav" aria-label="Footer">
         <ul>
           <li><a href="https://github.com/axeltoll/recipe-bank">GitHub</a></li>
-          <li><a href="self-hosting.html">Self-hosting guide</a></li>
-          <li><a href="changelog.html" aria-current="page">Changelog</a></li>
+          <li><a href="getting-started.html">Getting started</a></li>
+          <li><a href="recipe-format.html">Recipe format</a></li>
+          <li><a href="recipe-agent.html">Recipe Agent</a></li>
+          <li><a href="self-hosting.html">Self-hosting</a></li>
+          <li><a href="contributing.html">Contributing</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
           <li><a href="https://github.com/axeltoll/recipe-bank/blob/main/ROADMAP.md">Roadmap</a></li>
           <li><a href="https://github.com/axeltoll/recipe-bank/blob/main/LICENSE">License</a></li>
         </ul>

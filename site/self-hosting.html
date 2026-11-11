@@ -4,19 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Self-hosting guide · Recipe Bank</title>
-  <meta name="description" content="How to run Recipe Bank on your own machine: what you need, how to start it, where the data lives, how a recipe file is written, and how to host a read-only copy.">
-  <meta name="theme-color" content="#f8f4ee">
+  <meta name="description" content="How to run Recipe Bank on your own machine: what you need, where the data lives, the optional capture tools, where captures are kept, and how to host a read-only copy.">
+  <meta name="theme-color" content="#faf6f0">
   <meta name="color-scheme" content="light dark">
   <meta property="og:type" content="article">
   <meta property="og:site_name" content="Recipe Bank">
   <meta property="og:title" content="Self-hosting guide · Recipe Bank">
   <meta property="og:description" content="Run Recipe Bank on your own machine with Node.js 22 and nothing else.">
   <meta name="twitter:card" content="summary">
+  <!-- gen:meta -->
+  <!-- baseUrl in data/site.json is empty. Once it is set, npm run site:sync writes canonical, og:url and og:image here. -->
+  <!-- /gen:meta -->
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <script src="js/theme.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,650;1,9..144,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/site.css">
   <script type="module" src="js/main.js"></script>
 </head>
@@ -29,14 +29,13 @@
         <svg class="logo-mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect class="m-bg" width="32" height="32" rx="8"/><path class="m-fg" d="M9 20c0-5 3-9 7-9s7 4 7 9z"/><rect class="m-fg" x="7" y="20" width="18" height="3" rx="1.5"/></svg>
         <span>Recipe Bank</span>
       </a>
-      <nav class="site-nav" id="site-nav" aria-label="Sections">
+      <nav class="site-nav" aria-label="Site">
         <ul>
-          <li><a href="index.html#how">How it works</a></li>
-          <li><a href="index.html#showcase">Showcase</a></li>
           <li><a href="index.html#features">Features</a></li>
-          <li><a href="self-hosting.html" aria-current="page">Self-hosting</a></li>
+          <li><a href="index.html#how">How it works</a></li>
+          <li><a href="getting-started.html" aria-current="page">Docs</a></li>
           <li><a href="index.html#roadmap">Roadmap</a></li>
-          <li><a href="index.html#faq">FAQ</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
         </ul>
       </nav>
       <button class="icon-btn theme-toggle" id="theme-toggle" type="button" aria-label="Switch theme">
@@ -47,9 +46,6 @@
         <svg class="i-star" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>
         <span><span class="cta-long">Star on </span>GitHub</span>
       </a>
-      <button class="icon-btn nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">
-        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-      </button>
     </div>
     <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
   </header>
@@ -57,37 +53,54 @@
   <main id="main">
     <section class="band page-head" aria-labelledby="page-title">
       <div class="inner">
-        <p class="eyebrow">Self-hosting guide</p>
+        <p class="eyebrow">Docs</p>
         <h1 id="page-title">Run Recipe Bank <em>on your own machine.</em></h1>
-        <p class="lede">Everything below describes the repository as it is today. Where something is only planned, it says so.</p>
+        <p class="lede">The dashboard needs Node.js and nothing else. Everything about captures and the Recipe Agent is optional, and each part of this page says where it stands.</p>
       </div>
     </section>
 
-    <section class="band doc-band" aria-label="Guide">
+    <section class="band doc-band" aria-label="Self-hosting guide">
       <div class="inner">
         <div class="doc">
+          <div class="doc-side">
+            <button class="btn btn-small docs-menu-toggle" id="docs-menu-toggle" type="button" aria-expanded="false" aria-controls="docs-nav" hidden>Docs menu</button>
+            <nav class="docs-nav" id="docs-nav" aria-label="Docs">
+              <p class="docs-nav-title">Docs</p>
+              <ul>
+                <li><a href="getting-started.html">Getting started</a></li>
+                <li><a href="recipe-format.html">Recipe format</a></li>
+                <li><a href="recipe-format-cheatsheet.html">Format cheat sheet</a></li>
+                <li><a href="how-analysis-works.html">How the analysis works</a></li>
+                <li><a href="recipe-agent.html">Recipe Agent</a></li>
+                <li><a href="self-hosting.html" aria-current="page">Self-hosting</a></li>
+                <li><a href="contributing.html">Contributing</a></li>
+                <li><a href="changelog.html">Changelog</a></li>
+              </ul>
+            </nav>
+          </div>
+
           <nav class="toc" aria-label="On this page">
-            <h2>On this page</h2>
+            <p class="toc-title">On this page</p>
             <ol>
               <li><a href="#need">What you need</a></li>
               <li><a href="#start">Start it</a></li>
               <li><a href="#data">Where your data lives</a></li>
-              <li><a href="#add">Add a video</a></li>
-              <li><a href="#write">Write the recipe</a></li>
               <li><a href="#check">Check your files</a></li>
               <li><a href="#static">Host a read-only copy</a></li>
-              <li><a href="#planned">What is planned</a></li>
+              <li><a href="#tools">Optional capture tools</a></li>
+              <li><a href="#captures">Where captures are kept</a></li>
+              <li><a href="#trouble">Troubleshooting</a></li>
             </ol>
           </nav>
 
-          <div class="prose">
+          <article class="prose">
             <h2 id="need">What you need</h2>
             <ul>
               <li>Node.js 22 or newer.</li>
               <li>Git, to clone the repository.</li>
               <li>A current browser.</li>
             </ul>
-            <p>There is no install step. Recipe Bank has no dependencies, so there is nothing for <code>npm install</code> to fetch.</p>
+            <p>There is no install step and no build step for local use. Recipe Bank has no dependencies, so there is nothing for <code>npm install</code> to fetch.</p>
 
             <h2 id="start">Start it</h2>
             <div class="code-card">
@@ -118,21 +131,6 @@ npm start</code></pre>
             </div>
             <p>There is no database. Back up the two paths above and you have backed up everything.</p>
 
-            <h2 id="add">Add a video</h2>
-            <p>Press Add video on the dashboard and paste a link to a YouTube video or Short, a TikTok or an Instagram Reel. The video joins the queue. If it is already a recipe or already queued, the dashboard tells you instead of adding it twice.</p>
-
-            <h2 id="write">Write the recipe</h2>
-            <p>A recipe is one JSON file in <code>recipes/</code>. The format is documented in <a href="https://github.com/axeltoll/recipe-bank/blob/main/CLAUDE.md">CLAUDE.md</a> and enforced by <code>lib/recipe.mjs</code>. Today you write that file yourself, or you ask a coding agent that reads CLAUDE.md to write it from the video. The packaged Recipe Agent that does this from a link is planned, not shipped.</p>
-            <p>The rules that matter more than the format:</p>
-            <ol>
-              <li>Never invent an amount. An amount is the creator's own words. If the video does not say, the amount is empty and its basis is <code>unstated</code>.</li>
-              <li>Steps come from the video. If part of the method is missing, mark the recipe <code>partial</code> and list what is missing under <code>gaps</code>.</li>
-              <li>Give every ingredient a short filter key, lowercase and singular, and reuse the keys that already exist.</li>
-              <li>Add a timestamp in seconds to each step where you can. The dashboard turns it into a play from here button.</li>
-              <li>Keep transcripts, captions and frames out of the repository. They are the creators' own content.</li>
-            </ol>
-            <p>When the recipe file exists, remove the matching entry from <code>data/queue.json</code>. The dashboard already hides queue entries whose video is in <code>recipes/</code>. You are responsible for following each platform's terms when you capture a video.</p>
-
             <h2 id="check">Check your files</h2>
             <div class="table-scroll">
               <table>
@@ -140,7 +138,7 @@ npm start</code></pre>
                   <tr><th scope="col">Command</th><th scope="col">What it does</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td><code>npm run validate</code></td><td>Checks every recipe file and the queue against the contract. Run it before you commit.</td></tr>
+                  <tr><td><code>npm run validate</code></td><td>Checks every recipe file and the queue against the <a href="recipe-format.html">contract</a>. Run it before you commit.</td></tr>
                   <tr><td><code>npm test</code></td><td>Runs the tests on Node's built-in test runner.</td></tr>
                 </tbody>
               </table>
@@ -150,21 +148,75 @@ npm start</code></pre>
             <p><code>npm run build</code> writes a static copy of the dashboard to <code>dist/</code>. Any static host can serve it. The copy is read-only: it cannot change the queue, so Add video copies a request message instead of queueing.</p>
             <p>The repository also has <code>npm run deploy</code>, which builds and then publishes <code>dist/</code> to a Cloudflare Pages project with wrangler. It needs your own Cloudflare account and project.</p>
 
-            <h2 id="planned">What is planned</h2>
-            <p>These are on the roadmap and not in the repository yet:</p>
+            <h2 id="tools">Optional capture tools</h2>
+            <!-- gen:status:private-captures -->
+            <p class="status-note" data-feature-status="private-captures"><span class="badge badge-next">Being merged</span> This is built and is being merged into the main branch. Until the merge lands, a fresh clone may not have it.</p>
+            <!-- /gen:status:private-captures -->
+            <p>The note above covers the rest of this page: the setup check, the capture helper and the capture store that the <a href="recipe-agent.html">Recipe Agent</a> uses. The dashboard and the validator work with Node alone.</p>
+            <p><code>npm run doctor</code> reports which tools it finds on your <code>PATH</code>, with install hints. A missing capture tool is information, not an error. The check does not run the tools, does not use the network and does not fetch models.</p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr><th scope="col">Tool</th><th scope="col">Used for</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>yt-dlp</code></td><td>Captions, the description, metadata, and the audio or video file when one is needed.</td></tr>
+                  <tr><td><code>ffmpeg</code></td><td>Audio conversion and sampled frames.</td></tr>
+                  <tr><td><code>whisper-ctranslate2</code> or <code>whisper</code></td><td>Local speech-to-text, when the captions have no usable text.</td></tr>
+                  <tr><td><code>tesseract</code></td><td>Reading English text that is shown on screen.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>Installing the tools and getting a speech-to-text model are your own steps. Transcription needs a model that is already on your disk: set <code>RECIPE_BANK_STT_MODEL</code> to its absolute path. The helper never names a model in a way that would start a download, and it runs transcription on the CPU.</p>
+
+            <h2 id="captures">Where captures are kept</h2>
+            <p>Captured material is the creators' own content, so the capture helper keeps it outside the repository. Set <code>RECIPE_BANK_CAPTURE_DIR</code> to an absolute folder of your choice, or let the helper use the data folder of your system:</p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr><th scope="col">System</th><th scope="col">Capture folder</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Linux</td><td><code>$XDG_DATA_HOME/recipe-bank/captures</code>, or <code>$HOME/.local/share/recipe-bank/captures</code></td></tr>
+                  <tr><td>macOS</td><td><code>$HOME/Library/Application Support/recipe-bank/captures</code></td></tr>
+                  <tr><td>Windows</td><td><code>%LOCALAPPDATA%\recipe-bank\captures</code></td></tr>
+                </tbody>
+              </table>
+            </div>
             <ul>
-              <li>A Recipe Agent definition with entry files for common coding agents, and the video analysis packaged as a reusable skill.</li>
-              <li>A self-hosting document in the repository and a setup check for the optional tools the agent needs, such as ffmpeg, yt-dlp, a local speech-to-text engine and tesseract. The dashboard keeps working without any of them.</li>
-              <li>A form to add and edit recipes in the dashboard, and queueing from the static copy.</li>
+              <li>Each video gets its own folder, named after the platform and the video id.</li>
+              <li>A folder inside the repository, one of its worktrees, or a symlink that leads back into one is refused.</li>
+              <li>A capture can hold captions, the description, metadata, audio, video, a transcript, frames, text read from frames, tool logs and a report of each step. Do not publish these, and do not put them in commits, issues or support messages.</li>
+              <li>Managing access, backups, disk space and deletion is up to you. Delete a video's capture folder when you no longer need it.</li>
+              <li>You are responsible for following each platform's terms and for having permission to capture the material. Do not get around logins, paywalls or other access restrictions.</li>
             </ul>
+
+            <h2 id="trouble">Troubleshooting</h2>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr><th scope="col">What you see</th><th scope="col">What to do</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>A tool is reported missing</td><td>Run <code>npm run doctor</code> again in the terminal the agent uses. Restart the terminal after changing <code>PATH</code>. Without <code>yt-dlp</code> the capture helper stops; the dashboard still runs.</td></tr>
+                  <tr><td>No speech-to-text</td><td>Check the name of the program and the path in <code>RECIPE_BANK_STT_MODEL</code>. Analysis from captions alone is still possible.</td></tr>
+                  <tr><td>No captions, or access denied</td><td>Read the capture report and the tool logs in the capture folder. Record the limit as a gap. Do not guess a recipe from a title.</td></tr>
+                  <tr><td>Text on screen is read badly</td><td>The helper reads English. Look at the frames yourself for other languages or handwriting.</td></tr>
+                  <tr><td>The capture folder is refused</td><td>Use an absolute folder outside every checkout of the repository.</td></tr>
+                  <tr><td>The queue looks stale</td><td>Stop the dashboard before the queue helper runs, and start it again afterwards.</td></tr>
+                  <tr><td>Validation fails</td><td>Follow the messages from <code>npm run validate</code>. A missing fact becomes an unstated amount or a gap, never a guess.</td></tr>
+                </tbody>
+              </table>
+            </div>
             <div class="cta-row">
               <a class="btn btn-primary" data-cta="primary" href="https://github.com/axeltoll/recipe-bank">
                 <svg class="i-star" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>
                 <span>Star and run it from GitHub</span>
               </a>
-              <a class="btn btn-ghost" href="https://github.com/axeltoll/recipe-bank/blob/main/ROADMAP.md">Read the roadmap</a>
+              <a class="btn btn-ghost" href="recipe-agent.html">Read about the Recipe Agent</a>
             </div>
-          </div>
+            <p class="doc-next"><span>Next</span><a class="text-link" href="contributing.html">Contributing</a></p>
+          </article>
         </div>
       </div>
     </section>
@@ -182,7 +234,11 @@ npm start</code></pre>
       <nav class="footer-nav" aria-label="Footer">
         <ul>
           <li><a href="https://github.com/axeltoll/recipe-bank">GitHub</a></li>
-          <li><a href="self-hosting.html" aria-current="page">Self-hosting guide</a></li>
+          <li><a href="getting-started.html">Getting started</a></li>
+          <li><a href="recipe-format.html">Recipe format</a></li>
+          <li><a href="recipe-agent.html">Recipe Agent</a></li>
+          <li><a href="self-hosting.html">Self-hosting</a></li>
+          <li><a href="contributing.html">Contributing</a></li>
           <li><a href="changelog.html">Changelog</a></li>
           <li><a href="https://github.com/axeltoll/recipe-bank/blob/main/ROADMAP.md">Roadmap</a></li>
           <li><a href="https://github.com/axeltoll/recipe-bank/blob/main/LICENSE">License</a></li>

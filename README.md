@@ -58,6 +58,7 @@ npm run smoke      # real-browser checks of the local server and the static buil
 npm run device-check # layout audit at 390, 768, 1280, 1920 and 2560 pixels
 npm run site       # previews the public website in site/ at http://127.0.0.1:4790
 npm run site:data  # regenerates site/data/showcase.js from the showcased recipe files
+npm run site:sync  # rewrites the website's generated parts after editing site/data/features.json or site.json
 ```
 
 Recipe packs are described in [public/features/PACKS.md](public/features/PACKS.md), the editor in [public/features/EDITOR.md](public/features/EDITOR.md).
@@ -107,8 +108,8 @@ Use the coding agent you already have to turn a supported video link into a cred
 | `docs/` | Design contract and mount points (`docs/design/`), platform support (`PLATFORMS.md`), architecture (`ARCHITECTURE.md`). |
 | `schema/` | JSON Schema of the recipe file. |
 | `agent/` | The Recipe Agent's instructions and skill. |
-| `site/` | The public website for the project (static, separate from the dashboard). See [site/README.md](site/README.md). |
-| `scripts/` | Validator, static build, migration, recipe packs, queue helper, capture and doctor, browser checks, website preview. |
+| `site/` | The public website for the project (static, separate from the dashboard): home page, docs and changelog. What it says about each feature comes from `site/data/features.json`. See [site/README.md](site/README.md). |
+| `scripts/` | Validator, static build, migration, recipe packs, queue helper, capture and doctor, browser checks, the website's preview server, sample-data generator and sync script. |
 | `test/` | `node:test` suites. |
 
 ## Plans

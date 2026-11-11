@@ -1,14 +1,16 @@
-// Page behaviour for every page of the site: navigation, theme, scroll reveals, the reading progress line,
-// the sticky action on phones and tablets, copy buttons, then the showcase and the hero on the home page.
-// Each part runs on its own, so one failure cannot take the others down. Without this module the page is
-// still complete: all content is in the HTML and nothing is hidden until `js-ready` is set below.
-
-import { initShowcase } from './showcase.js';
-import { initHero } from './hero-boot.js';
+// Page behaviour for every page of the site: theme, the docs menu, scroll reveals, the reading progress
+// line, the sticky action on phones and tablets, copy and print buttons. The parts only some pages have
+// (the showcase and the hero on the home page, the feature groups and status notes) are imported on demand,
+// so a docs page does not download them. Each part runs on its own, so one failure cannot take the others
+// down. Without this module every page is still complete: all content is in the HTML, the header navigation
+// needs no script, and nothing is hidden until `js-ready` is set below.
 
 const root = document.documentElement;
 const THEME_KEY = 'rb-site-theme';
-const THEME_COLOR = { light: '#f8f4ee', dark: '#15120f' };
+/** --bg of css/site.css per theme, for the browser chrome. */
+const THEME_COLOR = { light: '#faf6f0', dark: '#14110e' };
+/** The desktop breakpoint of the layout contract (css/site.css). */
+const DESKTOP = '(min-width: 1280px)';
 
 function initTheme() {
   const button = document.getElementById('theme-toggle');
@@ -36,23 +38,22 @@ function initTheme() {
   system.addEventListener('change', () => { if (!stored()) apply(system.matches ? 'dark' : 'light'); });
 }
 
-function initNav() {
-  const button = document.getElementById('nav-toggle');
-  const nav = document.getElementById('site-nav');
+// Docs pages: below the desktop breakpoint the docs list is a menu behind a button. The button is hidden in
+// the HTML and shown here, so without JavaScript the list is simply visible.
+function initDocsMenu() {
+  const button = document.getElementById('docs-menu-toggle');
+  const nav = document.getElementById('docs-nav');
   if (!button || !nav) return;
   const set = (open) => {
     nav.classList.toggle('is-open', open);
     button.setAttribute('aria-expanded', String(open));
   };
+  button.hidden = false;
   button.addEventListener('click', () => set(button.getAttribute('aria-expanded') !== 'true'));
-  nav.addEventListener('click', (e) => { if (e.target instanceof Element && e.target.closest('a')) set(false); });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && button.getAttribute('aria-expanded') === 'true') { set(false); button.focus(); }
   });
-  document.addEventListener('click', (e) => {
-    if (e.target instanceof Node && !nav.contains(e.target) && !button.contains(e.target)) set(false);
-  });
-  matchMedia('(min-width: 1024px)').addEventListener('change', () => set(false));
+  matchMedia(DESKTOP).addEventListener('change', () => set(false));
 }
 
 function initReveal() {
@@ -135,7 +136,25 @@ function initCopy() {
   }
 }
 
-for (const init of [initTheme, initNav, initReveal, initProgress, initSticky, initCopy, initShowcase, initHero]) {
+function initPrint() {
+  for (const button of document.querySelectorAll('[data-print]')) {
+    button.hidden = false;
+    button.addEventListener('click', () => window.print());
+  }
+}
+
+// Parts that only some pages have. A failed download leaves the static HTML as it is.
+function initLazy() {
+  const load = (present, path, name) => {
+    if (!present) return;
+    import(path).then((mod) => mod[name]()).catch((err) => console.error(`Recipe Bank site: ${name} failed`, err));
+  };
+  load(document.querySelector('[data-features], [data-feature-status]'), './features.js', 'initFeatures');
+  load(document.getElementById('demo'), './showcase.js', 'initShowcase');
+  load(document.getElementById('hero-slot'), './hero-boot.js', 'initHero');
+}
+
+for (const init of [initTheme, initDocsMenu, initReveal, initProgress, initSticky, initCopy, initPrint, initLazy]) {
   try {
     init();
   } catch (err) {

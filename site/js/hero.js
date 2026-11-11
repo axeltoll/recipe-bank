@@ -1,6 +1,7 @@
 // The live hero mark: about 220 instanced tiles that read as a video and reflow into a recipe.
-// three.js is loaded from the page's import map (see index.html) only when this module is asked to mount,
-// so the page works without it: the inline SVG poster stays in place.
+// three.js is the site's only third-party request. It is fetched from THREE_URL only when this module is
+// asked to mount (js/hero-boot.js decides: never under reduced motion, never without WebGL 2, and not before
+// the hero is on screen), so the page works without it: the inline SVG poster stays in place.
 //
 // Rails: one canvas, device pixel ratio capped (1.5 on touch and narrow screens, 1.75 elsewhere), one
 // InstancedMesh, rendering paused while the canvas is off-screen or the tab is hidden.
@@ -10,10 +11,16 @@
 import { buildTiles, GRID, MAX_DELAY } from './hero-shapes.js';
 import { clamp01, easeInOut, lerp, smoothstep } from './stage-math.js';
 
-/** Tile colours per page theme. Light pages get dark tiles so the mark reads on paper. */
+/** The CDN build of three.js r170 (jsDelivr). Must equal three_url in site/brand.json. */
+export const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+
+/**
+ * Tile colours per page theme: the --ink and --accent tokens of css/site.css (a test compares them), so the
+ * live mark and the SVG poster are the same colours. Light pages get dark tiles so the mark reads on paper.
+ */
 export const PALETTES = {
-  dark: { tile: '#e9e1d6', accent: '#f07a3e', rim: '#f07a3e' },
-  light: { tile: '#2b241e', accent: '#c2410c', rim: '#f0a070' },
+  dark: { tile: '#f4eee7', accent: '#f08a4b', rim: '#f08a4b' },
+  light: { tile: '#1f1a16', accent: '#c2410c', rim: '#f5a06a' },
 };
 
 // Lights. three.js r155+ uses physical light units, so these are higher than the pre-r155 defaults.
@@ -43,7 +50,7 @@ export function webgl2Available() {
  * Returns { ready, setProgress(0..1), setTheme(name), toggle(), dispose() }.
  */
 export async function mountHero(container, { theme = 'light', fit = 0.86, onState, onLost } = {}) {
-  const THREE = await import('three');
+  const THREE = await import(THREE_URL);
   const tiles = buildTiles();
   const count = tiles.length;
 
@@ -206,9 +213,17 @@ export async function mountHero(container, { theme = 'light', fit = 0.86, onStat
   }
 
   // ---- input ----
+  // Hover is read from the window, not from the canvas: as a fixed layer behind the page content the canvas
+  // takes no pointer events (css/site.css), so it can never swallow a click meant for the page.
   function onPointerMove(e) {
+    if (!running) return;
     const r = canvas.getBoundingClientRect();
     if (!r.width || !r.height) return;
+    const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    if (!inside) {
+      if (pointer.active || pointer.nx || pointer.ny) onPointerOut();
+      return;
+    }
     ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -(((e.clientY - r.top) / r.height) * 2 - 1));
     pointer.nx = ndc.x;
     pointer.ny = ndc.y;
@@ -235,10 +250,12 @@ export async function mountHero(container, { theme = 'light', fit = 0.86, onStat
     e.preventDefault();
     onLost?.();
   }
-  canvas.addEventListener('pointermove', onPointerMove);
-  canvas.addEventListener('pointerleave', onPointerOut);
-  canvas.addEventListener('pointercancel', onPointerOut);
-  canvas.addEventListener('pointerup', (e) => { if (e.pointerType !== 'mouse') onPointerOut(); });
+  const onPointerEnd = (e) => { if (e.pointerType !== 'mouse') onPointerOut(); };
+  window.addEventListener('pointermove', onPointerMove, { passive: true });
+  window.addEventListener('pointerup', onPointerEnd, { passive: true });
+  window.addEventListener('pointercancel', onPointerOut, { passive: true });
+  document.documentElement.addEventListener('pointerleave', onPointerOut);
+  // Only reachable while the canvas sits in the hero slot; as a fixed layer it gets no clicks.
   canvas.addEventListener('click', toggle);
   canvas.addEventListener('webglcontextlost', onContextLost);
 
@@ -269,6 +286,10 @@ export async function mountHero(container, { theme = 'light', fit = 0.86, onStat
       sizeWatch.disconnect();
       viewWatch.disconnect();
       document.removeEventListener('visibilitychange', sync);
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerEnd);
+      window.removeEventListener('pointercancel', onPointerOut);
+      document.documentElement.removeEventListener('pointerleave', onPointerOut);
       canvas.removeEventListener('webglcontextlost', onContextLost);
       geometry.dispose();
       material.dispose();
