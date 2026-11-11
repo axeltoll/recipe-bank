@@ -11,7 +11,7 @@ import { join } from 'node:path';
 import { createApp, createHandler, hostRefusal } from '../server.mjs';
 import { server as siteServer } from '../scripts/serve-site.mjs';
 import { assertQueue, nextQueued } from '../scripts/queue.mjs';
-import { servingCount, parseServes } from '../lib/scale.mjs';
+import { servingCount, parseServes, factorFor } from '../lib/scale.mjs';
 import { makeRecipe, tempBank, ROOT } from './helpers/bank.mjs';
 
 let dir, server, port, handle, sitePort;
@@ -146,4 +146,12 @@ test('servingCount: servings scale to a household, counted items do not', async 
   assert.equal(servingCount('2 thighs per person'), null);
   const feature = await readFile(join(ROOT, 'public', 'features', 'scale-feature.js'), 'utf8');
   assert.match(feature, /servingCount\(recipe\.serves\) != null/, 'the household button is only offered for servings');
+});
+
+test('factorFor scales servings to a household, never a count of items', () => {
+  assert.equal(factorFor({ serves: '4' }, 6), 1.5);
+  assert.equal(factorFor({ serves: '4 servings' }, 2), 0.5);
+  for (const serves of ['9 rolls', '12 subs', 'about 12 nuggets', '2 thighs per person', null]) {
+    assert.equal(factorFor({ serves }, 4), null, String(serves));
+  }
 });
