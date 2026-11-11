@@ -223,11 +223,23 @@ test('week plan: a route with a header link, and "Add to week" on cards and reci
   rb.emit('view', { name: 'recipe', recipe: alpha });
   assert.match(actions.innerHTML, /data-plan-add="alpha"[^>]*>.*Add to week/);
 
-  const button = { dataset: { planAdd: 'alpha' } };
-  doc.fire('click', { target: { closest: (sel) => (sel === '[data-plan-add]' ? button : null) } });
-  assert.deepEqual(rb.toasts, ['Added to this week: Alpha']);
-  doc.fire('click', { target: { closest: () => ({ dataset: { planAdd: 'not-a-recipe' } }) } });
-  assert.equal(rb.toasts.length, 1, 'an unknown id adds nothing');
+  // "Add to week" only reports success when the stored plan gained the recipe, so give it working storage.
+  const saved = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+  const mem = new Map();
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    value: { getItem: (k) => (mem.has(k) ? mem.get(k) : null), setItem: (k, v) => mem.set(k, String(v)), removeItem: (k) => mem.delete(k) },
+  });
+  try {
+    const button = { dataset: { planAdd: 'alpha' } };
+    doc.fire('click', { target: { closest: (sel) => (sel === '[data-plan-add]' ? button : null) } });
+    assert.deepEqual(rb.toasts, ['Added to this week: Alpha']);
+    doc.fire('click', { target: { closest: () => ({ dataset: { planAdd: 'not-a-recipe' } }) } });
+    assert.equal(rb.toasts.length, 1, 'an unknown id adds nothing');
+  } finally {
+    if (saved) Object.defineProperty(globalThis, 'localStorage', saved);
+    else delete globalThis.localStorage;
+  }
 });
 
 test('household and budget: a route of their own', () => {
