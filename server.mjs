@@ -167,7 +167,7 @@ async function readBody(req) {
   }
 }
 
-const server = createServer(async (req, res) => {
+export const server = createServer(async (req, res) => {
   const { pathname } = new URL(req.url, 'http://localhost');
   try {
     if (pathname.startsWith('/api/')) return await api(req, res, pathname);

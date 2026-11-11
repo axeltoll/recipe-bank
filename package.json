@@ -14,6 +14,8 @@
     "validate": "node scripts/validate.mjs",
     "test": "node --test \"test/*.test.mjs\"",
     "build": "node scripts/build-static.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "device-check": "node scripts/device-check.mjs",
     "deploy": "node scripts/build-static.mjs && npx wrangler pages deploy dist --project-name=recipe-bank --branch=main --commit-dirty=true"
   }
 }

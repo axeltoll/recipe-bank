@@ -42,9 +42,34 @@ Other commands:
 ```bash
 npm run dev        # restarts on server/lib changes
 npm run validate   # checks every recipes/*.json and data/queue.json
-npm test           # URL parsing and recipe-contract tests
+npm test           # URL parsing, recipe-contract and browser-tooling unit tests
 npm run build      # static copy in dist/ (read-only: "Add video" copies a request instead of queueing)
+npm run smoke      # real-browser checks of the local server and static build
+npm run device-check # layout audit at 390, 768, 1280, 1920 and 2560 pixels
 ```
+
+Browser checks use system Chrome/Chromium and Node's built-in WebSocket, with no
+packages to install. Set `CHROME_PATH` to override browser discovery. If no browser
+is found, both commands print a skip and exit successfully; `SMOKE_REQUIRED=1`
+makes a missing browser fail (as in CI). Browser startup failures always fail.
+Each run uses a fresh temporary profile and removes it on exit. External fonts,
+images and video embeds are fulfilled locally, so checks make no third-party
+requests and screenshots use fallback fonts and placeholder images. The smoke
+check leaves the queue unchanged.
+
+Screenshots are written under git-ignored `.smoke/`. The device audit also writes
+`.smoke/device/summary.json` and `summary.txt`, and exits with an error for sideways
+scroll, mobile tap targets below 44×44 pixels, prose lines over approximately 80
+characters, unpainted wide-screen edges, or console errors. Checkbox labels count
+as their tap area; edge paint and line length use DOM/style measurements. Use the
+screenshots for visual review, especially with production fonts and video embeds.
+
+For local debugging, append `-- --headed` to either command. Narrow a smoke run
+with `-- --only grid|filters|creator|recipe|timestamp|queue|keyboard` (choose one),
+or a device audit with `-- --only home|recipe|390|768|1280|1920|2560`. Keyboard smoke
+checks use Tab and Enter on every timestamp button. CI runs unit tests, validation,
+the static build and a required Chrome smoke check on pushes to `main` and pull
+requests; it does not deploy.
 
 ## Project layout
 
