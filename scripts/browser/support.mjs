@@ -1,5 +1,5 @@
 import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, realpath } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { spawn } from 'node:child_process';
 import { server } from '../../server.mjs';
@@ -30,7 +30,10 @@ export function staticServer(root = resolve(ROOT, 'dist')) {
       const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
       const file = resolve(root, `.${pathname === '/' ? '/index.html' : pathname}`);
       if (!file.startsWith(root + sep)) { res.writeHead(403).end(); return; }
-      const data = await readFile(file);
+      // The lexical check above does not see symlinks: resolve both and check again before reading.
+      const [realRoot, realFile] = await Promise.all([realpath(root), realpath(file)]);
+      if (!realFile.startsWith(realRoot + sep)) { res.writeHead(403).end(); return; }
+      const data = await readFile(realFile);
       res.writeHead(200, { 'content-type': TYPES[extname(file)] ?? 'application/octet-stream' }).end(data);
     } catch { res.writeHead(404).end(); }
   });
