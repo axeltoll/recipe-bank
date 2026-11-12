@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Recipe format cheat sheet · Recipe Bank</title>
+  <meta name="description" content="The Recipe Bank recipe format on one printable page: the rules, the fields, the four amount bases, and the checks to run before you commit.">
+  <meta name="theme-color" content="#faf6f0">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Recipe Bank">
+  <meta property="og:title" content="Recipe format cheat sheet · Recipe Bank">
+  <meta property="og:description" content="The recipe format on one printable page.">
+  <meta name="twitter:card" content="summary">
+  <!-- gen:meta -->
+  <!-- baseUrl in data/site.json is empty. Once it is set, npm run site:sync writes canonical, og:url and og:image here. -->
+  <!-- /gen:meta -->
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <script src="js/theme.js"></script>
+  <link rel="stylesheet" href="css/site.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="inner">
+      <a class="logo" href="index.html">
+        <svg class="logo-mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect class="m-bg" width="32" height="32" rx="8"/><path class="m-fg" d="M9 20c0-5 3-9 7-9s7 4 7 9z"/><rect class="m-fg" x="7" y="20" width="18" height="3" rx="1.5"/></svg>
+        <span>Recipe Bank</span>
+      </a>
+      <nav class="site-nav" aria-label="Site">
+        <ul>
+          <li><a href="index.html#features">Features</a></li>
+          <li><a href="index.html#how">How it works</a></li>
+          <li><a href="getting-started.html" aria-current="page">Docs</a></li>
+          <li><a href="index.html#roadmap">Roadmap</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </nav>
+      <button class="icon-btn theme-toggle" id="theme-toggle" type="button" aria-label="Switch theme">
+        <svg class="i-sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
+        <svg class="i-moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 14.2A8 8 0 0 1 9.8 4a8 8 0 1 0 10.2 10.2z"/></svg>
+      </button>
+      <a class="btn btn-primary btn-small header-cta" href="https://github.com/axeltoll/recipe-bank">
+        <svg class="i-star" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>
+        <span><span class="cta-long">Star on </span>GitHub</span>
+      </a>
+    </div>
+    <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+  </header>
+
+  <main id="main">
+    <section class="band page-head" aria-labelledby="page-title">
+      <div class="inner">
+        <p class="eyebrow no-print">Docs</p>
+        <h1 id="page-title">Recipe format <em>cheat sheet.</em></h1>
+        <p class="lede">One recipe is one JSON file: <code>recipes/&lt;id&gt;.json</code>. This page prints on one sheet.</p>
+        <button type="button" class="btn btn-small no-print" data-print hidden>Print this page</button>
+      </div>
+    </section>
+
+    <section class="band doc-band" aria-label="Cheat sheet">
+      <div class="inner">
+        <div class="doc">
+          <div class="doc-side">
+            <button class="btn btn-small docs-menu-toggle" id="docs-menu-toggle" type="button" aria-expanded="false" aria-controls="docs-nav" hidden>Docs menu</button>
+            <nav class="docs-nav" id="docs-nav" aria-label="Docs">
+              <p class="docs-nav-title">Docs</p>
+              <ul>
+                <li><a href="getting-started.html">Getting started</a></li>
+                <li><a href="recipe-format.html">Recipe format</a></li>
+                <li><a href="recipe-format-cheatsheet.html" aria-current="page">Format cheat sheet</a></li>
+                <li><a href="how-analysis-works.html">How the analysis works</a></li>
+                <li><a href="recipe-agent.html">Recipe Agent</a></li>
+                <li><a href="self-hosting.html">Self-hosting</a></li>
+                <li><a href="contributing.html">Contributing</a></li>
+                <li><a href="changelog.html">Changelog</a></li>
+              </ul>
+            </nav>
+          </div>
+
+          <article class="sheet-wrap">
+            <div class="sheet">
+              <section aria-labelledby="cs-rules">
+                <h2 id="cs-rules">The rules</h2>
+                <ol>
+                  <li>Never invent an amount. Use the creator's words, or <code>null</code> with the basis <code>unstated</code>.</li>
+                  <li>Steps come from the video. A withheld method makes the recipe <code>partial</code>, with <code>gaps</code>.</li>
+                  <li><code>key</code> is what you shop and filter by: lowercase, singular, reused.</li>
+                  <li>Add <code>t</code>, in seconds, to a step when the evidence shows where it happens.</li>
+                  <li>Write in your own words. Credit the creator. Link the video.</li>
+                  <li>Captions, transcripts and frames never go into the repository.</li>
+                </ol>
+              </section>
+
+              <section aria-labelledby="cs-basis">
+                <h2 id="cs-basis">Amount and basis</h2>
+                <table>
+                  <thead>
+                    <tr><th scope="col">basis</th><th scope="col">Where it was given</th><th scope="col">amount</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><code>spoken</code></td><td>Said in the video</td><td>Required</td></tr>
+                    <tr><td><code>on-screen</code></td><td>Shown as text</td><td>Required</td></tr>
+                    <tr><td><code>description</code></td><td>Written under the video</td><td>Required</td></tr>
+                    <tr><td><code>unstated</code></td><td>Not given</td><td><code>null</code></td></tr>
+                  </tbody>
+                </table>
+                <p>Vague filler such as some counts as unstated.</p>
+              </section>
+
+              <section aria-labelledby="cs-top">
+                <h2 id="cs-top">Top-level fields</h2>
+                <table>
+                  <thead>
+                    <tr><th scope="col">Field</th><th scope="col">Rule</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><code>id</code></td><td>Kebab-case, equals the file name</td></tr>
+                    <tr><td><code>title</code>, <code>summary</code></td><td>Required text</td></tr>
+                    <tr><td><code>status</code></td><td><code>analyzed</code> or <code>partial</code></td></tr>
+                    <tr><td><code>video</code></td><td><code>platform</code>, <code>id</code>, <code>url</code>: a supported link</td></tr>
+                    <tr><td><code>creator</code></td><td><code>name</code> required; <code>handle</code>, <code>url</code></td></tr>
+                    <tr><td><code>analyzed</code></td><td>Required, <code>YYYY-MM-DD</code></td></tr>
+                    <tr><td><code>uploaded</code></td><td>Optional, <code>YYYY-MM-DD</code></td></tr>
+                    <tr><td><code>serves</code></td><td>As stated, or <code>null</code></td></tr>
+                    <tr><td><code>tags</code></td><td>Lowercase strings</td></tr>
+                    <tr><td><code>components</code></td><td>At least one</td></tr>
+                    <tr><td><code>nutrition</code></td><td>Optional, only as stated</td></tr>
+                    <tr><td><code>notes</code>, <code>gaps</code></td><td>Lists of strings; <code>gaps</code> required when partial</td></tr>
+                    <tr><td><code>source</code></td><td>Optional: <code>evidence</code>, <code>quantity_basis</code></td></tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <section aria-labelledby="cs-component">
+                <h2 id="cs-component">Inside a component</h2>
+                <pre><code>{ "name": "Pan sauce",
+  "ingredients": [
+    { "item": "Chicken stock",
+      "key": "chicken stock",
+      "amount": "about 1 cup",
+      "basis": "spoken",
+      "note": "optional" },
+    { "item": "Cold butter",
+      "key": "butter",
+      "amount": null,
+      "basis": "unstated" }
+  ],
+  "steps": [
+    { "text": "Deglaze with wine.", "t": 58 }
+  ] }</code></pre>
+              </section>
+
+              <section aria-labelledby="cs-check">
+                <h2 id="cs-check">Before you commit</h2>
+                <ol>
+                  <li><code>npm run validate</code> passes.</li>
+                  <li>Every amount and timestamp was checked against the video.</li>
+                  <li>The matching entry is gone from <code>data/queue.json</code>.</li>
+                  <li><code>npm test</code> passes.</li>
+                  <li>The change holds the recipe and nothing captured.</li>
+                </ol>
+              </section>
+
+              <section aria-labelledby="cs-queue">
+                <h2 id="cs-queue">Queue states</h2>
+                <table>
+                  <thead>
+                    <tr><th scope="col">Status</th><th scope="col">Meaning</th></tr>
+                  </thead>
+                  <tbody>
+                    <tr><td><code>queued</code></td><td>Waiting for analysis</td></tr>
+                    <tr><td><code>analyzing</code></td><td>Claimed</td></tr>
+                    <tr><td><code>failed</code></td><td>Analysis was impossible</td></tr>
+                    <tr><td>Removed</td><td>The recipe file exists</td></tr>
+                  </tbody>
+                </table>
+              </section>
+            </div>
+            <p class="sheet-foot">Recipe Bank, MIT licensed. The enforced contract is <code>lib/recipe.mjs</code> in github.com/axeltoll/recipe-bank. The long version is the <a href="recipe-format.html">recipe format</a> page.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <div class="footer-brand">
+        <a class="logo" href="index.html">
+          <svg class="logo-mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect class="m-bg" width="32" height="32" rx="8"/><path class="m-fg" d="M9 20c0-5 3-9 7-9s7 4 7 9z"/><rect class="m-fg" x="7" y="20" width="18" height="3" rx="1.5"/></svg>
+          <span>Recipe Bank</span>
+        </a>
+        <p>Open source under the MIT license. The videos belong to their creators; Recipe Bank only links to and embeds them.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer">
+        <ul>
+          <li><a href="https://github.com/axeltoll/recipe-bank">GitHub</a></li>
+          <li><a href="getting-started.html">Getting started</a></li>
+          <li><a href="recipe-format.html">Recipe format</a></li>
+          <li><a href="recipe-agent.html">Recipe Agent</a></li>
+          <li><a href="self-hosting.html">Self-hosting</a></li>
+          <li><a href="contributing.html">Contributing</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+          <li><a href="https://github.com/axeltoll/recipe-bank/blob/main/ROADMAP.md">Roadmap</a></li>
+          <li><a href="https://github.com/axeltoll/recipe-bank/blob/main/LICENSE">License</a></li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>

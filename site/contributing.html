@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Contributing · Recipe Bank</title>
+  <meta name="description" content="How to contribute to Recipe Bank: add a recipe, add a video platform, add a feature module to the dashboard, and keep this website truthful.">
+  <meta name="theme-color" content="#faf6f0">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Recipe Bank">
+  <meta property="og:title" content="Contributing · Recipe Bank">
+  <meta property="og:description" content="Add a recipe, a video platform or a feature module.">
+  <meta name="twitter:card" content="summary">
+  <!-- gen:meta -->
+  <!-- baseUrl in data/site.json is empty. Once it is set, npm run site:sync writes canonical, og:url and og:image here. -->
+  <!-- /gen:meta -->
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <script src="js/theme.js"></script>
+  <link rel="stylesheet" href="css/site.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <div class="inner">
+      <a class="logo" href="index.html">
+        <svg class="logo-mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect class="m-bg" width="32" height="32" rx="8"/><path class="m-fg" d="M9 20c0-5 3-9 7-9s7 4 7 9z"/><rect class="m-fg" x="7" y="20" width="18" height="3" rx="1.5"/></svg>
+        <span>Recipe Bank</span>
+      </a>
+      <nav class="site-nav" aria-label="Site">
+        <ul>
+          <li><a href="index.html#features">Features</a></li>
+          <li><a href="index.html#how">How it works</a></li>
+          <li><a href="getting-started.html" aria-current="page">Docs</a></li>
+          <li><a href="index.html#roadmap">Roadmap</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+        </ul>
+      </nav>
+      <button class="icon-btn theme-toggle" id="theme-toggle" type="button" aria-label="Switch theme">
+        <svg class="i-sun" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.6M12 18.9v2.6M2.5 12h2.6M18.9 12h2.6M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
+        <svg class="i-moon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M20 14.2A8 8 0 0 1 9.8 4a8 8 0 1 0 10.2 10.2z"/></svg>
+      </button>
+      <a class="btn btn-primary btn-small header-cta" href="https://github.com/axeltoll/recipe-bank">
+        <svg class="i-star" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>
+        <span><span class="cta-long">Star on </span>GitHub</span>
+      </a>
+    </div>
+    <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+  </header>
+
+  <main id="main">
+    <section class="band page-head" aria-labelledby="page-title">
+      <div class="inner">
+        <p class="eyebrow">Docs</p>
+        <h1 id="page-title">Contributing <em>to Recipe Bank.</em></h1>
+        <p class="lede">Three things people add most: a recipe, a video platform, a feature. Each has a small, fixed path through the code.</p>
+      </div>
+    </section>
+
+    <section class="band doc-band" aria-label="Contributing">
+      <div class="inner">
+        <div class="doc">
+          <div class="doc-side">
+            <button class="btn btn-small docs-menu-toggle" id="docs-menu-toggle" type="button" aria-expanded="false" aria-controls="docs-nav" hidden>Docs menu</button>
+            <nav class="docs-nav" id="docs-nav" aria-label="Docs">
+              <p class="docs-nav-title">Docs</p>
+              <ul>
+                <li><a href="getting-started.html">Getting started</a></li>
+                <li><a href="recipe-format.html">Recipe format</a></li>
+                <li><a href="recipe-format-cheatsheet.html">Format cheat sheet</a></li>
+                <li><a href="how-analysis-works.html">How the analysis works</a></li>
+                <li><a href="recipe-agent.html">Recipe Agent</a></li>
+                <li><a href="self-hosting.html">Self-hosting</a></li>
+                <li><a href="contributing.html" aria-current="page">Contributing</a></li>
+                <li><a href="changelog.html">Changelog</a></li>
+              </ul>
+            </nav>
+          </div>
+
+          <nav class="toc" aria-label="On this page">
+            <p class="toc-title">On this page</p>
+            <ol>
+              <li><a href="#ground">Ground rules</a></li>
+              <li><a href="#recipe">Add a recipe</a></li>
+              <li><a href="#platform">Add a platform</a></li>
+              <li><a href="#feature">Add a feature module</a></li>
+              <li><a href="#site">Change this website</a></li>
+              <li><a href="#send">Send it</a></li>
+            </ol>
+          </nav>
+
+          <article class="prose">
+            <h2 id="ground">Ground rules</h2>
+            <ul>
+              <li><strong>No dependencies.</strong> Plain ES modules, Node.js 22 or newer, no framework. Adding a build step is a decision to raise with the owner first.</li>
+              <li><strong>Tests come with the change.</strong> They run on Node's built-in test runner: <code>npm test</code>.</li>
+              <li><strong>Escape every string from data.</strong> Recipe files and looked-up video titles come from third parties. The dashboard passes each one through <code>esc()</code> before it reaches the page.</li>
+              <li><strong>Browser storage holds conveniences only.</strong> Each read and write is wrapped so that blocked storage never breaks a page.</li>
+              <li><strong>The recipe contract is the source of truth.</strong> <code>lib/recipe.mjs</code> decides what a valid recipe is.</li>
+            </ul>
+
+            <h2 id="recipe">Add a recipe</h2>
+            <ol>
+              <li>Read the <a href="recipe-format.html">recipe format</a>, or keep the <a href="recipe-format-cheatsheet.html">cheat sheet</a> next to you.</li>
+              <li>Write <code>recipes/&lt;id&gt;.json</code> from the video, by hand or with the <a href="recipe-agent.html">Recipe Agent</a>. Use the creator's amounts, your own words for the method, and reuse ingredient keys that exist.</li>
+              <li>Credit the creator by name and link, and link the original video.</li>
+              <li>Run <code>npm run validate</code>.</li>
+              <li>Remove the matching entry from <code>data/queue.json</code> if there is one.</li>
+              <li>Keep captions, transcripts and frames out of the change.</li>
+            </ol>
+            <p>Three recipes are shown on the home page of this website: <code>cold-pan-chicken</code>, <code>air-fried-chicken-nuggets</code> and <code>banana-milk</code>. After editing one of them, run <code>npm run site:data</code>, or <code>npm test</code> fails.</p>
+
+            <h2 id="platform">Add a platform</h2>
+            <p>Everything the project knows about a video platform is in one file, <code>lib/video.mjs</code>, which the server, the validator and the browser share. It must stay free of dependencies and of browser-only code.</p>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr><th scope="col">Function</th><th scope="col">What to add</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><code>parseVideoUrl</code></td><td>Recognise the platform's links and return its <code>platform</code> name, the video <code>id</code> and one canonical <code>url</code>. Return nothing for links that are not a video.</td></tr>
+                  <tr><td><code>embedUrl</code></td><td>The address of the platform's own player, or nothing when it has none. Videos are embedded from the platform, never re-hosted.</td></tr>
+                  <tr><td><code>thumbnailUrl</code></td><td>A poster image only when the platform has a stable public one.</td></tr>
+                  <tr><td><code>videoKey</code></td><td>Usually nothing: it builds the key that finds duplicates from the platform and the id.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <ol>
+              <li>Add cases to <code>test/video.test.mjs</code> for every link shape you accept, and for look-alike links you reject.</li>
+              <li>Update the message in <code>lib/recipe.mjs</code> that names the supported platforms.</li>
+              <li>Check the places that show a platform by name: the dashboard in <code>public/</code>, and the showcase of this website in <code>site/js/showcase-core.js</code>.</li>
+              <li>If the platform has a public title lookup, the server can use it when a video is queued. A queue entry works without a title.</li>
+            </ol>
+            <!-- gen:status:more-platforms -->
+            <p class="status-note" data-feature-status="more-platforms"><span class="badge badge-next">Being merged</span> This is built and is being merged into the main branch. Until the merge lands, a fresh clone may not have it.</p>
+            <!-- /gen:status:more-platforms -->
+            <p>The note above is about support for Facebook, Pinterest, X and opted-in web pages. Look at how that work is laid out before you add another platform, so yours follows the same pattern.</p>
+
+            <h2 id="feature">Add a feature module</h2>
+            <!-- gen:status:redesign -->
+            <p class="status-note" data-feature-status="redesign"><span class="badge badge-next">Being merged</span> This is built and is being merged into the main branch. Until the merge lands, a fresh clone may not have it.</p>
+            <!-- /gen:status:redesign -->
+            <p>The note above is about the redesigned dashboard, which is what makes feature modules possible. With it, a feature plugs in without editing the dashboard's own code. The contract is written down in <code>docs/design/MOUNT-POINTS.md</code>; this is the short version.</p>
+            <ol>
+              <li><strong>One module.</strong> A feature is one ES module in <code>public/features/</code> that exports <code>install(rb)</code>, registered in <code>public/features/index.js</code>. A feature that fails to load is skipped, and the dashboard carries on.</li>
+              <li><strong>Mount points.</strong> The dashboard renders empty, named elements and leaves them alone: in the header, above the grid, in the filter panel, on each card, and on the recipe page. A feature fills the ones it needs each time the view is drawn.</li>
+              <li><strong>Events.</strong> The dashboard announces what happens: a view was drawn, the grid was redrawn, the filters changed, an ingredient was ticked, cook mode opened.</li>
+              <li><strong>Filters and routes.</strong> A feature can register a recipe filter, and a page of its own with one of the three layout types: list, detail or message.</li>
+              <li><strong>Logic apart from the page.</strong> Pure logic goes in <code>lib/</code> with tests, so it runs without a browser.</li>
+            </ol>
+            <p>Rules a feature must keep:</p>
+            <ul>
+              <li>Use the design tokens and the existing components. Controls are at least 44 px on phones, and nothing depends on hover.</li>
+              <li>Never change a recipe's data. A scaled amount is a display value, marked as scaled, with the creator's original still shown. An unstated amount never gets a number.</li>
+              <li>Escape strings from recipes and the queue, and use the storage helper that never throws.</li>
+            </ul>
+
+            <h2 id="site">Change this website</h2>
+            <p>The website lives in <code>site/</code> and is separate from the dashboard. Its rules are in <code>site/README.md</code>. The two that matter most:</p>
+            <ul>
+              <li><strong>Only true things.</strong> Every feature the site names is an entry in <code>site/data/features.json</code> with a status: shipped, next or planned. When something merges, change its status there and run <code>npm run site:sync</code>. The home page and the status notes in these docs follow.</li>
+              <li><strong>Every page works without JavaScript.</strong> Scripts add the filter, the theme switch and the animated mark. They never hold content.</li>
+            </ul>
+
+            <h2 id="send">Send it</h2>
+            <ol>
+              <li>Run <code>npm run validate</code> and <code>npm test</code>.</li>
+              <li>Open a pull request on <a href="https://github.com/axeltoll/recipe-bank">GitHub</a> that says what changed and how you checked it.</li>
+              <li>For a recipe, say what you looked at: the captions, the description, the frames.</li>
+            </ol>
+            <p>The code and the recipe files are MIT licensed. The videos belong to their creators.</p>
+            <p class="doc-next"><span>Next</span><a class="text-link" href="changelog.html">Changelog</a></p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <div class="footer-brand">
+        <a class="logo" href="index.html">
+          <svg class="logo-mark" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><rect class="m-bg" width="32" height="32" rx="8"/><path class="m-fg" d="M9 20c0-5 3-9 7-9s7 4 7 9z"/><rect class="m-fg" x="7" y="20" width="18" height="3" rx="1.5"/></svg>
+          <span>Recipe Bank</span>
+        </a>
+        <p>Open source under the MIT license. The videos belong to their creators; Recipe Bank only links to and embeds them.</p>
+      </div>
+      <nav class="footer-nav" aria-label="Footer">
+        <ul>
+          <li><a href="https://github.com/axeltoll/recipe-bank">GitHub</a></li>
+          <li><a href="getting-started.html">Getting started</a></li>
+          <li><a href="recipe-format.html">Recipe format</a></li>
+          <li><a href="recipe-agent.html">Recipe Agent</a></li>
+          <li><a href="self-hosting.html">Self-hosting</a></li>
+          <li><a href="contributing.html">Contributing</a></li>
+          <li><a href="changelog.html">Changelog</a></li>
+          <li><a href="https://github.com/axeltoll/recipe-bank/blob/main/ROADMAP.md">Roadmap</a></li>
+          <li><a href="https://github.com/axeltoll/recipe-bank/blob/main/LICENSE">License</a></li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
