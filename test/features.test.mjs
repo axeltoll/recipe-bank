@@ -284,3 +284,15 @@ test('a panel with some sections only reports and clears its own fields', () => 
   assert.deepEqual(changes.at(-1).without, []);
   panel.destroy();
 });
+
+test('scale "Original amounts" resets, although the section around it carries data-factor', () => {
+  const el = fakeEl();
+  const scaler = scaleUi.mount(el, { recipe: alpha, factor: 2, css: false });
+  assert.equal(scaler.getFactor(), 2);
+  // A click on the reset button: its closest [data-factor] is the section (factor 2), not a factor button.
+  fire(el, 'click', { '[data-reset]': {}, '[data-factor]': { dataset: { factor: '2' } } });
+  assert.equal(scaler.getFactor(), 1);
+  fire(el, 'click', { 'button[data-factor]': { dataset: { factor: '0.5' } }, '[data-factor]': { dataset: { factor: '0.5' } } });
+  assert.equal(scaler.getFactor(), 0.5, 'factor buttons still work');
+  scaler.destroy();
+});
