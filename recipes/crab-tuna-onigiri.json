@@ -1,0 +1,220 @@
+{
+  "id": "crab-tuna-onigiri",
+  "title": "Crab & Tuna Onigiri",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "Owj9x2B9u4E",
+    "url": "https://www.youtube.com/shorts/Owj9x2B9u4E"
+  },
+  "creator": {
+    "name": "Culinary Lion",
+    "handle": "@CulinaryLion",
+    "url": "https://www.youtube.com/@CulinaryLion"
+  },
+  "uploaded": "2026-08-29",
+  "analyzed": "2026-11-12",
+  "summary": "Triangle rice molds filled with a creamy imitation-crab and cooked-tuna salad, wrapped in nori \u2014 pitched as an after-school snack and meal-prep fridge staple (3\u20134 days). The narration is a comedic pitch with no quantities; the description supplies the full measured recipe.",
+  "serves": null,
+  "tags": [
+    "onigiri",
+    "rice",
+    "crab",
+    "tuna",
+    "nori",
+    "japanese",
+    "meal prep",
+    "lunch box",
+    "no cook assembly"
+  ],
+  "components": [
+    {
+      "name": "Sushi rice",
+      "ingredients": [
+        {
+          "item": "Sushi rice",
+          "key": "rice",
+          "amount": "2 cups",
+          "basis": "description"
+        },
+        {
+          "item": "Water",
+          "key": "water",
+          "amount": "4 cups",
+          "basis": "description"
+        },
+        {
+          "item": "Sesame oil",
+          "key": "sesame oil",
+          "amount": "2 tsp",
+          "basis": "description",
+          "note": "Folded into the cooked rice; distinct from the 1 tsp in the filling."
+        },
+        {
+          "item": "Rice wine vinegar",
+          "key": "rice wine vinegar",
+          "amount": "1 tbsp",
+          "basis": "description"
+        },
+        {
+          "item": "Sugar \u2014 optional",
+          "key": "sugar",
+          "amount": "1 tsp",
+          "basis": "description",
+          "note": "Marked optional in the source."
+        }
+      ],
+      "steps": [
+        {
+          "text": "Add the sushi rice and water to the rice cooker and cook on the white rice setting.",
+          "t": 10
+        },
+        {
+          "text": "Once fully cooked, transfer the rice to a large bowl and gently fold in the sesame oil, rice wine vinegar and optional sugar. Let the rice cool enough to handle. No cooling time is stated."
+        }
+      ]
+    },
+    {
+      "name": "Crab & tuna filling",
+      "ingredients": [
+        {
+          "item": "Imitation crab",
+          "key": "imitation crab",
+          "amount": "16 oz",
+          "basis": "description"
+        },
+        {
+          "item": "Tuna fillets or canned tuna",
+          "key": "tuna",
+          "amount": "12 oz",
+          "basis": "description",
+          "note": "The source offers both forms; the method cooks fillets, so canned tuna would skip the cooking step (not separately specified)."
+        },
+        {
+          "item": "Mayonnaise",
+          "key": "mayonnaise",
+          "amount": "1/3 cup",
+          "basis": "description"
+        },
+        {
+          "item": "Low-sodium soy sauce",
+          "key": "soy sauce",
+          "amount": "2 tbsp",
+          "basis": "description",
+          "note": "Source specifies low-sodium."
+        },
+        {
+          "item": "Chin-Su Hot Sauce",
+          "key": "hot sauce",
+          "amount": "2 tbsp",
+          "basis": "description",
+          "note": "Named brand; a Chin-Su bottle appears on screen around 0:23."
+        },
+        {
+          "item": "Chin-Su Fish Sauce",
+          "key": "fish sauce",
+          "amount": "1 tbsp",
+          "basis": "description",
+          "note": "The description says Chin-Su Fish Sauce, but the bottle on screen (~0:23) reads 'PHU QUOC Reduced Sodium Fish Sauce'. Discrepancy preserved, not corrected."
+        },
+        {
+          "item": "Sesame oil",
+          "key": "sesame oil",
+          "amount": "1 tsp",
+          "basis": "description",
+          "note": "Filling allocation; distinct from the rice's 2 tsp."
+        },
+        {
+          "item": "Sliced scallions",
+          "key": "spring onion",
+          "amount": "1/4 cup",
+          "basis": "description",
+          "note": "Source says scallions; existing spring-onion filter key reused."
+        },
+        {
+          "item": "Salt (for seasoning the tuna)",
+          "key": "salt",
+          "amount": null,
+          "basis": "unstated"
+        },
+        {
+          "item": "Black pepper (for seasoning the tuna)",
+          "key": "black pepper",
+          "amount": null,
+          "basis": "unstated"
+        },
+        {
+          "item": "Garlic seasoning (for the tuna)",
+          "key": "garlic powder",
+          "amount": null,
+          "basis": "unstated",
+          "note": "Source says 'garlic seasoning' without specifying granule/powder form or quantity."
+        }
+      ],
+      "steps": [
+        {
+          "text": "Cook the tuna: season with salt, pepper and garlic seasoning, then cook in the oven or air fryer for about 10\u201312 minutes, until the tuna reaches an internal temperature of 150\u00b0F. Let it cool for a few minutes, then crumble it up. Oven/air-fryer temperature is not stated. This step is description-only; the narration just says 'cooked tuna'."
+        },
+        {
+          "text": "In a large bowl, shred the imitation crab. Add the scallions, cooked tuna, mayonnaise, soy sauce, hot sauce, fish sauce and sesame oil, and mix everything together really well.",
+          "t": 13
+        },
+        {
+          "text": "Chill the filling in the refrigerator for 30 minutes while you make the rice, so the flavors come together."
+        }
+      ]
+    },
+    {
+      "name": "Assembly and wrapping",
+      "ingredients": [
+        {
+          "item": "Nori sheets (half sheet per onigiri)",
+          "key": "nori",
+          "amount": "half sheet per onigiri",
+          "basis": "description",
+          "note": "Per-onigiri rate, not a batch quantity; total sheets depend on the unstated yield."
+        }
+      ],
+      "steps": [
+        {
+          "text": "Grab triangle onigiri molds (available at Asian markets or Amazon). Place a small amount of rice in the bottom of the mold and press it down.",
+          "t": 19
+        },
+        {
+          "text": "Add some of the crab & tuna filling, press it down, then add a little more rice on top and press everything together firmly.",
+          "t": 22
+        },
+        {
+          "text": "Remove the onigiri from the mold and wrap each one with a half sheet of nori.",
+          "t": 24
+        },
+        {
+          "text": "Wrap each onigiri individually in plastic wrap and store in the refrigerator for 3\u20134 days.",
+          "t": 25
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "The narration is a comedic 'onigiri factory' pitch and states no quantities, times or temperatures; the description is the sole measured source (Louis Howard-style description recipe).",
+    "The tuna's target internal temperature of 150\u00b0F is the creator's stated figure, preserved verbatim; no Celsius equivalent is given by the source.",
+    "Chin-Su is a named Vietnamese sauce brand used for both the hot sauce and fish sauce; the on-screen bottle at ~0:23 corroborates the brand. Substitution guidance is not given by the creator.",
+    "Sesame oil appears twice with different allocations (2 tsp rice, 1 tsp filling) \u2014 both preserved, not merged.",
+    "No yield, serving count or nutrition information is given on any surface.",
+    "Capture-time metrics (2,718,731 views / 64,936 likes / 409 comments) are platform snapshots, not reach or conversion evidence.",
+    "Brand discrepancy: the description calls both sauces Chin-Su, while the on-screen fish-sauce bottle is labeled 'PHU QUOC Reduced Sodium Fish Sauce' (vision read, corroborated by the OCR hit on the same frame). Which product the creator actually used is unresolved; both labels are recorded as stated."
+  ],
+  "gaps": [
+    "Yield/batch size is unstated, so the nori count and mold fills per batch cannot be derived.",
+    "Oven or air-fryer temperature for the tuna is unstated; only the 10\u201312 minute duration and 150\u00b0F internal target are given.",
+    "Salt, pepper and garlic-seasoning quantities for the tuna are unstated.",
+    "Rice cooling time ('cool enough to handle') and tuna resting time ('a few minutes') are vague by source design.",
+    "If canned tuna is used instead of fillets, the source does not say how the method changes beyond skipping the cook step.",
+    "No nutrition information is given.",
+    "Fish-sauce brand: the description says Chin-Su; the visible bottle says PHU QUOC. The source never reconciles this."
+  ],
+  "source": {
+    "evidence": "Public description (full measured recipe), YouTube transcript-API (21 English auto-generated segments, is_generated=true), public oEmbed, sanitized extractor metadata, ffprobe receipt, and 10 sampled frames: tesseract sweep (noise except a CHIN-SU bottle label at ~0:23) and one control-proven auxiliary-vision read. Master video not retained; SHA-256 and re-fetch command kept in the vault evidence bundle.",
+    "quantity_basis": "All quantities and the method order come from the creator's public description; narration timestamps anchor the steps it covers (rice cooker, molds, nori, fridge). Tuna-cooking and filling-chill steps are description-only and carry no invented timestamps. No amounts were taken from generic cooking knowledge; vague source wording ('a small amount', 'some', 'a few minutes') is preserved as-is."
+  }
+}

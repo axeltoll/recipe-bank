@@ -1,0 +1,220 @@
+{
+  "id": "one-pan-chicken-dumplings",
+  "title": "One-Pan Chicken Dumplings (Wonton-Wrapper 'Pot Pie')",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "Ep_o4uG74ZM",
+    "url": "https://www.youtube.com/shorts/Ep_o4uG74ZM"
+  },
+  "creator": {
+    "name": "Jack Sonoda",
+    "handle": "@HiJackTheMenu",
+    "url": "https://www.youtube.com/@HiJackTheMenu"
+  },
+  "uploaded": "2026-10-09",
+  "analyzed": "2026-11-12",
+  "summary": "A pork-free one-pan 'pot pie' shortcut: seasoned ground-chicken dumpling filling is seared in a pan, capped with wonton wrappers, steamed in chicken broth, then finished with a soy-black-vinegar dipping sauce, chili oil, green onions and sesame seeds. The description gives a measured recipe; the narration adds two extra filling ingredients (honey, white pepper) and conflicts with the description on chicken form and chili-oil placement \u2014 all preserved, not reconciled.",
+  "serves": null,
+  "tags": [
+    "chicken",
+    "dumpling",
+    "one pan",
+    "wonton",
+    "comfort food",
+    "asian",
+    "steamed",
+    "quick"
+  ],
+  "components": [
+    {
+      "name": "Chicken dumpling filling",
+      "ingredients": [
+        {
+          "item": "Chicken breast",
+          "key": "chicken",
+          "amount": "1 lb",
+          "basis": "description",
+          "note": "CONFLICT: the description lists '1lb chicken breast', but the narration says 'ground chicken' and the frames show raw ground/minced chicken in the bowl. Whether the creator ground the breast or used pre-ground chicken is not stated; both surfaces preserved."
+        },
+        {
+          "item": "Soy sauce",
+          "key": "soy sauce",
+          "amount": "1 tbsp",
+          "basis": "description",
+          "note": "This is the filling's 1 tbsp soy sauce; the dipping sauce separately uses 1/4 cup."
+        },
+        {
+          "item": "Sesame oil",
+          "key": "sesame oil",
+          "amount": "2 tsp",
+          "basis": "description",
+          "note": "Filling allocation; the dipping sauce separately uses 2 tsp."
+        },
+        {
+          "item": "Green onions, chopped",
+          "key": "spring onion",
+          "amount": null,
+          "basis": "unstated",
+          "note": "Source says 'Green onions chopped' with no quantity; also used as a garnish."
+        },
+        {
+          "item": "Garlic cloves",
+          "key": "garlic",
+          "amount": "3 cloves",
+          "basis": "description"
+        },
+        {
+          "item": "Chili oil",
+          "key": "chili oil",
+          "amount": "2 tsp",
+          "basis": "description",
+          "note": "PLACEMENT CONFLICT: the description lists 2 tsp chili oil among the main ingredients (implying it goes in the filling) but its own method step 6 says 'Garnish with sauce, chili oil...' \u2014 i.e. drizzled on at the end. The narration also puts chili oil in the filling mix. Use is split across the two surfaces; not reconciled."
+        },
+        {
+          "item": "Grated ginger",
+          "key": "ginger",
+          "amount": "1 tsp",
+          "basis": "description"
+        },
+        {
+          "item": "Honey",
+          "key": "honey",
+          "amount": null,
+          "basis": "unstated",
+          "note": "NARRATION-ONLY: 'a little bit of honey' is added to the filling in the video but does NOT appear in the description ingredient list. No quantity given ('a little bit')."
+        },
+        {
+          "item": "White pepper",
+          "key": "white pepper",
+          "amount": null,
+          "basis": "unstated",
+          "note": "NARRATION-ONLY: 'some white pepper' is added to the filling in the video but does NOT appear in the description ingredient list. No quantity given."
+        }
+      ],
+      "steps": [
+        {
+          "text": "Combine the ground chicken with the green onion, ginger, garlic, soy sauce and sesame oil \u2014 the narration also adds chili oil, a little honey and some white pepper at this stage.",
+          "t": 3
+        },
+        {
+          "text": "Mix until combined.",
+          "t": 8
+        }
+      ]
+    },
+    {
+      "name": "Pan-sear and steam",
+      "ingredients": [
+        {
+          "item": "Wonton wrappers",
+          "key": "wonton wrapper",
+          "amount": null,
+          "basis": "unstated",
+          "note": "No count given; enough to cap each filling mound."
+        },
+        {
+          "item": "Chicken broth",
+          "key": "chicken stock",
+          "amount": "1/4 cup",
+          "basis": "description",
+          "note": "Description says 'chicken broth'; the narration says 'chicken stock'. Wording drift preserved; existing chicken-stock filter key reused."
+        }
+      ],
+      "steps": [
+        {
+          "text": "Scoop dumpling-sized balls of the filling onto the pan and sear.",
+          "t": 12
+        },
+        {
+          "text": "Cover each seared mound with a wonton wrapper.",
+          "t": 16
+        },
+        {
+          "text": "Add the chicken broth and steam. TIME CONFLICT: the description says steam 10\u201315 minutes until cooked; the narration says 15 minutes. Both recorded.",
+          "t": 19
+        }
+      ]
+    },
+    {
+      "name": "Dipping sauce",
+      "ingredients": [
+        {
+          "item": "Soy sauce",
+          "key": "soy sauce",
+          "amount": "1/4 cup",
+          "basis": "description"
+        },
+        {
+          "item": "Black vinegar",
+          "key": "black vinegar",
+          "amount": "1/8 cup",
+          "basis": "description"
+        },
+        {
+          "item": "Sesame oil",
+          "key": "sesame oil",
+          "amount": "2 tsp",
+          "basis": "description"
+        }
+      ],
+      "steps": [
+        {
+          "text": "Combine the soy sauce, black vinegar and sesame oil for the dipping sauce. The video only says 'Sauce.' over this beat; no mixing method or heating is specified."
+        }
+      ]
+    },
+    {
+      "name": "Garnish",
+      "ingredients": [
+        {
+          "item": "Sesame seeds",
+          "key": "sesame seeds",
+          "amount": null,
+          "basis": "unstated",
+          "note": "Listed in the description ingredients and as a garnish in step 6; narration does not mention them. No quantity."
+        },
+        {
+          "item": "Green onions, chopped (garnish)",
+          "key": "spring onion",
+          "amount": null,
+          "basis": "unstated",
+          "note": "Reserved from the chopped green onions; garnish quantity not separately stated."
+        }
+      ],
+      "steps": [
+        {
+          "text": "Garnish the finished dumplings with the dipping sauce, chili oil, green onions and sesame seeds.",
+          "t": 23
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Source is split: the 30-second narration is the cooking demo; the description carries the measured ingredient list and method. They disagree in several places, and every disagreement is preserved rather than repaired.",
+    "CHICKEN FORM: description says '1lb chicken breast'; narration says 'ground chicken' and the frames confirm raw ground/minced chicken. Recorded as both; the creator never says whether the breast was ground down.",
+    "EXTRA FILLING INGREDIENTS: the narration adds honey and white pepper to the filling; neither appears in the description list. Added as rows named from the narration with basis 'unstated' and null amounts ('a little bit' / 'some' are vague, i.e. no quantity).",
+    "CHILI OIL PLACEMENT: the description's ingredient list implies 2 tsp chili oil in the filling, but its own step 6 and the garnish use put chili oil on at the end. Both placements retained.",
+    "STEAM TIME: description 10\u201315 minutes; narration 15 minutes. Both recorded; do not pick one.",
+    "BROTH vs STOCK wording drift (description 'chicken broth', narration 'chicken stock') preserved; same liquid, one 1/4 cup amount.",
+    "Sesame seeds appear only in the description (ingredients + step 6), not the narration. Green onions are used in both the filling and the garnish.",
+    "Vision read (control-proven) of frames at 5/8/13/21 s confirmed: ground/minced chicken, oil poured over garlic/green-onion/chili on the meat, a lifted scoop of mixed filling, and dumplings steaming in a shallow liquid pool; NO readable on-screen text anywhere. tesseract over 11 frames returned only noise.",
+    "Capture-time metrics (3,205,186 views / 98,806 likes / 990 comments) are platform snapshots, not reach or conversion evidence.",
+    "Creator hook is a substitution/pork-free framing ('if you can't eat pork but want one pan easy chicken dumplings') and a pot-pie comparison ('Who needs a pot pie when you've got THIS?'); both are creator claims."
+  ],
+  "gaps": [
+    "Yield/dumpling count is unstated, so wonton-wrapper count and per-pan batch size cannot be derived.",
+    "Chicken form is unresolved: 'chicken breast' (description) vs 'ground chicken' (narration + frames). No instruction to grind is given.",
+    "Honey and white pepper quantities are unstated ('a little bit', 'some').",
+    "Green onion, sesame seed and garnish-green-onion quantities are unstated.",
+    "Chili-oil placement (filling vs garnish) is contradictory across the description's own surfaces; final location is unresolved.",
+    "Steam time is 10\u201315 minutes (description) or 15 minutes (narration); the exact target and the doneness cue beyond 'until cooked' are unstated.",
+    "Sear heat/temperature, pan size, oil for searing and the sauce's mixing/heating method are unstated.",
+    "Internal doneness temperature for the chicken is not given.",
+    "No nutrition information is provided on any surface."
+  ],
+  "source": {
+    "evidence": "Public description (measured ingredient list + 6-step method), YouTube transcript-API (17 English auto-generated segments, is_generated=true), public oEmbed, sanitized extractor metadata, ffprobe receipt, and 11 sampled frames: tesseract sweep (noise only) plus one control-proven auxiliary-vision read confirming ground chicken, the oil-pour, the filling scoop, steaming dumplings and no on-screen text. Master video not retained; SHA-256 and re-fetch command kept in the vault evidence bundle.",
+    "quantity_basis": "Quantities come from the creator's description; the narration supplies two additional filling ingredients (honey, white pepper) with no amounts. Where the two sources conflict (chicken form, chili-oil placement, steam time, broth/stock wording), both readings are recorded and none is silently chosen. No amounts, temperatures or times were invented from generic cooking knowledge; vague narration ('a little bit', 'some') is treated as unstated."
+  }
+}

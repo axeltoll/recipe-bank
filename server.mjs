@@ -10,7 +10,7 @@
 // RECIPE_BANK_DIR points the server and the scripts at another folder holding recipes/ and data/.
 
 import { createServer } from 'node:http';
-import { readFile, readdir, writeFile, rename, mkdir, unlink, link } from 'node:fs/promises';
+import { access, readFile, readdir, writeFile, rename, mkdir, unlink, link } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { parseVideoUrl, videoKey, PLATFORMS } from './lib/video.mjs';
@@ -116,15 +116,19 @@ const saveQueue = (queueFile, queue) => writeJsonAtomic(queueFile, queue);
 // Creates `file` only if it does not exist, never leaving half a file: like writeJsonAtomic it writes a temp file
 // first, but then hard-links it into place, and link() fails with EEXIST instead of replacing an existing file. On a
 // file system without hard links it falls back to an exclusive create. `write` is for tests.
-export async function createFileOnce(file, text, { write = writeFile } = {}) {
+export async function createFileOnce(file, text, { write = writeFile, linkFile = link } = {}) {
   const tmp = `${file}.${process.pid}.${randomUUID().slice(0, 8)}.tmp`;
   try {
     await write(tmp, text, { flag: 'wx' });
     try {
-      await link(tmp, file);
+      await linkFile(tmp, file);
     } catch (e) {
       if (!['EPERM', 'ENOTSUP', 'ENOSYS', 'EOPNOTSUPP'].includes(e.code)) throw e;
-      await writeFile(file, text, { flag: 'wx' });
+      // No hard links on this file system: move the finished temp file into place, so a crash never leaves a
+      // partial file under the final name. Writes hold the server's lock, so the existence check cannot race.
+      const exists = await access(file).then(() => true, () => false);
+      if (exists) throw Object.assign(new Error(`EEXIST: file already exists, '${file}'`), { code: 'EEXIST' });
+      await rename(tmp, file);
     }
   } finally {
     await unlink(tmp).catch(() => {});

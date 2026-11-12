@@ -228,7 +228,7 @@ test('HTML and control characters in titles stay plain text, bounded', () => {
   const read = readPack(wrap([makeRecipe('alpha', 1, { title: html })], { title: html }));
   assert.equal(read.title, html, 'kept as text; renderers escape it');
   assert.equal(read.entries[0].title, html);
-  assert.equal(readPack(wrap([makeRecipe('alpha', 1)], { title: 'a\u0000b‮c\n\nd' })).title, 'a b c d');
+  assert.equal(readPack(wrap([makeRecipe('alpha', 1)], { title: 'a\u0000b\u202ec\n\nd' })).title, 'a b c d');
   assert.equal(readPack(wrap([makeRecipe('alpha', 1)], { title: 'é'.repeat(400) })).title.length, MAX_TITLE_CHARS);
   assert.equal(readPack(wrap([makeRecipe('alpha', 1)], { title: 42 })).title, 'Untitled pack');
   assert.equal(readPack(wrap([makeRecipe('alpha', 1)], { exported: 'not a date' })).exported, null);
@@ -433,4 +433,21 @@ test('base64url helpers', () => {
     assert.equal(fromBase64url(enc), s);
   }
   assert.throws(() => fromBase64url('a+b/'), PackError);
+});
+
+test('import removes control and bidi-override characters from every recipe string, not only the title', () => {
+  const a = makeRecipe('alpha', 1);
+  const r = structuredClone(a);
+  r.summary = 'Looks fine\u202e enil skool';
+  r.tags = ['quick\u0007', 'easy\u2066'];
+  r.components[0].steps[0].text = 'Whisk\u200f the eggs\nthen salt.';
+  r.creator.handle = '@cre\u2028ator';
+  const recipe = readPack(wrap([r])).entries[0].recipe;
+  const all = JSON.stringify(recipe);
+  assert.doesNotMatch(all, /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u061c\u200e\u200f\u2028\u2029\u202a-\u202e\u2066-\u2069]/);
+  assert.equal(recipe.summary, 'Looks fine enil skool');
+  assert.deepEqual(recipe.tags, ['quick', 'easy']);
+  assert.equal(recipe.components[0].steps[0].text, 'Whisk the eggs\nthen salt.', 'a line break inside a string stays');
+  assert.equal(recipe.creator.handle, '@creator');
+  assert.deepEqual(readPack(wrap([a])).entries[0].recipe, a, 'clean text is unchanged');
 });
