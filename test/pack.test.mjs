@@ -441,7 +441,7 @@ test('import removes control and bidi-override characters from every recipe stri
   r.summary = 'Looks fine\u202e enil skool';
   r.tags = ['quick\u0007', 'easy\u2066'];
   r.components[0].steps[0].text = 'Whisk\u200f the eggs\nthen salt.';
-  r.creator.handle = '@cre\u2028ator';
+  r.creator.handle = '@cre\u0008ator';
   const recipe = readPack(wrap([r])).entries[0].recipe;
   const all = JSON.stringify(recipe);
   assert.doesNotMatch(all, /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u061c\u200e\u200f\u2028\u2029\u202a-\u202e\u2066-\u2069]/);
@@ -450,4 +450,13 @@ test('import removes control and bidi-override characters from every recipe stri
   assert.equal(recipe.components[0].steps[0].text, 'Whisk the eggs\nthen salt.', 'a line break inside a string stays');
   assert.equal(recipe.creator.handle, '@creator');
   assert.deepEqual(readPack(wrap([a])).entries[0].recipe, a, 'clean text is unchanged');
+});
+
+test('import keeps line breaks of every kind as line feeds, so no two words are joined', () => {
+  const r = structuredClone(makeRecipe('alpha', 1));
+  r.notes = ['Mix\rthen bake', 'Mix\r\nthen bake', 'Mix\u2028then bake', 'Mix\u2029then bake', 'Mix\u0085then bake'];
+  r.summary = 'Tabs\tstay, and so do \u{1F468}\u200D\u{1F373} and \u0645\u0631\u062D\u0628\u0627.';
+  const recipe = readPack(wrap([r])).entries[0].recipe;
+  assert.deepEqual(recipe.notes, Array(5).fill('Mix\nthen bake'));
+  assert.equal(recipe.summary, r.summary);
 });

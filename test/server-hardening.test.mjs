@@ -187,3 +187,24 @@ test('createFileOnce without hard links: the finished file is moved into place, 
   await assert.rejects(createFileOnce(join(dir, 'beta.json'), '{"id":"beta"}\n', { write: full, linkFile: noLink }), { code: 'ENOSPC' });
   assert.deepEqual(await readdir(dir), ['alpha.json']);
 });
+
+test('createFileOnce without hard links: of two writers at once exactly one creates the file, the other gets EEXIST', async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), 'recipe-bank-nolink-race-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const noLink = async () => { throw Object.assign(new Error('not supported'), { code: 'EPERM' }); };
+  const file = join(dir, 'alpha.json');
+  const results = await Promise.allSettled(['{"id":"one"}\n', '{"id":"two"}\n'].map((text) => createFileOnce(file, text, { linkFile: noLink })));
+  assert.deepEqual(results.map((r) => r.status).sort(), ['fulfilled', 'rejected']);
+  const won = results.findIndex((r) => r.status === 'fulfilled');
+  assert.equal(results[1 - won].reason.code, 'EEXIST');
+  assert.equal(await readFile(file, 'utf8'), ['{"id":"one"}\n', '{"id":"two"}\n'][won], 'the winner is never replaced');
+  assert.deepEqual(await readdir(dir), ['alpha.json'], 'no temp file left');
+  // Another program that creates the file first (an exclusive create, as a command-line import does) also wins.
+  const beta = join(dir, 'beta.json');
+  const otherWriterFirst = async () => {
+    await writeFile(beta, '{"id":"theirs"}\n', { flag: 'wx' });
+    throw Object.assign(new Error('not supported'), { code: 'EPERM' });
+  };
+  await assert.rejects(createFileOnce(beta, '{"id":"ours"}\n', { linkFile: otherWriterFirst }), { code: 'EEXIST' });
+  assert.equal(await readFile(beta, 'utf8'), '{"id":"theirs"}\n');
+});
