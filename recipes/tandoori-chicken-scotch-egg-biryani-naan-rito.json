@@ -1,0 +1,217 @@
+{
+  "id": "tandoori-chicken-scotch-egg-biryani-naan-rito",
+  "title": "Tandoori Chicken Scotch Egg Biryani Naan-rito",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "tR8XBUI_B48",
+    "url": "https://www.youtube.com/shorts/tR8XBUI_B48"
+  },
+  "creator": {
+    "name": "Elburritomonster",
+    "handle": "@elburritomonster",
+    "url": "https://www.youtube.com/@elburritomonster"
+  },
+  "uploaded": "2026-11-06",
+  "analyzed": "2026-11-11",
+  "summary": "An over-the-top mash-up the creator himself frames as a 'social media cross section': cheddar-rich tandoori chicken thighs wrapped in slow-proofed naan, chopped kottu-roti style, used to scotch-egg a jammy boiled egg (beer batter, blitzed poppadoms for crumb), then loaded onto garlic naan with lamb biryani, curry sauce and slaw and rolled into a naan-rito. The whole method is narrated but no quantities are given on any surface.",
+  "serves": null,
+  "tags": [
+    "chicken",
+    "tandoori",
+    "scotch egg",
+    "biryani",
+    "naan",
+    "burrito",
+    "indian",
+    "fakeaway",
+    "fried"
+  ],
+  "components": [
+    {
+      "name": "Tandoori chicken thighs",
+      "ingredients": [
+        {
+          "item": "Chicken thighs",
+          "key": "chicken",
+          "amount": null,
+          "basis": "unstated",
+          "note": "Narration: 'the obvious first step is to use chicken thighs, the best bit of meat on the bird.' Skin/bone-in vs fillet and count not specified."
+        },
+        {
+          "item": "Cheddar cheese (into the marinade)",
+          "key": "cheese",
+          "amount": null,
+          "basis": "unstated",
+          "note": "'using cheddar cheese in the tandoori marinade overnight ... so it oozes out fat as it cooks and smothers the meat.' Quantity unstated."
+        },
+        {
+          "item": "Tandoori marinade",
+          "key": "tandoori masala",
+          "amount": null,
+          "basis": "unstated",
+          "note": "Referred to as 'the tandoori marinade'; its component spices/yogurt are not itemized in the video."
+        }
+      ],
+      "steps": [
+        {
+          "text": "Start with chicken thighs \u2014 the creator's stated first step for the juiciest tandoori chicken.",
+          "t": 4
+        },
+        {
+          "text": "Add cheddar cheese into the tandoori marinade and marinate the thighs overnight, so the cheese oozes fat as it cooks and smothers the meat. Marinade time is 'overnight'; no temperature or cook time for the chicken itself is given.",
+          "t": 9
+        }
+      ]
+    },
+    {
+      "name": "Slow-proofed naan wrap",
+      "ingredients": [
+        {
+          "item": "Naan dough (slow-proofed)",
+          "key": "flatbread",
+          "amount": null,
+          "basis": "unstated",
+          "note": "'always slow proof in the fridge for optimal gluten development.' Dough ingredients/quantities not given."
+        },
+        {
+          "item": "Garlic butter (for brushing)",
+          "key": "butter",
+          "amount": null,
+          "basis": "unstated",
+          "note": "'brushing with garlic butter.' Butter-to-garlic ratio and quantity unstated."
+        }
+      ],
+      "steps": [
+        {
+          "text": "Slow-proof the naan dough in the fridge for optimal gluten development.",
+          "t": 16
+        },
+        {
+          "text": "Maximise surface contact by wrapping the naan around the tandoori chicken for the final couple of minutes of the cook, deliberately leaving gaps for the steam to escape, and brushing it with garlic butter.",
+          "t": 22
+        }
+      ]
+    },
+    {
+      "name": "Tandoori chicken scotch eggs",
+      "ingredients": [
+        {
+          "item": "Egg (soft-boiled, jammy)",
+          "key": "egg",
+          "amount": null,
+          "basis": "unstated",
+          "note": "'boiled my egg for six minutes and into ice ... for a nice and jammy yolk.' Egg count unstated; six minutes is a time, not a quantity."
+        },
+        {
+          "item": "Beer (for a quick batter)",
+          "key": "beer",
+          "amount": null,
+          "basis": "unstated",
+          "note": "'whisk a quick beer batter to dip in.' Other batter ingredients (e.g. flour) are implied but not spoken; not added."
+        },
+        {
+          "item": "Poppadoms (blitzed, instead of panko)",
+          "key": "poppadom",
+          "amount": null,
+          "basis": "unstated",
+          "note": "'blitz up my poppadoms to use instead of panko' as the crumb coating. Quantity unstated."
+        }
+      ],
+      "steps": [
+        {
+          "text": "Chop the cooked cheesy tandoori chicken and naan up, kottu roti style.",
+          "t": 35
+        },
+        {
+          "text": "Boil the egg for six minutes, then plunge into ice, for a nice jammy yolk.",
+          "t": 36
+        },
+        {
+          "text": "Envelop the jammy egg with the cheesy tandoori chicken and naan mix.",
+          "t": 40
+        },
+        {
+          "text": "Whisk a quick beer batter and dip the wrapped egg in it.",
+          "t": 44
+        },
+        {
+          "text": "Blitz the poppadoms and use them instead of panko to crumb the battered egg, forming little tandoori chicken scotch eggs.",
+          "t": 46
+        },
+        {
+          "text": "Cook the scotch eggs until golden (a fryer/air-fryer basket is shown removing two breaded scotch eggs). No frying temperature or time is stated.",
+          "t": 50
+        }
+      ]
+    },
+    {
+      "name": "Biryani naan-rito assembly",
+      "ingredients": [
+        {
+          "item": "Garlic naan (freshly made)",
+          "key": "flatbread",
+          "amount": null,
+          "basis": "unstated",
+          "note": "'pop onto a freshly made garlic naan.' Size/count unstated."
+        },
+        {
+          "item": "Lamb biryani (prepared)",
+          "key": "lamb",
+          "amount": null,
+          "basis": "unstated",
+          "note": "'along with some lamb biryani' \u2014 a prepared accompaniment, not made in this video; recipe/quantity out of scope here."
+        },
+        {
+          "item": "Curry sauce",
+          "key": "curry sauce",
+          "amount": null,
+          "basis": "unstated",
+          "note": "'curry sauce' to add; type and quantity unstated."
+        },
+        {
+          "item": "Slaw",
+          "key": "slaw",
+          "amount": null,
+          "basis": "unstated",
+          "note": "'and slaw to fold'; composition and quantity unstated."
+        }
+      ],
+      "steps": [
+        {
+          "text": "Pop the fried tandoori chicken scotch eggs onto a freshly made garlic naan.",
+          "t": 53
+        },
+        {
+          "text": "Add lamb biryani, curry sauce and slaw on top.",
+          "t": 55
+        },
+        {
+          "text": "Fold, roll and wrap it up into the tandoori scotch egg biryani naan-rito.",
+          "t": 57
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "The video description is empty and a vision read of 16 sampled frames found no on-screen ingredient list, quantities or captions \u2014 the only source is the narration, which gives the full method but no amounts. Every ingredient amount is therefore null / basis 'spoken' with the quantity unstated.",
+    "The creator explicitly frames this as an indulgent 'social media cross section' ('this is the part where you probably should stop'), stacking several dishes into one wrap; it is not presented as an everyday recipe.",
+    "YouTube lists the video category as 'Gaming', which is inconsistent with the food content; recorded as a source-metadata quirk, not relied on.",
+    "'Beer batter' implies flour, but flour is never spoken or shown as a measured ingredient, so it is not added as an ingredient row (see gaps).",
+    "Lamb biryani, curry sauce and slaw appear as prepared accompaniments assembled into the naan-rito, not components cooked in this video.",
+    "Capture-time metrics (305,784 views / 11,040 likes / 299 comments) are platform snapshots, not evidence of reach or conversion."
+  ],
+  "gaps": [
+    "No quantity is given for ANY ingredient: chicken thighs, cheddar, tandoori marinade, naan dough, garlic butter, egg count, beer, poppadoms, garlic naan, lamb biryani, curry sauce or slaw.",
+    "No cook temperature or time for the tandoori chicken itself; only the 'overnight' marinade and the naan's 'final couple of minutes' against the meat are stated.",
+    "Six minutes is the only stated cooking time (the soft-boiled egg). No frying temperature or time for the scotch eggs.",
+    "Tandoori marinade composition (spices, yogurt, etc.) is not itemized.",
+    "Beer batter composition beyond beer (flour, seasoning, resting) is not stated.",
+    "Lamb biryani, curry sauce and slaw are not prepared in-video; their recipes and quantities are out of scope of this capture.",
+    "No nutrition information is given on any surface."
+  ],
+  "source": {
+    "evidence": "YouTube transcript-API (37 English auto-generated segments, is_generated=true), public oEmbed, sanitized extractor metadata, ffprobe receipt, and 16 sampled source frames reviewed natively and via an auxiliary vision pass (no on-screen ingredient text or quantities). Description empty. Master video not retained; SHA-256 and re-fetch command kept in the vault evidence bundle.",
+    "quantity_basis": "No quantities are stated on any inspected surface (empty description, no on-screen text, unmeasured narration), so all amounts are null and basis is 'spoken' for named-but-unmeasured ingredients. Method and step order come from the narration and were cross-checked against the sampled frames; no amounts, temperatures or times were invented from generic cooking knowledge."
+  }
+}
