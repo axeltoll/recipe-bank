@@ -98,6 +98,23 @@ export function renderPlan(plan, { include = new Set(), canImport = false, busy 
  *   readHash     open a #pack= link from location.hash on mount and on hashchange; default true
  *   onImported   called with the created ids after a successful import
  */
+/**
+ * The status line after an import: the recipes created, and every recipe the server did not write with its reason
+ * (a file that could not be written, an id that is taken), so a failed write never reads as success.
+ * Returns [message, kind].
+ */
+export function importMessage(body) {
+  const created = Array.isArray(body?.created) ? body.created.map(String) : [];
+  const skipped = (Array.isArray(body?.skipped) ? body.skipped : []).filter((s) => s && s.reason !== 'not selected');
+  const parts = [];
+  if (created.length) parts.push(`Imported ${plural(created.length, 'recipe')}: ${created.join(', ')}.`);
+  if (skipped.length) {
+    parts.push(`Not imported: ${skipped.map((s) => `${s.id ?? `recipe ${Number(s.index) + 1}`} (${s.reason ?? 'unknown reason'})`).join('; ')}.`);
+  }
+  if (!parts.length) return ['Nothing was imported; those recipes are already in your bank.', ''];
+  return [parts.join(' '), skipped.length ? 'error' : 'ok'];
+}
+
 export function mount(element, options = {}) {
   const doc = element.ownerDocument;
   const win = doc.defaultView;
@@ -263,13 +280,13 @@ export function mount(element, options = {}) {
         return;
       }
       const created = Array.isArray(body.created) ? body.created : [];
-      setStatus('import-status', created.length
-        ? `Imported ${plural(created.length, 'recipe')}: ${created.join(', ')}.`
-        : 'Nothing was imported; those recipes are already in your bank.', created.length ? 'ok' : '');
+      const [message, kind] = importMessage(body);
       state.recipes = null; // reload so the plan shows the new recipes as already in the bank
       options.onImported?.(created);
       state.busy = false;
       await showRead(state.read);
+      // After the refresh, which clears the status line: what was imported and what was not, and why.
+      if (!destroyed) setStatus('import-status', message, kind);
     } catch {
       setStatus('import-status', 'The Recipe Bank server is not reachable. Is `npm start` running?', 'error');
     } finally {
