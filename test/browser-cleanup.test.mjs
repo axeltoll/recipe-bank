@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import { request as httpRequest } from 'node:http';
 import { spawn } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
-import { chmod, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -213,4 +213,24 @@ test('killTree kills the process group on POSIX and the whole tree on Windows', 
   killTree(42, { platform: 'win32', kill: () => assert.fail(), run: (cmd, args) => runs.push([cmd, ...args]) });
   assert.deepEqual(runs, [['taskkill', '/pid', '42', '/t', '/f']]);
   killTree(undefined, { kill: () => assert.fail(), run: () => assert.fail() });
+});
+
+test('the static server does not follow a symlink out of its root', async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), 'recipe-static-link-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const root = join(dir, 'dist');
+  await mkdir(root, { recursive: true });
+  await writeFile(join(root, 'index.html'), '<p>home</p>');
+  await writeFile(join(dir, 'secret.txt'), 'SECRET');
+  await symlink(join(dir, 'secret.txt'), join(root, 'leak.txt'));
+  await writeFile(join(root, 'inside.txt'), 'inside');
+  await symlink(join(root, 'inside.txt'), join(root, 'alias.txt'));
+  const server = staticServer(root);
+  const origin = await listen(server);
+  t.after(() => stop(server));
+  const port = Number(new URL(origin).port);
+  const leak = await get(port, '/leak.txt');
+  assert.equal(leak.status, 403);
+  assert.ok(!leak.body.includes('SECRET'));
+  assert.equal((await get(port, '/alias.txt')).body, 'inside', 'a link that stays inside the root still works');
 });

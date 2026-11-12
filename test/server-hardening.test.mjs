@@ -171,3 +171,19 @@ test('createFileOnce: a write that fails part-way leaves no file, and an existin
   assert.equal(await readFile(file, 'utf8'), text, 'unchanged');
   assert.deepEqual(await readdir(folder), ['pack-recipe.json']);
 });
+
+test('createFileOnce without hard links: the finished file is moved into place, never written there in part', async (t) => {
+  const dir = await mkdtemp(join(tmpdir(), 'recipe-bank-nolink-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const noLink = async () => { throw Object.assign(new Error('not supported'), { code: 'EPERM' }); };
+  const file = join(dir, 'alpha.json');
+  await createFileOnce(file, '{"id":"alpha"}\n', { linkFile: noLink });
+  assert.equal(await readFile(file, 'utf8'), '{"id":"alpha"}\n');
+  assert.deepEqual(await readdir(dir), ['alpha.json'], 'no temp file left');
+  await assert.rejects(createFileOnce(file, '{"id":"other"}\n', { linkFile: noLink }), { code: 'EEXIST' });
+  assert.equal(await readFile(file, 'utf8'), '{"id":"alpha"}\n', 'an existing file is never replaced');
+  // A write that fails part-way (disk full) leaves nothing under the final name.
+  const full = async (p, text, opts) => { await writeFile(p, text.slice(0, 3), opts); throw Object.assign(new Error('no space'), { code: 'ENOSPC' }); };
+  await assert.rejects(createFileOnce(join(dir, 'beta.json'), '{"id":"beta"}\n', { write: full, linkFile: noLink }), { code: 'ENOSPC' });
+  assert.deepEqual(await readdir(dir), ['alpha.json']);
+});
