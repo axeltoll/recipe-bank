@@ -1,0 +1,14 @@
+{
+  "name": "Recipe Bank",
+  "short_name": "Recipes",
+  "description": "Cooking videos turned into recipes you can cook from.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#faf6f0",
+  "theme_color": "#c2410c",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}
