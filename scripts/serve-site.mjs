@@ -56,7 +56,13 @@ export const server = createServer(async (req, res) => {
     res.writeHead(405, { 'content-type': 'text/plain; charset=utf-8' });
     return res.end('Method not allowed');
   }
-  const { pathname } = new URL(req.url, 'http://localhost');
+  let pathname;
+  try {
+    ({ pathname } = new URL(req.url, 'http://localhost'));
+  } catch {
+    res.writeHead(400, { 'content-type': 'text/plain; charset=utf-8' });
+    return res.end('Bad request path');
+  }
   try {
     let file = resolveSitePath(pathname);
     if (file && (await stat(file)).isDirectory()) file = join(file, 'index.html');

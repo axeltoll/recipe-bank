@@ -138,14 +138,20 @@ const EMPTY = { recipes: '{"recipes":[],"invalid":[]}', queue: '{"queue":[]}' };
 
 async function networkFirst(event, kind) {
   const cache = await caches.open(DATA_CACHE);
+  let res;
   try {
-    const res = await fetch(event.request);
-    if (res.ok) await cache.put(event.request, res.clone());
-    return res;
+    res = await fetch(event.request);
   } catch {
     const cached = await cache.match(event.request, { ignoreSearch: true });
     return cached ?? new Response(EMPTY[kind], { headers: { 'content-type': 'application/json; charset=utf-8' } });
   }
+  // A network answer always wins: a cache that will not store it (quota, Vary: *) must not hide a save.
+  if (res.ok) {
+    try {
+      await cache.put(event.request, res.clone());
+    } catch { /* keep the answer; the next visit tries to cache it again */ }
+  }
+  return res;
 }
 
 self.addEventListener('fetch', (event) => {
