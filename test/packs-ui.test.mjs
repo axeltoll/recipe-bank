@@ -3,7 +3,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { renderPicker, renderPlan, esc, mount } from '../public/features/packs.mjs';
+import { renderPicker, renderPlan, esc, mount, importMessage } from '../public/features/packs.mjs';
 import { exportPack, planImport, PACK_FORMAT } from '../lib/pack.mjs';
 import { makeRecipe } from './helpers/bank.mjs';
 
@@ -119,5 +119,45 @@ test('the file input is cleared on each pick, so the same file can be opened aga
   assert.equal(input.value, '');
   await new Promise((r) => setTimeout(r, 0));
   assert.equal(reads, 2);
+  panel.destroy();
+});
+
+test('importMessage: a recipe the server could not write is named with its reason, never reported as success', () => {
+  assert.deepEqual(importMessage({ created: ['alpha'], skipped: [] }), ['Imported 1 recipe: alpha.', 'ok']);
+  const [text, kind] = importMessage({
+    created: ['alpha'],
+    skipped: [{ index: 1, id: 'beta', reason: 'the id is too long for a file name' }, { index: 2, id: 'gamma', reason: 'not selected' }],
+  });
+  assert.equal(text, 'Imported 1 recipe: alpha. Not imported: beta (the id is too long for a file name).');
+  assert.equal(kind, 'error');
+  assert.deepEqual(importMessage({ created: [], skipped: [{ index: 0, id: 'alpha', reason: 'the recipe file could not be written' }] }),
+    ['Not imported: alpha (the recipe file could not be written).', 'error']);
+  assert.deepEqual(importMessage({ created: [], skipped: [{ index: 0, id: 'x', reason: 'not selected' }] }),
+    ['Nothing was imported; those recipes are already in your bank.', '']);
+});
+
+test('the import status line survives the refresh after an import', async () => {
+  const { element, el } = fakePanel();
+  const pack = JSON.stringify(exportPack([makeRecipe('alpha', 1)], { title: 't' }));
+  const fetch = async (url) => ({
+    ok: true,
+    json: async () => (String(url).includes('/api/packs/import')
+      ? { created: [], skipped: [{ index: 0, id: 'alpha', reason: 'the recipe file could not be written' }] }
+      : { recipes: [], invalid: [] }),
+  });
+  const panel = mount(element, { recipes: [], static: false, fetch, readHash: false });
+  const input = el('[data-el="file"]');
+  input.files = [{ size: pack.length, text: async () => pack }];
+  const change = new Event('change');
+  Object.defineProperty(change, 'target', { value: input });
+  element.dispatchEvent(change);
+  await new Promise((r) => setTimeout(r, 10));
+  const click = new Event('click');
+  Object.defineProperty(click, 'target', { value: { closest: () => ({ dataset: { act: 'import' } }) } });
+  element.dispatchEvent(click);
+  await new Promise((r) => setTimeout(r, 10));
+  const status = el('[data-el="import-status"]');
+  assert.equal(status.textContent, 'Not imported: alpha (the recipe file could not be written).');
+  assert.equal(status.dataset.kind, 'error');
   panel.destroy();
 });

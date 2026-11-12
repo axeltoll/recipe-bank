@@ -10,7 +10,7 @@
 // RECIPE_BANK_DIR points the server and the scripts at another folder holding recipes/ and data/.
 
 import { createServer } from 'node:http';
-import { access, readFile, readdir, writeFile, rename, mkdir, unlink, link } from 'node:fs/promises';
+import { readFile, readdir, writeFile, rename, mkdir, unlink, link } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { dirname, extname, join, normalize, resolve, sep } from 'node:path';
 import { parseVideoUrl, videoKey, PLATFORMS } from './lib/video.mjs';
@@ -115,7 +115,7 @@ const saveQueue = (queueFile, queue) => writeJsonAtomic(queueFile, queue);
 
 // Creates `file` only if it does not exist, never leaving half a file: like writeJsonAtomic it writes a temp file
 // first, but then hard-links it into place, and link() fails with EEXIST instead of replacing an existing file. On a
-// file system without hard links it falls back to an exclusive create. `write` is for tests.
+// file system without hard links it claims the name with an exclusive create first. `write` is for tests.
 export async function createFileOnce(file, text, { write = writeFile, linkFile = link } = {}) {
   const tmp = `${file}.${process.pid}.${randomUUID().slice(0, 8)}.tmp`;
   try {
@@ -124,11 +124,18 @@ export async function createFileOnce(file, text, { write = writeFile, linkFile =
       await linkFile(tmp, file);
     } catch (e) {
       if (!['EPERM', 'ENOTSUP', 'ENOSYS', 'EOPNOTSUPP'].includes(e.code)) throw e;
-      // No hard links on this file system: move the finished temp file into place, so a crash never leaves a
-      // partial file under the final name. Writes hold the server's lock, so the existence check cannot race.
-      const exists = await access(file).then(() => true, () => false);
-      if (exists) throw Object.assign(new Error(`EEXIST: file already exists, '${file}'`), { code: 'EEXIST' });
-      await rename(tmp, file);
+      // No hard links on this file system. An exclusive create of an empty file claims the name atomically (it
+      // fails with EEXIST for every other writer, in this process or not), then the finished temp file is moved
+      // over that claim: no other recipe is ever replaced, and a reader sees the empty claim or the whole file,
+      // never part of it. A crash between the two steps leaves an empty file, which the validator and the
+      // dashboard report as invalid.
+      await writeFile(file, '', { flag: 'wx' });
+      try {
+        await rename(tmp, file);
+      } catch (err) {
+        await unlink(file).catch(() => {});
+        throw err;
+      }
     }
   } finally {
     await unlink(tmp).catch(() => {});
