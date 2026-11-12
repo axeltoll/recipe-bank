@@ -1,0 +1,65 @@
+/* Serving scaling (public/features/scale.mjs). Themed through the --rbf-* properties; see week-plan.css
+   for how they fall back to the dashboard tokens. */
+.rbf-scale {
+  --_fg: var(--rbf-fg, var(--ink, #1f1a16));
+  --_fg-2: var(--rbf-fg-2, var(--rbf-fg, var(--ink-2, #4a423b)));
+  --_muted: var(--rbf-muted, var(--muted, #655b53));
+  --_line: var(--rbf-line, var(--line-strong, #8f8378));
+  --_rule: var(--rbf-rule, var(--rbf-line, var(--line, #e6ddd1)));
+  --_surface: var(--rbf-surface, var(--surface, #fff));
+  --_inset: var(--rbf-inset, var(--surface-2, transparent));
+  --_accent: var(--rbf-accent, var(--accent, #c2410c));
+  --_accent-ink: var(--rbf-accent-ink, var(--accent-ink, #fff));
+  --_accent-text: var(--rbf-accent-text, var(--rbf-accent, var(--accent-text, #9a3412)));
+  --_accent-soft: var(--rbf-accent-soft, var(--accent-soft, #fde8d7));
+  --_focus: var(--rbf-focus, var(--rbf-fg, var(--focus, #1f1a16)));
+  --_ctl: var(--rbf-control-radius, var(--r-md, 12px));
+  --_gap: var(--rbf-gap, var(--s-3, 12px));
+  --_tap: var(--tap, 44px);
+  --_font: var(--rbf-font, inherit);
+  color: var(--_fg);
+  font: var(--_font);
+  display: grid;
+  gap: calc(var(--_gap) / 1.5);
+  min-width: 0;
+}
+/* The control reads as one inset strip at the top of the Ingredients panel. */
+.rbf-scale .rbf-scale-ctl {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 8px 8px 8px var(--_gap); border-radius: var(--_ctl); background: var(--_inset);
+}
+.rbf-scale .rbf-label { margin-right: auto; color: var(--_fg-2); font-size: var(--text-sm, 0.875rem); font-weight: 600; }
+.rbf-scale .rbf-target { min-width: 2.5ch; font: 650 var(--text-xl, 1.375rem) / 1 var(--font-display, Georgia, serif); text-align: center; font-variant-numeric: tabular-nums; }
+.rbf-scale .rbf-unit { color: var(--_fg-2); font-size: var(--text-sm, 0.875rem); }
+
+.rbf-scale .rbf-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: var(--_tap); min-height: var(--_tap); padding: 0 12px;
+  border: 1px solid var(--_line); border-radius: var(--_ctl);
+  background: var(--_surface); color: var(--_fg); font: inherit; font-weight: 600; white-space: nowrap; cursor: pointer;
+}
+.rbf-scale .rbf-step { font-size: var(--text-xl, 1.375rem); line-height: 1; }
+.rbf-scale .rbf-btn[aria-pressed="true"] { background: var(--_accent); border-color: var(--_accent); color: var(--_accent-ink); }
+.rbf-scale .rbf-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.rbf-scale .rbf-btn-quiet { border-color: transparent; background: transparent; color: var(--_fg-2); }
+.rbf-scale .rbf-btn:focus-visible { outline: 2px solid var(--_focus); outline-offset: 2px; }
+@media (hover: hover) {
+  .rbf-scale .rbf-btn:not([aria-pressed="true"]):not(:disabled):hover { background: var(--_surface); border-color: var(--_fg); }
+}
+
+.rbf-scale .rbf-scale-note { margin: 0; color: var(--_muted); font-size: var(--text-sm, 0.875rem); }
+.rbf-scale[data-factor]:not([data-factor="1"]) .rbf-scale-note { color: var(--_accent-text); font-weight: 600; }
+.rbf-scale h3 { margin: var(--_gap) 0 0; font-size: 1em; }
+.rbf-scale .rbf-scale-list { list-style: none; margin: 0; padding: 0; }
+.rbf-scale .rbf-scale-list li {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px var(--_gap);
+  padding: 8px 0; border-top: 1px solid var(--_rule);
+}
+.rbf-scale .rbf-scale-list li:first-child { border-top: 0; }
+.rbf-scale .rbf-amts { display: grid; justify-items: end; text-align: right; }
+.rbf-scale .rbf-amt { font-weight: 600; font-variant-numeric: tabular-nums; }
+.rbf-scale .rbf-scaled { padding: 0 6px; border-radius: 6px; background: var(--_accent-soft); color: var(--_accent-text); font-weight: 700; }
+.rbf-scale .rbf-badge { font-size: var(--text-xs, 0.75rem); }
+.rbf-scale .rbf-kept { font-style: italic; }
+.rbf-scale .rbf-unstated { color: var(--_muted); font-style: italic; font-weight: 400; }
+.rbf-scale .rbf-orig { color: var(--_muted); font-size: var(--text-xs, 0.75rem); }

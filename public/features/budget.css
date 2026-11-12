@@ -1,0 +1,100 @@
+/* Food budget (public/features/budget.mjs). Loaded by household-feature.js. Themed through the --rb-*
+   properties; see household.css for how they fall back to the dashboard tokens. */
+.rb-budget {
+  --_text: var(--rb-text, var(--ink, #1f1a16));
+  --_text-2: var(--rb-text-2, var(--rb-text, var(--ink-2, #4a423b)));
+  --_muted: var(--rb-muted, var(--muted, #655b53));
+  --_surface: var(--rb-surface, var(--surface, #fff));
+  --_inset: var(--rb-inset, var(--surface-2, transparent));
+  --_input: var(--rb-input, var(--bg, #faf6f0));
+  --_border: var(--rb-border, var(--line-strong, #8f8378));
+  --_rule: var(--rb-rule, var(--rb-border, var(--line, #e6ddd1)));
+  --_accent: var(--rb-accent, var(--accent, #c2410c));
+  --_accent-strong: var(--rb-accent-strong, var(--rb-accent, var(--accent-strong, #a83a0b)));
+  --_accent-text: var(--rb-accent-text, var(--rb-accent, var(--accent-text, #9a3412)));
+  --_on-accent: var(--rb-on-accent, var(--accent-ink, #fff));
+  --_focus: var(--rb-focus, var(--focus, #1f1a16));
+  --_danger: var(--rb-danger, var(--danger, #b3261e));
+  --_danger-soft: var(--rb-danger-soft, var(--danger-soft, transparent));
+  --_radius: var(--rb-radius, var(--r-lg, 18px));
+  --_ctl: var(--rb-control-radius, var(--r-md, 12px));
+  --_xs: var(--rb-space-xs, 4px);
+  --_sm: var(--rb-space-sm, 8px);
+  --_md: var(--rb-space-md, 16px);
+  --_lg: var(--rb-space-lg, 24px);
+  --_tap: var(--tap, 44px);
+  --_measure: var(--measure-text, 60ch);
+  min-width: 0;
+  padding: var(--_md);
+  border: 1px solid var(--_rule);
+  border-radius: var(--_radius);
+  background: var(--_surface);
+  box-shadow: var(--shadow-1, none);
+  color: var(--_text);
+  font-family: var(--rb-font, var(--font-body, system-ui, sans-serif));
+  line-height: 1.5;
+  color-scheme: inherit;
+}
+.rb-budget * { box-sizing: border-box; }
+.rb-budget h2 { margin: 0 0 var(--_sm); font: 650 var(--text-xl, 1.375rem) / 1.2 var(--font-display, Georgia, serif); }
+.rb-budget h3 { margin: var(--_lg) 0 var(--_sm); color: var(--_accent-text); font-size: 1rem; font-weight: 700; }
+.rb-budget p, .rb-budget fieldset { margin: var(--_md) 0; }
+.rb-budget p { max-width: var(--_measure); }
+.rb-budget h2 + p { margin-top: 0; color: var(--_muted); }
+.rb-budget fieldset { min-width: 0; padding: var(--_md); border: 1px solid var(--_rule); border-radius: var(--_ctl); }
+.rb-budget legend { padding: 0 var(--_sm); color: var(--_accent-text); font-weight: 700; }
+.rb-budget-grid, .rb-budget-totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr)); gap: var(--_md); align-items: end; }
+.rb-budget label { display: grid; gap: var(--_xs); min-width: 0; color: var(--_text-2); font-size: var(--text-sm, 0.875rem); font-weight: 600; }
+.rb-budget input, .rb-budget select, .rb-budget textarea {
+  width: 100%; min-width: 0; min-height: var(--_tap); padding: 0 var(--_md);
+  border: 1px solid var(--_border); border-radius: var(--_ctl);
+  background: var(--_input); color: var(--_text); font: inherit; font-size: max(1rem, 16px); font-weight: 400;
+}
+.rb-budget textarea { padding: var(--_sm) var(--_md); resize: vertical; }
+/* One primary button per form. Removing a shop and importing a file are secondary. */
+.rb-budget button {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: var(--_tap); margin-top: var(--_md); padding: 0 var(--_md);
+  border: 1px solid var(--_accent); border-radius: var(--_ctl);
+  background: var(--_accent); color: var(--_on-accent); font: inherit; font-weight: 600; cursor: pointer;
+}
+.rb-budget-shops button, .rb-budget details button { border-color: var(--_border); background: var(--_surface); color: var(--_text); }
+.rb-budget-shops button { flex-shrink: 0; margin: 0; color: var(--_danger); }
+.rb-budget :focus-visible { outline: 2px solid var(--_focus); outline-offset: 2px; }
+@media (hover: hover) {
+  .rb-budget button:hover { background: var(--_accent-strong); border-color: var(--_accent-strong); }
+  .rb-budget-shops button:hover, .rb-budget details button:hover { background: var(--_inset); border-color: var(--_border); }
+}
+/* Status and errors: the same two patterns in every feature module. */
+.rb-budget .rb-feature-status { margin-top: 0; color: var(--_muted); font-size: var(--text-sm, 0.875rem); }
+.rb-budget .rb-feature-status[role="alert"], .rb-budget .rb-feature-errors, .rb-budget-warning {
+  max-width: var(--_measure); margin: var(--_md) 0; padding: var(--_sm) var(--_md);
+  border-left: 4px solid var(--_danger); border-radius: var(--_ctl);
+  background: var(--_danger-soft); color: var(--_danger); font-size: 1rem; font-weight: 600; list-style: none;
+}
+
+/* Totals as inset tiles, like the facts on a recipe page. */
+.rb-budget-totals { margin: 0; align-items: stretch; gap: var(--_sm); }
+.rb-budget-totals div { padding: var(--_sm) var(--_md); border: 1px solid var(--_rule); border-radius: var(--_ctl); background: var(--_inset); }
+.rb-budget dt { color: var(--_muted); font-size: var(--text-sm, 0.875rem); }
+.rb-budget dd { margin: 0; font: 650 var(--text-xl, 1.375rem) / 1.2 var(--font-display, Georgia, serif); overflow-wrap: anywhere; }
+
+/* The chart and the table scroll inside themselves, so the page never scrolls sideways. */
+.rb-budget-scroll { overflow-x: auto; border-radius: var(--_ctl); }
+.rb-budget table { width: 100%; border-collapse: collapse; font-size: var(--text-sm, 0.875rem); font-variant-numeric: tabular-nums; }
+.rb-budget caption { padding-bottom: var(--_sm); color: var(--_muted); text-align: left; }
+.rb-budget th, .rb-budget td { padding: var(--_sm); border-bottom: 1px solid var(--_rule); text-align: left; white-space: nowrap; }
+.rb-budget thead th { color: var(--_muted); font-weight: 600; }
+.rb-budget-shops { max-width: var(--_measure); margin: var(--_md) 0; padding: 0; list-style: none; }
+.rb-budget-shops li {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--_sm);
+  min-height: var(--_tap); padding: var(--_sm) 0; border-bottom: 1px solid var(--_rule); overflow-wrap: anywhere;
+}
+/* The empty ledger (a lone <li> with no button) reads as the shared empty state. */
+.rb-budget-shops li:only-child:not(:has(button)) { justify-content: center; border: 1px dashed var(--_border); border-radius: var(--_ctl); color: var(--_muted); }
+
+.rb-budget details { margin-top: var(--_lg); }
+.rb-budget summary { min-height: var(--_tap); color: var(--_accent-text); font-weight: 600; line-height: var(--_tap); cursor: pointer; }
+.rb-budget-chart { display: block; width: 100%; min-width: 38rem; height: auto; margin: var(--_md) 0; }
+.rb-budget-chart text { fill: var(--_text); font: 14px var(--rb-font, var(--font-body, system-ui, sans-serif)); }
+.rb-budget-chart rect { fill: var(--_accent); }

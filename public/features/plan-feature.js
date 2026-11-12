@@ -1,0 +1,86 @@
+// Week plan and the combined shopping list (week-plan.mjs, shopping-list.mjs).
+//   #/plan                 the week on one side, the shopping list for it on the other
+//   card-actions slot      "Add to week" on every recipe card
+//   recipe-actions slot    "Add to week" on the recipe page
+// Both modules keep their own storage and follow each other through the rb:plan-change event.
+import { mount as mountWeek, addRecipeToWeek, readPlan } from './week-plan.mjs';
+import { mount as mountShop } from './shopping-list.mjs';
+import { householdTarget } from './household-target.js';
+
+const ROUTE = 'plan';
+
+export function install(rb) {
+  let parts = [];
+  const unmount = () => {
+    for (const p of parts) p.destroy();
+    parts = [];
+  };
+
+  // "Add to week" puts the recipe on the "any day" slot. The toast says what the stored plan now holds:
+  // nothing new when it was already there, and a warning when the browser did not keep it.
+  const add = (id) => {
+    const r = rb.recipe(id);
+    if (!r) return;
+    const planned = () => readPlan().items.some((it) => it.recipe === id && it.day === null);
+    if (planned()) {
+      rb.toast(`Already in this week: ${r.title}`);
+      return;
+    }
+    addRecipeToWeek(id);
+    rb.toast(planned() ? `Added to this week: ${r.title}` : 'Could not add it: this browser is not saving the week plan');
+  };
+
+  rb.addRoute(ROUTE, {
+    label: 'Week plan',
+    title: 'Week plan',
+    layout: 'list',
+    render(root) {
+      unmount();
+      const target = householdTarget();
+      root.innerHTML = `
+        <div class="feature-page">
+          <header class="feature-head">
+            <h1>This week</h1>
+            <p>Plan recipes for the days of the week; the shopping list merges their ingredients by key and keeps
+              every amount in the creator's own words.</p>
+            ${target
+              ? `<p class="feature-note">Your household: ${rb.esc(target.description)}, about ${rb.esc(target.servings.toFixed(1))}
+                  adult-equivalent servings per meal. <a href="#/household">Change</a></p>`
+              : '<p class="feature-note">Tip: set up your <a href="#/household">household</a> to see how many servings a meal needs.</p>'}
+          </header>
+          <div class="feature-cols">
+            <div data-part="week"></div>
+            <div data-part="shop"></div>
+          </div>
+        </div>`;
+      const recipes = rb.recipes();
+      // One at a time, so a part that fails to mount still leaves the ones before it to unmount().
+      parts.push(mountWeek(root.querySelector('[data-part="week"]'), { recipes }));
+      parts.push(mountShop(root.querySelector('[data-part="shop"]'), { recipes }));
+    },
+  });
+
+  rb.on('view', ({ name, recipe }) => {
+    if (name !== ROUTE) unmount();
+    if (name === 'recipe' && recipe) {
+      const slot = rb.mount('recipe-actions');
+      slot?.insertAdjacentHTML('beforeend',
+        `<button type="button" class="btn" data-plan-add="${rb.esc(recipe.id)}">${rb.icon('week')}<span class="label-wide">Add to week</span></button>`);
+    }
+  });
+
+  rb.on('grid', ({ root }) => {
+    // On a card the button is the icon alone (the card is small); its name carries the recipe's title.
+    for (const slot of rb.mounts('card-actions', root)) {
+      const title = rb.recipe(slot.dataset.recipeId)?.title;
+      slot.insertAdjacentHTML('beforeend',
+        `<button type="button" class="btn btn-quiet" data-plan-add="${rb.esc(slot.dataset.recipeId)}">${rb.icon('week')}<span class="sr-only">Add to week${title ? `: ${rb.esc(title)}` : ''}</span></button>`);
+    }
+  });
+
+  // One delegated listener for every "Add to week" button the two slots render.
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest?.('[data-plan-add]');
+    if (btn) add(btn.dataset.planAdd);
+  });
+}

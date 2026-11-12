@@ -1,0 +1,81 @@
+/* Week plan (public/features/week-plan.mjs).
+   Colour, shape and spacing come from the --rbf-* properties, which the dashboard maps to its design tokens in
+   the "feature modules" block of public/styles.css. On a page without that block each property falls back to
+   the module's older property of the nearest meaning (a host that themes only --rbf-fg, --rbf-line and
+   --rbf-accent stays readable), then to the dashboard token, then to that token's light value. */
+.rbf-week {
+  --_fg: var(--rbf-fg, var(--ink, #1f1a16));
+  --_fg-2: var(--rbf-fg-2, var(--rbf-fg, var(--ink-2, #4a423b)));
+  --_muted: var(--rbf-muted, var(--muted, #655b53));
+  --_line: var(--rbf-line, var(--line-strong, #8f8378));
+  --_rule: var(--rbf-rule, var(--rbf-line, var(--line, #e6ddd1)));
+  --_surface: var(--rbf-surface, var(--surface, #fff));
+  --_inset: var(--rbf-inset, var(--surface-2, transparent));
+  --_accent: var(--rbf-accent, var(--accent, #c2410c));
+  --_accent-strong: var(--rbf-accent-strong, var(--rbf-accent, var(--accent-strong, #a83a0b)));
+  --_accent-ink: var(--rbf-accent-ink, var(--accent-ink, #fff));
+  --_focus: var(--rbf-focus, var(--rbf-fg, var(--focus, #1f1a16)));
+  --_radius: var(--rbf-radius, var(--r-lg, 18px));
+  --_ctl: var(--rbf-control-radius, var(--r-md, 12px));
+  --_gap: var(--rbf-gap, var(--s-3, 12px));
+  --_tap: var(--tap, 44px);
+  --_font: var(--rbf-font, inherit);
+  color: var(--_fg);
+  font: var(--_font);
+  display: grid;
+  gap: var(--_gap);
+  min-width: 0;
+}
+.rbf-week .rbf-head { display: flex; flex-wrap: wrap; align-items: center; gap: calc(var(--_gap) / 2) var(--_gap); min-height: var(--_tap); }
+.rbf-week .rbf-head h2 { margin: 0; font: 650 var(--text-xl, 1.375rem) / 1.2 var(--font-display, Georgia, serif); }
+.rbf-week .rbf-muted, .rbf-week .rbf-empty, .rbf-week .rb-feature-status { margin: 0; color: var(--_muted); font-size: var(--text-sm, 0.875rem); }
+.rbf-week .rbf-head [data-clear] { margin-left: auto; }
+
+.rbf-week .rbf-add {
+  display: flex; flex-wrap: wrap; align-items: end; gap: var(--_gap);
+  padding: var(--_gap); border: 1px solid var(--_rule); border-radius: var(--_radius); background: var(--_surface);
+}
+.rbf-week .rbf-add label { display: grid; gap: 4px; flex: 1 1 12rem; min-width: 0; color: var(--_fg-2); font-size: var(--text-sm, 0.875rem); font-weight: 600; }
+.rbf-week .rbf-add label:nth-of-type(2) { flex: 0 1 9rem; }
+/* width: 100% keeps a select no wider than its column, however long the longest recipe title is. */
+.rbf-week select {
+  width: 100%; min-width: 0; max-width: 100%; min-height: var(--_tap); padding: 0 10px;
+  border: 1px solid var(--_line); border-radius: var(--_ctl);
+  background: var(--_surface); color: var(--_fg); font: inherit; font-size: max(1em, 16px); font-weight: 400;
+}
+
+.rbf-week .rbf-btn {
+  display: inline-flex; align-items: center; justify-content: center; min-height: var(--_tap); padding: 0 16px;
+  border: 1px solid var(--_line); border-radius: var(--_ctl);
+  background: var(--_surface); color: var(--_fg); font: inherit; font-weight: 600; white-space: nowrap; cursor: pointer;
+}
+.rbf-week .rbf-btn-primary { background: var(--_accent); border-color: var(--_accent); color: var(--_accent-ink); }
+.rbf-week .rbf-btn-quiet { border-color: transparent; background: transparent; color: var(--_fg-2); }
+.rbf-week .rbf-btn:focus-visible, .rbf-week select:focus-visible, .rbf-week a:focus-visible {
+  outline: 2px solid var(--_focus); outline-offset: 2px;
+}
+@media (hover: hover) {
+  .rbf-week .rbf-btn:hover { background: var(--_inset); }
+  .rbf-week .rbf-btn-primary:hover { background: var(--_accent-strong); border-color: var(--_accent-strong); }
+}
+
+.rbf-week .rbf-days {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: var(--_gap); grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+}
+.rbf-week .rbf-day {
+  display: grid; gap: calc(var(--_gap) / 2); align-content: start; min-width: 0;
+  padding: var(--_gap); border: 1px solid var(--_rule); border-radius: var(--_radius); background: var(--_surface);
+}
+.rbf-week .rbf-day h3 { margin: 0; color: var(--_fg); font: 700 var(--text-md, 1rem) / 1.35 var(--font-body, inherit); }
+/* An empty day is quieter by shape (dashed, no fill), never by opacity: the text keeps its contrast. */
+.rbf-week .rbf-day-empty { border-style: dashed; border-color: var(--_line); background: transparent; }
+.rbf-week .rbf-planned { list-style: none; margin: 0; padding: 0; display: grid; gap: calc(var(--_gap) / 2); }
+.rbf-week .rbf-planned li { display: grid; gap: 4px; min-width: 0; }
+.rbf-week .rbf-planned li + li { padding-top: calc(var(--_gap) / 2); border-top: 1px solid var(--_rule); }
+.rbf-week .rbf-planned a {
+  display: flex; align-items: center; min-height: var(--_tap);
+  color: var(--_fg); font-weight: 600; text-decoration-color: var(--_line); text-underline-offset: 3px; overflow-wrap: anywhere;
+}
+.rbf-week .rbf-row-actions { display: flex; gap: 8px; min-width: 0; }
+.rbf-week .rbf-row-actions select { flex: 1; }
