@@ -11,13 +11,19 @@ const readJSON = async (path) => JSON.parse(await readFile(new URL(path, root), 
 test('every stored recipe and queue entry keeps its parsed URL and videoKey', async () => {
   const expected = await readJSON('test/video-compat.json');
   const files = (await readdir(new URL('recipes/', root))).filter((f) => f.endsWith('.json')).sort();
-  assert.deepEqual(files, Object.keys(expected.recipes));
   for (const file of files) {
     const { video } = await readJSON(`recipes/${file}`);
     const parsed = parseVideoUrl(video.url);
-    assert.deepEqual(parsed, expected.recipes[file].parsed, file);
-    assert.equal(videoKey(video), expected.recipes[file].key, file);
-    assert.equal(videoKey(parsed), expected.recipes[file].key, file);
+    const pinned = expected.recipes[file];
+    if (!pinned) {
+      // Added after the capture: its link must still parse, to the key the recipe file implies.
+      assert.ok(parsed, `${file}: ${video.url} no longer parses`);
+      assert.equal(videoKey(parsed), videoKey(video), file);
+      continue;
+    }
+    assert.deepEqual(parsed, pinned.parsed, file);
+    assert.equal(videoKey(video), pinned.key, file);
+    assert.equal(videoKey(parsed), pinned.key, file);
   }
   const queue = await readJSON('data/queue.json');
   assert.equal(queue.length, expected.queue.length);
