@@ -106,9 +106,10 @@ export function mount(el, options = {}) {
       const target = Math.max(1, Math.round((serves.count * factor + Number(step.dataset.step)) * 1e6) / 1e6);
       return set(target / serves.count);
     }
-    const f = e.target.closest('[data-factor]');
-    if (f) return set(Number(f.dataset.factor));
+    // Reset first: the section itself carries data-factor, so a factor lookup would find it before the button.
     if (e.target.closest('[data-reset]')) return set(1);
+    const f = e.target.closest('button[data-factor]');
+    if (f) return set(Number(f.dataset.factor));
   };
 
   el.addEventListener('click', onClick);
