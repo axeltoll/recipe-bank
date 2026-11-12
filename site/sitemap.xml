@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://base-url.invalid/</loc></url>
+  <url><loc>https://base-url.invalid/changelog.html</loc></url>
+  <url><loc>https://base-url.invalid/contributing.html</loc></url>
+  <url><loc>https://base-url.invalid/getting-started.html</loc></url>
+  <url><loc>https://base-url.invalid/how-analysis-works.html</loc></url>
+  <url><loc>https://base-url.invalid/recipe-agent.html</loc></url>
+  <url><loc>https://base-url.invalid/recipe-format-cheatsheet.html</loc></url>
+  <url><loc>https://base-url.invalid/recipe-format.html</loc></url>
+  <url><loc>https://base-url.invalid/self-hosting.html</loc></url>
+</urlset>
