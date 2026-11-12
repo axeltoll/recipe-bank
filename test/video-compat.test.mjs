@@ -13,7 +13,7 @@ test('every stored recipe and queue entry keeps its parsed URL and videoKey', as
   const files = (await readdir(new URL('recipes/', root))).filter((f) => f.endsWith('.json')).sort();
   for (const file of files) {
     const { video } = await readJSON(`recipes/${file}`);
-    const parsed = parseVideoUrl(video.url);
+    const parsed = parseVideoUrl(video.url, { allowWeb: video.platform === 'web' });
     const pinned = expected.recipes[file];
     if (!pinned) {
       // Added after the capture: its link must still parse, to the key the recipe file implies.
