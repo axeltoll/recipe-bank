@@ -81,6 +81,9 @@ test('words, rates, percentages and broken fractions are kept exactly', () => {
 test('both sides of a dual-unit amount written without spaces are scaled ("200g/7oz")',
   () => {
     assert.equal(scaleAmount('200g/7oz', 2).amount, '400g/14oz');
+    // A pack size in two units stays whole on both sides; only the count before the "x" scales.
+    assert.equal(scaleAmount('2 x 400g/14oz', 2).amount, '4 x 400g/14oz');
+    assert.equal(scaleAmount('2 x 400 g / 14 oz', 2).amount, '4 x 400 g / 14 oz');
     assert.equal(scaleAmount('2 cups/480ml', 2).amount, '4 cups/960ml');
     assert.equal(scaleAmount('15ml/1 tbsp', 2).amount, '30ml/2 tbsp');
   });
