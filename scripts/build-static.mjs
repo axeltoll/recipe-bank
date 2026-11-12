@@ -1,46 +1,61 @@
 // Builds a static copy of the dashboard in dist/ for Cloudflare Pages (`npm run build`, deploy with `npm run deploy`).
 // The two read APIs become plain JSON files; the page is marked data-static="1", so app.js reads those files, hides
-// "Remove" and turns "Add video" into a copy-a-request for the Recipe Bank Telegram topic (there is no server to queue to).
+// "Remove", turns "Add video" into a copy-a-request message (there is no server to queue to), makes the recipe editor
+// offer "Download JSON" instead of saving, and turns pack import off. Nothing in dist/ tries to write.
+// public/features/ is copied with the rest of public/, so the feature modules work the same in the static copy.
 import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
-import { loadRecipes } from '../server.mjs';
+import { loadQueue, loadRecipes, dataPaths } from '../server.mjs';
 import { videoKey } from '../lib/video.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
-const DIST = join(ROOT, 'dist');
 
-async function loadQueue() {
+/**
+ * Build the static site into `outDir`. Throws (without touching `outDir`) when a recipe file is invalid.
+ * Returns { recipes, queue } counts.
+ *
+ * The data is this repository's, never RECIPE_BANK_DIR's: `npm run deploy` publishes dist/, and a shell
+ * that set the variable for a private bank must not publish that bank and its queue notes by accident.
+ * Another folder is used only when it is passed here as `dataDir` (or as `recipesDir` / `queueFile`).
+ */
+export async function buildStatic({ outDir = join(ROOT, 'dist'), dataDir = ROOT, recipesDir, queueFile } = {}) {
+  const data = dataPaths(dataDir);
+  recipesDir ??= data.recipesDir;
+  queueFile ??= data.queueFile;
+  const { recipes, invalid } = await loadRecipes(recipesDir);
+  if (invalid.length) {
+    throw Object.assign(new Error(`Invalid recipe files, fix them first (npm run validate): ${invalid.map((i) => i.file).join(', ')}`), { invalid });
+  }
+  const done = new Set(recipes.map((r) => videoKey(r.video)));
+  const queue = (await loadQueue(queueFile)).map((q) => (done.has(videoKey(q.video)) ? { ...q, status: 'done' } : q));
+
+  await rm(outDir, { recursive: true, force: true });
+  await cp(join(ROOT, 'public'), outDir, { recursive: true });
+  await cp(join(ROOT, 'lib'), join(outDir, 'lib'), { recursive: true });
+  await mkdir(join(outDir, 'api'), { recursive: true });
+  await writeFile(join(outDir, 'api', 'recipes.json'), JSON.stringify({ recipes, invalid: [] }));
+  await writeFile(join(outDir, 'api', 'queue.json'), JSON.stringify({ queue }));
+
+  const index = join(outDir, 'index.html');
+  await writeFile(index, (await readFile(index, 'utf8')).replace('<html lang="en">', '<html lang="en" data-static="1">'));
+  await writeFile(join(outDir, '_headers'), [
+    '/lib/*',
+    '  Content-Type: text/javascript; charset=utf-8',
+    '/features/*.mjs',
+    '  Content-Type: text/javascript; charset=utf-8',
+    '/api/*',
+    '  Cache-Control: no-cache',
+    '',
+  ].join('\n'));
+  return { recipes: recipes.length, queue: queue.length };
+}
+
+if (process.argv[1] === import.meta.filename) {
   try {
-    return JSON.parse(await readFile(join(ROOT, 'data', 'queue.json'), 'utf8'));
+    const n = await buildStatic();
+    console.log(`dist/: ${n.recipes} recipes, ${n.queue} queued`);
   } catch (e) {
-    if (e.code === 'ENOENT') return [];
-    throw e;
+    console.error(e.message);
+    process.exit(1);
   }
 }
-
-const { recipes, invalid } = await loadRecipes();
-if (invalid.length) {
-  console.error('Invalid recipe files, fix them first (npm run validate):', invalid.map((i) => i.file).join(', '));
-  process.exit(1);
-}
-const done = new Set(recipes.map((r) => videoKey(r.video)));
-const queue = (await loadQueue()).map((q) => (done.has(videoKey(q.video)) ? { ...q, status: 'done' } : q));
-
-await rm(DIST, { recursive: true, force: true });
-await cp(join(ROOT, 'public'), DIST, { recursive: true });
-await cp(join(ROOT, 'lib'), join(DIST, 'lib'), { recursive: true });
-await mkdir(join(DIST, 'api'), { recursive: true });
-await writeFile(join(DIST, 'api', 'recipes.json'), JSON.stringify({ recipes, invalid: [] }));
-await writeFile(join(DIST, 'api', 'queue.json'), JSON.stringify({ queue }));
-
-const index = join(DIST, 'index.html');
-await writeFile(index, (await readFile(index, 'utf8')).replace('<html lang="en">', '<html lang="en" data-static="1">'));
-await writeFile(join(DIST, '_headers'), [
-  '/lib/*',
-  '  Content-Type: text/javascript; charset=utf-8',
-  '/api/*',
-  '  Cache-Control: no-cache',
-  '',
-].join('\n'));
-
-console.log(`dist/: ${recipes.length} recipes, ${queue.length} queued`);
