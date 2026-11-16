@@ -212,6 +212,39 @@ test('editor: leaving with unsaved changes asks; Cancel puts the same editor bac
   assert.equal(quiet.prevented, false, 'nothing to lose: the tab closes without asking');
 });
 
+test('editor: a save that finishes after the reader left does not navigate back', async (t) => {
+  t.after(() => { delete globalThis.confirm; delete globalThis.location; });
+  const h = editorHarness();
+  h.rb.current = () => {
+    const hash = location.hash;
+    if (hash.startsWith('#/edit')) return { name: 'edit' };
+    if (hash.startsWith('#/new')) return { name: 'new' };
+    return { name: 'home' };
+  };
+  let resolveReload;
+  h.rb.reload = () => new Promise((resolve) => { resolveReload = resolve; });
+  h.go('#/edit/alpha');
+  document.dispatchEvent(new CustomEvent('recipe-bank:recipe-saved', { detail: { id: 'alpha', created: false } }));
+  h.go('#/');
+  resolveReload();
+  await Promise.resolve();
+  assert.deepEqual(h.rb.navigated, [], 'the recipe page is only opened from the editor');
+});
+
+test('editor: a save that finishes while new or edit is still showing opens the recipe', async (t) => {
+  t.after(() => { delete globalThis.confirm; delete globalThis.location; });
+  const h = editorHarness();
+  h.rb.current = () => (location.hash.startsWith('#/new') ? { name: 'new' } : { name: 'edit' });
+  let resolveReload;
+  h.rb.reload = () => new Promise((resolve) => { resolveReload = resolve; });
+  h.go('#/new');
+  document.dispatchEvent(new CustomEvent('recipe-bank:recipe-saved', { detail: { id: 'alpha', created: true } }));
+  resolveReload();
+  await Promise.resolve();
+  assert.deepEqual(h.rb.navigated, ['#/r/alpha']);
+  assert.deepEqual(h.rb.toasts, ['Recipe saved']);
+});
+
 test('editor: Cancel with changes asks once, not again on the way out', (t) => {
   t.after(() => { delete globalThis.confirm; delete globalThis.location; });
   const h = editorHarness();

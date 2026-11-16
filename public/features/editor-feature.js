@@ -128,7 +128,10 @@ export function install(rb, { mountEditor = realMountEditor } = {}) {
       return;
     }
     rb.toast(created ? 'Recipe saved' : 'Changes saved');
-    if (id) rb.navigate(`#/r/${encodeURIComponent(id)}`);
+    // The reader may have left the editor while the bank was reloading. Opening the recipe then
+    // would pull them back from whatever they moved on to.
+    const viewName = rb.current?.().name;
+    if (id && (viewName === 'new' || viewName === 'edit')) rb.navigate(`#/r/${encodeURIComponent(id)}`);
   });
 
   document.addEventListener('recipe-bank:editor-cancel', (e) => {

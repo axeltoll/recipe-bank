@@ -358,6 +358,7 @@ test('editor: #/new and #/edit routes, a "New recipe" button, and the save and c
   rb.emit('view', { name: 'home' });
   assert.match(tools.innerHTML, /href="#\/new"/);
 
+  rb.current = () => ({ name: 'edit' });
   await Promise.all(doc.fire('recipe-bank:recipe-saved', { detail: { id: 'alpha', created: true } }));
   assert.equal(rb.reloaded, 1);
   assert.deepEqual(rb.navigated, ['#/r/alpha']);
