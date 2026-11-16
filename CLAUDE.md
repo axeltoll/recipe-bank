@@ -15,7 +15,7 @@ npm run migrate    # dry run; `npm run migrate -- --write` upgrades recipe files
 npm run packs      # export / import recipe packs (scripts/pack.mjs; import is a dry run without --write)
 npm run doctor     # optional tools for the Recipe Agent
 npm run smoke      # browser smoke test, live and static (needs Chrome; skips without one)
-npm run device-check # layout audit of the home page, a recipe and every feature route at 390, 768, 1280, 1920 and 2560 pixels
+npm run device-check # layout audit of the home page, a recipe, #/plan, #/household, #/packs and #/new at 390, 768, 1280, 1920 and 2560 pixels
 npm run site       # the public website in site/ on port 4790
 ```
 
