@@ -1,7 +1,8 @@
 // Serving scaling on the recipe page (scale.mjs) through the recipe-scaling mount and the .ing-amt hooks
 // (docs/design/MOUNT-POINTS.md). The control sits above the ingredient list; scaled amounts replace the text of
-// .ing-amt-text and are marked data-scaled="true". Amounts in words and rates keep the creator's words, and while
-// the factor is not 1 they also show amountHtml's "not scaled" label; data-amount is never changed.
+// .ing-amt-text and, when the text changes, are marked data-scaled="true". Amounts in words and rates keep the
+// creator's words, and while the factor is not 1 they also show amountHtml's "not scaled" label; data-amount is never
+// changed.
 // With a saved household profile there is one more button: scale to the household's servings per meal.
 import { mount as mountScale } from './scale.mjs';
 import { factorFor, servingCount } from '../../lib/scale.mjs';
@@ -15,7 +16,9 @@ export function applyAmounts(root, scaled) {
     const ing = scaled?.components?.[Number(span.dataset.ci)]?.ingredients?.[Number(span.dataset.ii)];
     const text = span.querySelector('.ing-amt-text');
     if (!text) continue;
-    if (ing?.scaled) {
+    // scaleAmount reports scaled when rounding prints the same text ("1 cup" × 6.1/6). The flag stays
+    // for the purchase list; the page marks a row only when the amount the reader sees has changed.
+    if (ing?.scaled && ing.amount !== ing.originalAmount) {
       text.textContent = ing.amount;
       span.dataset.scaled = 'true';
     } else if (span.dataset.scaled) {

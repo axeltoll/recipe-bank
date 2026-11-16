@@ -239,6 +239,40 @@ test('scaling: kept amounts are marked not scaled on the recipe page and in cook
   assert.equal(page[0].text.textContent, '800g');
 });
 
+test('an amount unchanged by rounding is not marked scaled on the recipe page', () => {
+  const cups = {
+    serves: '6',
+    components: [{ ingredients: [
+      { item: 'Milk', amount: '1 cup', basis: 'spoken' },
+      { item: 'Flour', amount: '2 cups', basis: 'spoken' },
+    ] }],
+  };
+  // What lib/scale.mjs returns at 6.1/6: rounding prints "1 cup" again, but the amount was scaled, so the
+  // purchase list can add it. Built by hand so this checks the page's rule on its own.
+  const milk = { ...cups.components[0].ingredients[0], scaled: true, originalAmount: '1 cup', scaleReason: 'scaled' };
+  const flour = { ...cups.components[0].ingredients[1], amount: '2.03 cups', scaled: true, originalAmount: '2 cups', scaleReason: 'scaled' };
+  const scaled = { ...cups, scale: { factor: 6.1 / 6 }, components: [{ ingredients: [milk, flour] }] };
+  const span = (ii, amount) => {
+    const text = { textContent: amount };
+    return { dataset: { ci: '0', ii: String(ii), amount }, text, querySelector: (sel) => (sel === '.ing-amt-text' ? text : null) };
+  };
+  const spans = [span(0, '1 cup'), span(1, '2 cups')];
+  applyAmounts({ querySelectorAll: () => spans }, scaled);
+  assert.equal(milk.scaled, true, 'the library still reports scaled when the text did not change');
+  assert.equal(milk.amount, '1 cup');
+  assert.equal(spans[0].text.textContent, '1 cup');
+  assert.equal(spans[0].dataset.scaled, undefined);
+  assert.notEqual(flour.amount, flour.originalAmount);
+  assert.equal(spans[1].text.textContent, flour.amount);
+  assert.equal(spans[1].dataset.scaled, 'true');
+
+  spans[0].dataset.scaled = 'true';
+  spans[0].text.textContent = '2 cups';
+  applyAmounts({ querySelectorAll: () => spans }, scaled);
+  assert.equal(spans[0].text.textContent, '1 cup');
+  assert.equal(spans[0].dataset.scaled, undefined);
+});
+
 test('scaling: the control goes into recipe-scaling on recipe pages only', () => {
   const slot = fakeElement({ querySelector: (sel) => (sel === '[data-scale]' ? inner : null) });
   const inner = fakeElement();
