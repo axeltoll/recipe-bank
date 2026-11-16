@@ -1,6 +1,7 @@
-// The Add video dialog (public/ui/add.js). A request that outlives the dialog must not land in whatever
-// the reader opened next: closing aborts it, and a late result is applied only for the attempt that is
-// still current while the dialog is open.
+// The Add video dialog (public/ui/add.js). Closing forgets the attempt and re-enables the button.
+// The request keeps running, because the server may already have queued the video: a later 201 still
+// joins the queue and redraws the home page. It leaves a newer dialog alone, and it does not navigate
+// or toast.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { installUiResolver, installBrowser } from './helpers/ui-dom.mjs';
@@ -64,24 +65,23 @@ function reset() {
   holdFetch();
 }
 
-test('closing Add video aborts the request and re-enables the button before it finishes', async () => {
+test('closing Add video leaves the request running and re-enables the button', async () => {
   reset();
   click('open-add');
   submitForm();
   assert.equal(submit.disabled, true);
   assert.equal(submit.textContent, 'Adding…');
-  assert.equal(pending.init.signal instanceof AbortSignal, true, 'the POST is abortable');
 
   click('add-cancel');
   assert.equal(dialog.open, false);
-  assert.equal(pending.init.signal.aborted, true, 'closing aborts that attempt');
+  assert.ok(!pending.init.signal?.aborted, 'closing leaves the queue request running');
   click('open-add');
   assert.equal(submit.disabled, false, 'reopening must not leave the button disabled');
   assert.equal(submit.textContent, 'Add to queue');
   assert.equal(submit.getAttribute('aria-busy'), null);
 });
 
-test('a late success is ignored once the dialog has been closed', async () => {
+test('a cancelled attempt that later gets 201 joins the queue without navigating or closing a newer dialog', async () => {
   reset();
   click('open-add');
   submitForm();
@@ -98,9 +98,35 @@ test('a late success is ignored once the dialog has been closed', async () => {
 
   assert.equal(location.hash, '#/r/kept', 'a late success must not navigate home');
   assert.equal(dialog.open, true, 'a late success must not close the dialog that is open now');
-  assert.equal(state.queue.length, queueBefore);
+  assert.equal(state.queue.length, queueBefore + 1);
+  assert.equal(state.queue.at(-1).id, 'q-new');
+  assert.equal(dom.get('stats').textContent, '0 recipes · 1 in the queue');
+  assert.equal(dom.get('toast').textContent, '');
   assert.equal(error.textContent, '');
-  assert.equal(hooks.renders, 0);
+  assert.equal(hooks.renders, 0, 'a recipe page is not redrawn');
+  assert.equal(submit.disabled, false);
+});
+
+test('a cancelled attempt that later gets 201 redraws the home page', async () => {
+  reset();
+  location.hash = '#/';
+  click('open-add');
+  submitForm();
+  click('add-cancel');
+
+  pending.resolve({
+    ok: true,
+    status: 201,
+    json: async () => ({ entry: { id: 'q-home', title: 'Soup', status: 'queued' } }),
+  });
+  await flush();
+
+  assert.equal(location.hash, '#/');
+  assert.equal(dialog.open, false);
+  assert.equal(state.queue.length, 1);
+  assert.equal(state.queue[0].id, 'q-home');
+  assert.equal(hooks.renders, 1);
+  assert.equal(dom.get('toast').textContent, '');
 });
 
 test('a late error does not write into the dialog after it was closed', async () => {

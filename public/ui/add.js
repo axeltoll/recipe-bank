@@ -39,10 +39,11 @@ export function setupAdd({ rerender, reload }) {
     dlg.showModal();
     url.focus();
   });
-  // One attempt at a time. Closing the dialog (Cancel, Escape) aborts it and forgets it, so a response
-  // that arrives later cannot close a dialog the reader has opened since, or move them to another page.
+  // Closing (Cancel, Escape, or a finished add) forgets the attempt and re-enables the button, so a
+  // response that arrives later cannot close a dialog the reader has opened since or move them.
+  // The request itself keeps running: the server may already have queued the video, and a 201 still
+  // updates the queue and redraws the home page.
   let attempt = 0;
-  let controller = null;
   const resetSubmit = () => {
     submit.disabled = false;
     submit.removeAttribute('aria-busy');
@@ -50,12 +51,10 @@ export function setupAdd({ rerender, reload }) {
   };
   const abandon = () => {
     attempt += 1;
-    controller?.abort();
-    controller = null;
     resetSubmit();
   };
   const current = (token) => token === attempt && dlg.open;
-  dlg.addEventListener('close', () => { if (controller) abandon(); });
+  dlg.addEventListener('close', abandon);
   $('#add-cancel').addEventListener('click', () => dlg.close());
   url.addEventListener('input', showHint);
   web.addEventListener('change', showHint);
@@ -75,8 +74,6 @@ export function setupAdd({ rerender, reload }) {
       return;
     }
     const token = ++attempt;
-    controller?.abort();
-    controller = new AbortController();
     submit.disabled = true;
     submit.setAttribute('aria-busy', 'true');
     submit.textContent = 'Adding…';
@@ -85,10 +82,18 @@ export function setupAdd({ rerender, reload }) {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ url: url.value, note: $('#add-note').value, ...(web.checked ? { allowWeb: true } : {}) }),
-        signal: controller.signal,
       });
-      if (!current(token)) return;
       const body = await res.json();
+      if (res.status === 201 && body.entry) {
+        state.queue.push(body.entry);
+        const live = current(token);
+        if (live) dlg.close();
+        renderStats();
+        if (location.hash === '' || location.hash === '#/') rerender();
+        else if (live) location.hash = '#/';
+        if (live) toast(`Queued${body.entry.title ? `: ${body.entry.title}` : ''}`);
+        return;
+      }
       if (!current(token)) return;
       if (res.status === 409 && body.recipeId) {
         // The recipe may have been written after this page loaded: load it before opening it.
@@ -100,12 +105,6 @@ export function setupAdd({ rerender, reload }) {
         return;
       }
       if (!res.ok) { err.textContent = body.error ?? 'Could not add it'; return; }
-      state.queue.push(body.entry);
-      dlg.close();
-      renderStats();
-      if (location.hash === '' || location.hash === '#/') rerender();
-      else location.hash = '#/';
-      toast(`Queued${body.entry.title ? `: ${body.entry.title}` : ''}`);
     } catch {
       if (!current(token)) return;
       err.textContent = 'The Recipe Bank server is not reachable. Is `npm start` running?';
