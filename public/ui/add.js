@@ -39,6 +39,23 @@ export function setupAdd({ rerender, reload }) {
     dlg.showModal();
     url.focus();
   });
+  // One attempt at a time. Closing the dialog (Cancel, Escape) aborts it and forgets it, so a response
+  // that arrives later cannot close a dialog the reader has opened since, or move them to another page.
+  let attempt = 0;
+  let controller = null;
+  const resetSubmit = () => {
+    submit.disabled = false;
+    submit.removeAttribute('aria-busy');
+    submit.textContent = idle;
+  };
+  const abandon = () => {
+    attempt += 1;
+    controller?.abort();
+    controller = null;
+    resetSubmit();
+  };
+  const current = (token) => token === attempt && dlg.open;
+  dlg.addEventListener('close', () => { if (controller) abandon(); });
   $('#add-cancel').addEventListener('click', () => dlg.close());
   url.addEventListener('input', showHint);
   web.addEventListener('change', showHint);
@@ -57,6 +74,9 @@ export function setupAdd({ rerender, reload }) {
       copy(analysisRequest({ video, note: $('#add-note').value.trim() }), 'Request copied');
       return;
     }
+    const token = ++attempt;
+    controller?.abort();
+    controller = new AbortController();
     submit.disabled = true;
     submit.setAttribute('aria-busy', 'true');
     submit.textContent = 'Adding…';
@@ -65,11 +85,15 @@ export function setupAdd({ rerender, reload }) {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ url: url.value, note: $('#add-note').value, ...(web.checked ? { allowWeb: true } : {}) }),
+        signal: controller.signal,
       });
+      if (!current(token)) return;
       const body = await res.json();
+      if (!current(token)) return;
       if (res.status === 409 && body.recipeId) {
         // The recipe may have been written after this page loaded: load it before opening it.
         if (!state.recipes.some((r) => r.id === body.recipeId)) await reload?.().catch(() => {});
+        if (!current(token)) return;
         dlg.close();
         location.hash = recipeHash(body.recipeId);
         toast('That one is already in the bank');
@@ -83,11 +107,10 @@ export function setupAdd({ rerender, reload }) {
       else location.hash = '#/';
       toast(`Queued${body.entry.title ? `: ${body.entry.title}` : ''}`);
     } catch {
+      if (!current(token)) return;
       err.textContent = 'The Recipe Bank server is not reachable. Is `npm start` running?';
     } finally {
-      submit.disabled = false;
-      submit.removeAttribute('aria-busy');
-      submit.textContent = idle;
+      if (token === attempt) resetSubmit();
     }
   });
 }
