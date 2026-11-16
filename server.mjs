@@ -283,15 +283,6 @@ export function writeRefusal(headers = {}, { hosts = [], method = 'POST', peer }
   return null;
 }
 
-/**
- * The request handler. Options (all optional):
- *   dataDir     folder holding recipes/ and data/queue.json (default: RECIPE_BANK_DIR, else this repository)
- *   recipesDir  recipe folder, overrides dataDir's
- *   queueFile   queue file, overrides dataDir's
- *   oembed      async (video) => ({ title, creator, creatorUrl }), or null to skip the lookup
- *   resolve     async (video) => video, short-link resolution (default lib/video-resolver.mjs)
- *   hosts       host names besides loopback that writes may be addressed to (default: allowedHosts())
- */
 const MALFORMED_LIST = 'malformed recipe (a component, ingredient or step is not an object)';
 
 // A non-array list, or a null entry in one, used to throw inside validateRecipe. Strings and numbers
@@ -307,6 +298,15 @@ function contractThrows(body) {
   ));
 }
 
+/**
+ * The request handler. Options (all optional):
+ *   dataDir     folder holding recipes/ and data/queue.json (default: RECIPE_BANK_DIR, else this repository)
+ *   recipesDir  recipe folder, overrides dataDir's
+ *   queueFile   queue file, overrides dataDir's
+ *   oembed      async (video) => ({ title, creator, creatorUrl }), or null to skip the lookup
+ *   resolve     async (video) => video, short-link resolution (default lib/video-resolver.mjs)
+ *   hosts       host names besides loopback that writes may be addressed to (default: allowedHosts())
+ */
 export function createHandler({
   dataDir, recipesDir, queueFile, oembed: lookup = oembed, resolve: resolveVideo = resolveShortVideo,
   hosts = allowedHosts(),
