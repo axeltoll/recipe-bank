@@ -67,9 +67,10 @@ Unresolved `fb.watch/<code>`, `pin.it/<code>`, `vm.tiktok.com/<code>` and
 turned into `https:` so the resolver can follow it). Without a resolved ID they
 have no embed. `videoKey` is `<platform>:<id>` when an ID exists, otherwise that
 normal form of the URL, so `http://pin.it/AbC?si=1` and `https://pin.it/AbC`
-are one video. No stored recipe or queue entry is rewritten. The compatibility fixture pins all
-17 existing recipes and the currently empty queue; deliberately update that
-fixture when the collection changes.
+are one video. No stored recipe or queue entry is rewritten. The compatibility fixture
+(`test/video-compat.json`) pins the parsed URL and `videoKey` of each recipe it lists, and of
+the queue. A recipe the fixture does not list is only checked to parse, to the key its file
+implies (`test/video-compat.test.mjs`). Update the fixture when a pinned link or the queue changes.
 
 On new queue submissions only, the server tries to resolve these four short-link
 hosts before metadata lookup and deduplication. `lib/video-resolver.mjs` uses HEAD,
