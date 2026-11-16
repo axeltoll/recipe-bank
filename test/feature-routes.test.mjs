@@ -231,6 +231,32 @@ test('editor: a save that finishes after the reader left does not navigate back'
   assert.deepEqual(h.rb.navigated, [], 'the recipe page is only opened from the editor');
 });
 
+test('editor: a save that finishes after another editor route opened does not open the saved recipe', async (t) => {
+  t.after(() => { delete globalThis.confirm; delete globalThis.location; });
+  const h = editorHarness();
+  h.rb.current = () => {
+    const hash = location.hash;
+    if (hash.startsWith('#/edit')) return { name: 'edit' };
+    if (hash.startsWith('#/new')) return { name: 'new' };
+    return { name: 'home' };
+  };
+  let resolveReload;
+  h.rb.reload = () => new Promise((resolve) => { resolveReload = resolve; });
+  h.go('#/edit/alpha');
+  document.dispatchEvent(new CustomEvent('recipe-bank:recipe-saved', { detail: { id: 'alpha', created: false } }));
+  h.go('#/new');
+  resolveReload();
+  await Promise.resolve();
+  assert.deepEqual(h.rb.navigated, [], 'opening #/new must leave that route in place');
+
+  h.go('#/edit/alpha');
+  document.dispatchEvent(new CustomEvent('recipe-bank:recipe-saved', { detail: { id: 'alpha', created: false } }));
+  h.go('#/edit/beta');
+  resolveReload();
+  await Promise.resolve();
+  assert.deepEqual(h.rb.navigated, [], 'opening #/edit/beta must leave that route in place');
+});
+
 test('editor: a save that finishes while new or edit is still showing opens the recipe', async (t) => {
   t.after(() => { delete globalThis.confirm; delete globalThis.location; });
   const h = editorHarness();
