@@ -134,6 +134,28 @@ test('a count next to a pack size scales only the count', () => {
   assert.equal(scaleAmount('2 tbsp (30 ml)', 0.5).amount, '1 tbsp (15 ml)');
 });
 
+test('a bracket scales unless it is a pack size', () => {
+  const rows = [
+    ['3 eggs (about 150 g)', '6 eggs (about 300 g)'],
+    ['4 chicken thighs (about 600 g)', '8 chicken thighs (about 1200 g)'],
+    ['8 ounces (225 g)', '16 ounces (450 g)'],
+    ['8 fl oz (240 ml)', '16 fl oz (480 ml)'],
+    ['2 heaped tbsp (40 g)', '4 heaped tbsp (80 g)'],
+    ['1 scant cup (about 100 g)', '2 scant cups (about 200 g)'],
+    ['2 sticks (1 cup) butter', '4 sticks (2 cups) butter'],
+    ['1 lemon (2 tbsp juice)', '2 lemons (4 tbsp juice)'],
+    ['1 pint (568 ml)', '2 pint (1136 ml)'],
+    ['2 x 400g tins (about 3 cups)', '4 x 400g tins (about 6 cups)'],
+  ];
+  for (const [input, expected] of rows) {
+    assert.equal(scaleAmount(input, 2).amount, expected, input);
+  }
+  // Straight after the count, or after a container: the bracket is the pack size and stays.
+  assert.equal(scaleAmount('2-3 (200g) fillets', 2).amount, '4-6 (200g) fillets');
+  assert.equal(scaleAmount('2 cans (400g)', 2).amount, '4 cans (400g)');
+  assert.equal(scaleAmount('1 jar (500 g)', 2).amount, '2 jars (500 g)');
+});
+
 test('the count word agrees with the number as shown, after rounding', () => {
   assert.equal(scaleAmount('1½ cups', 0.67).amount, '1 cup'); // 1.005 is shown as 1
   assert.equal(scaleAmount('2 cans', 0.505).amount, '1 can');
