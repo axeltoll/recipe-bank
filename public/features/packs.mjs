@@ -175,6 +175,7 @@ export function mount(element, options = {}) {
   const $ = (name) => element.querySelector(`[data-el="${name}"]`);
   const setStatus = (name, msg, kind = '') => {
     const el = $(name);
+    if (!el) return;
     el.textContent = msg;
     el.dataset.kind = kind;
   };
@@ -213,14 +214,18 @@ export function mount(element, options = {}) {
     setStatus('share-status', `Downloaded ${a.download} with ${plural(pack.recipes.length, 'recipe')}.`, 'ok');
   }
   async function copyLink() {
+    if (destroyed) return;
     const link = packLink(currentPack(), win.location.href);
     const out = $('link-out');
+    if (!out) return;
     out.value = link;
     try {
       await win.navigator.clipboard.writeText(link);
+      if (destroyed) return;
       out.hidden = true;
       setStatus('share-status', 'Link copied. Anyone who opens it can import these recipes.', 'ok');
     } catch {
+      if (destroyed) return;
       out.hidden = false;
       out.select();
       setStatus('share-status', 'Copy the link below.', '');
@@ -230,19 +235,23 @@ export function mount(element, options = {}) {
     try {
       await fn();
     } catch (e) {
+      if (destroyed) return;
       if (!(e instanceof PackError)) throw e;
-      $('link-out').hidden = true;
+      const out = $('link-out');
+      if (out) out.hidden = true;
       setStatus('share-status', e.code === 'empty' ? 'Pick at least one recipe first.' : e.message, 'error');
     }
   };
 
   // ----- import -----
   async function showRead(read) {
+    if (destroyed) return;
     state.read = read;
     setStatus('import-status', '');
     try {
       await ensureRecipes();
     } catch {
+      if (destroyed) return;
       // Without the bank we can still show the pack; duplicates just aren't detected.
       setStatus('import-status', 'Couldn’t load your recipes, so duplicates are not checked.', 'error');
     }
@@ -256,16 +265,18 @@ export function mount(element, options = {}) {
     $('plan').innerHTML = state.plan ? renderPlan(state.plan, { include: state.include, canImport, busy: state.busy }) : '';
   }
   async function openFile(file) {
-    if (!file) return;
+    if (!file || destroyed) return;
     if (file.size > MAX_PACK_CHARS * 4) {
       state.plan = null;
       renderImport();
       return setStatus('import-status', 'That file is far too large to be a recipe pack.', 'error');
     }
-    await showRead(readPack(await file.text()));
+    const text = await file.text();
+    if (destroyed) return;
+    await showRead(readPack(text));
   }
   async function doImport() {
-    if (!state.read || state.busy) return;
+    if (!state.read || state.busy || destroyed) return;
     state.busy = true;
     renderImport();
     try {
@@ -274,7 +285,9 @@ export function mount(element, options = {}) {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ pack: packFromRead(state.read), include: [...state.include] }),
       });
+      if (destroyed) return;
       const body = await res.json().catch(() => ({}));
+      if (destroyed) return;
       if (!res.ok) {
         setStatus('import-status', body.error ?? `Import failed (HTTP ${res.status}).`, 'error');
         return;
@@ -288,7 +301,7 @@ export function mount(element, options = {}) {
       // After the refresh, which clears the status line: what was imported and what was not, and why.
       if (!destroyed) setStatus('import-status', message, kind);
     } catch {
-      setStatus('import-status', 'The Recipe Bank server is not reachable. Is `npm start` running?', 'error');
+      if (!destroyed) setStatus('import-status', 'The Recipe Bank server is not reachable. Is `npm start` running?', 'error');
     } finally {
       state.busy = false;
       if (!destroyed) renderImport();
@@ -318,7 +331,7 @@ export function mount(element, options = {}) {
     } else if (t === $('file')) {
       const file = t.files?.[0];
       t.value = ''; // so choosing the same file again (fixed on disk, or a retry) fires change again
-      openFile(file).catch(() => setStatus('import-status', 'Couldn’t read that file.', 'error'));
+      openFile(file).catch(() => { if (!destroyed) setStatus('import-status', 'Couldn’t read that file.', 'error'); });
     }
   });
   on(element, 'click', (e) => {
