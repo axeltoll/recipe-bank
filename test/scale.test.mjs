@@ -158,6 +158,15 @@ test('a bracket scales unless it is a pack size', () => {
   assert.equal(scaleAmount('1 jar (500 g)', 2).amount, '2 jars (500 g)');
 });
 
+test('a pack size written "oz." stays the size of one can', () => {
+  // The period is part of the unit, so the weight is not a second measure.
+  assert.equal(scaleAmount('1 15 oz. can', 2).amount, '2 15 oz. cans');
+  assert.equal(scaleAmount('1 15 oz. can', 0.5).amount, '½ 15 oz. can');
+  const household = scaleAmount('1 15 oz. can', 6.1 / 6);
+  assert.equal(household.amount, '1 15 oz. can');
+  assert.equal(household.scaled, true);
+});
+
 test('a bare pack size keeps its weight when the unit is spelled out', () => {
   const rows = [
     ['1 14-ounce can', '2 14-ounce cans'],

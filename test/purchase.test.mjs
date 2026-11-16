@@ -306,6 +306,14 @@ test('a factor that rounds back to the same text still adds the amount', () => {
   assert.equal(item(p, 'salt').parts[0].kind, 'total');
 });
 
+test('a pack written "oz." stays one can when a plain can is on the same list', () => {
+  const sized = recipe('sized', '4', [ing('Tomatoes', 'tomato', '1 15 oz. can')]);
+  const plain = recipe('plain', '2', [ing('Tomatoes', 'tomato', '1 can')]);
+  const p = purchaseList(plan('sized', 'plain'), [sized, plain], adults(6));
+  assert.equal(p.servings, 6);
+  assert.equal(item(p, 'tomato').amount, '3 cans + 1½ 15 oz. cans');
+});
+
 test('a pack weight in the scaled text stays the pack weight', () => {
   const tins = recipe('tins', '4', [
     ing('Chopped tomatoes', 'tomato', '2 (400g) cans'),
