@@ -14,6 +14,7 @@ lib/            pure ES modules, no DOM and no fs: shared by server, scripts, br
   migrate.mjs          contract migrations         json-schema.mjs   subset JSON Schema validator
   filter.mjs           every recipe filter          catalog.mjs       dashboard queries (delegates filtering)
   plan.mjs  scale.mjs  household.mjs  budget.mjs  draft.mjs  pack.mjs   feature logic
+  purchase.mjs         purchase amounts and pantry  prices.mjs        price snapshots, no live shop
   format.mjs  nav.mjs  hub.mjs                       dashboard helpers, router maths, feature registry
         │
 server.mjs      node:http: static public/ and /lib/, JSON API (createApp)
