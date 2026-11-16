@@ -136,6 +136,132 @@ test('importMessage: a recipe the server could not write is named with its reaso
     ['Nothing was imported; those recipes are already in your bank.', '']);
 });
 
+/** A packs panel whose nodes disappear when it is destroyed, as they do after leaving the page. */
+function removablePanel(options = {}) {
+  const nodes = new Map();
+  const node = (name) => {
+    if (!nodes.has(name)) {
+      let hidden = false;
+      let hiddenWrites = 0;
+      const el = {
+        dataset: {},
+        value: '',
+        textContent: '',
+        innerHTML: '',
+        files: null,
+        select() {},
+        hiddenWrites: () => hiddenWrites,
+      };
+      Object.defineProperty(el, 'hidden', {
+        get() { return hidden; },
+        set(value) { hidden = value; hiddenWrites += 1; },
+      });
+      nodes.set(name, el);
+    }
+    return nodes.get(name);
+  };
+  let html = '';
+  const win = Object.assign(new EventTarget(), {
+    location: { hash: '', href: '/packs' },
+    navigator: { clipboard: options.clipboard ?? { async writeText() {} } },
+    fetch: async () => { throw new Error('offline'); },
+    setTimeout,
+  });
+  const element = Object.assign(new EventTarget(), {
+    classList: { add() {}, remove() {} },
+    ownerDocument: {
+      defaultView: win,
+      documentElement: { dataset: {} },
+      createElement: () => ({ click() {}, remove() {} }),
+      body: { append() {} },
+    },
+    querySelector(sel) {
+      const name = /\[data-el="([^"]+)"\]/.exec(sel)?.[1];
+      if (!name || !html.includes(`data-el="${name}"`)) return null;
+      return node(name);
+    },
+    querySelectorAll: () => [],
+    contains: () => true,
+  });
+  Object.defineProperty(element, 'innerHTML', {
+    get() { return html; },
+    set(value) { html = String(value ?? ''); },
+  });
+  const panel = mount(element, { static: false, readHash: false, recipes: options.recipes ?? [], ...options, fetch: options.fetch });
+  return { element, panel, node, win };
+}
+
+function act(element, name) {
+  const event = new Event('click');
+  Object.defineProperty(event, 'target', { value: { closest: (sel) => (sel === '[data-act]' ? { dataset: { act: name } } : null) } });
+  element.dispatchEvent(event);
+}
+
+test('a late copy, import or open after leaving packs does not touch a removed status line', async (t) => {
+  const errors = [];
+  const onRejection = (error) => errors.push(error);
+  process.on('unhandledRejection', onRejection);
+  t.after(() => process.off('unhandledRejection', onRejection));
+
+  let rejectCopy;
+  const copy = removablePanel({
+    recipes: [makeRecipe('alpha', 1)],
+    clipboard: { writeText: () => new Promise((_, reject) => { rejectCopy = reject; }) },
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  const pick = new Event('change');
+  Object.defineProperty(pick, 'target', { value: { dataset: { pick: 'alpha' }, checked: true } });
+  copy.element.dispatchEvent(pick);
+  act(copy.element, 'link');
+  const linkOut = copy.node('link-out');
+  const writesAtAwait = linkOut.hiddenWrites();
+  copy.panel.destroy();
+  rejectCopy(new Error('clipboard unavailable'));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(linkOut.hiddenWrites(), writesAtAwait, 'the copy result must not update the link field after destroy');
+  assert.equal(copy.node('share-status').textContent, '');
+
+  let imported = 0;
+  let releaseImport;
+  const importer = removablePanel({
+    recipes: [makeRecipe('alpha', 1)],
+    onImported: () => { imported += 1; },
+    fetch: (url) => (String(url).includes('/api/packs/import')
+      ? new Promise((resolve) => {
+        releaseImport = () => resolve({
+          ok: true,
+          status: 200,
+          json: async () => ({ created: ['beta'], skipped: [] }),
+        });
+      })
+      : { ok: true, json: async () => ({ recipes: [], invalid: [] }) }),
+  });
+  const pack = JSON.stringify(exportPack([makeRecipe('beta', 2)], { title: 't' }));
+  const file = importer.node('file');
+  file.files = [{ size: pack.length, text: async () => pack }];
+  const change = new Event('change');
+  Object.defineProperty(change, 'target', { value: file });
+  importer.element.dispatchEvent(change);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  act(importer.element, 'import');
+  importer.panel.destroy();
+  releaseImport();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(imported, 1, 'a finished import still tells the page to reload the bank');
+
+  let releaseText;
+  const opener = removablePanel({ recipes: [] });
+  const input = opener.node('file');
+  input.files = [{ size: 8, text: () => new Promise((resolve) => { releaseText = () => resolve('{'); }) }];
+  const open = new Event('change');
+  Object.defineProperty(open, 'target', { value: input });
+  opener.element.dispatchEvent(open);
+  opener.panel.destroy();
+  releaseText();
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  assert.deepEqual(errors, []);
+});
+
 test('the import status line survives the refresh after an import', async () => {
   const { element, el } = fakePanel();
   const pack = JSON.stringify(exportPack([makeRecipe('alpha', 1)], { title: 't' }));

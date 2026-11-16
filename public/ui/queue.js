@@ -1,7 +1,7 @@
 // Queued-video page (layout type: detail): the video, where it is in the analysis, and what you can do meanwhile.
 import { esc, formatDate, safeUrl } from '/lib/format.mjs';
 import { analysisRequest, queueState, recipeForVideo } from '/lib/catalog.mjs';
-import { recipeHash } from '/lib/nav.mjs';
+import { recipeHash, queueHash } from '/lib/nav.mjs';
 import { $, view, state, STATIC, PLATFORM, icon, copy, removeQueued } from './core.js';
 import { renderMissing } from './states.js';
 import { player } from './recipe.js';
@@ -64,7 +64,8 @@ export function renderQueued(id) {
 
   $('#copy-req')?.addEventListener('click', () => copy(analysisRequest(x), 'Request copied'));
   $('#remove-req')?.addEventListener('click', async (e) => {
-    if (await removeQueued(x.id, e.currentTarget)) location.hash = '#/';
+    const page = queueHash(x.id);
+    if (await removeQueued(x.id, e.currentTarget) && location.hash === page) location.hash = '#/';
   });
   return { name: 'queue', layout: 'detail', id: x.id, entry: x };
 }

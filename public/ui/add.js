@@ -39,6 +39,22 @@ export function setupAdd({ rerender, reload }) {
     dlg.showModal();
     url.focus();
   });
+  // Closing (Cancel, Escape, or a finished add) forgets the attempt and re-enables the button, so a
+  // response that arrives later cannot close a dialog the reader has opened since or move them.
+  // The request itself keeps running: the server may already have queued the video, and a 201 still
+  // updates the queue and redraws the home page.
+  let attempt = 0;
+  const resetSubmit = () => {
+    submit.disabled = false;
+    submit.removeAttribute('aria-busy');
+    submit.textContent = idle;
+  };
+  const abandon = () => {
+    attempt += 1;
+    resetSubmit();
+  };
+  const current = (token) => token === attempt && dlg.open;
+  dlg.addEventListener('close', abandon);
   $('#add-cancel').addEventListener('click', () => dlg.close());
   url.addEventListener('input', showHint);
   web.addEventListener('change', showHint);
@@ -57,6 +73,7 @@ export function setupAdd({ rerender, reload }) {
       copy(analysisRequest({ video, note: $('#add-note').value.trim() }), 'Request copied');
       return;
     }
+    const token = ++attempt;
     submit.disabled = true;
     submit.setAttribute('aria-busy', 'true');
     submit.textContent = 'Adding…';
@@ -67,27 +84,32 @@ export function setupAdd({ rerender, reload }) {
         body: JSON.stringify({ url: url.value, note: $('#add-note').value, ...(web.checked ? { allowWeb: true } : {}) }),
       });
       const body = await res.json();
+      if (res.status === 201 && body.entry) {
+        state.queue.push(body.entry);
+        const live = current(token);
+        if (live) dlg.close();
+        renderStats();
+        if (location.hash === '' || location.hash === '#/') rerender();
+        else if (live) location.hash = '#/';
+        if (live) toast(`Queued${body.entry.title ? `: ${body.entry.title}` : ''}`);
+        return;
+      }
+      if (!current(token)) return;
       if (res.status === 409 && body.recipeId) {
         // The recipe may have been written after this page loaded: load it before opening it.
         if (!state.recipes.some((r) => r.id === body.recipeId)) await reload?.().catch(() => {});
+        if (!current(token)) return;
         dlg.close();
         location.hash = recipeHash(body.recipeId);
         toast('That one is already in the bank');
         return;
       }
       if (!res.ok) { err.textContent = body.error ?? 'Could not add it'; return; }
-      state.queue.push(body.entry);
-      dlg.close();
-      renderStats();
-      if (location.hash === '' || location.hash === '#/') rerender();
-      else location.hash = '#/';
-      toast(`Queued${body.entry.title ? `: ${body.entry.title}` : ''}`);
     } catch {
+      if (!current(token)) return;
       err.textContent = 'The Recipe Bank server is not reachable. Is `npm start` running?';
     } finally {
-      submit.disabled = false;
-      submit.removeAttribute('aria-busy');
-      submit.textContent = idle;
+      if (token === attempt) resetSubmit();
     }
   });
 }

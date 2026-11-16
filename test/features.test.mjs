@@ -285,6 +285,36 @@ test('a panel with some sections only reports and clears its own fields', () => 
   panel.destroy();
 });
 
+test('Show all and Show fewer keep keyboard focus on that section\'s new button', () => {
+  const recipes = [
+    { tags: ['soup', 'quick'], components: [{ ingredients: [{ key: 'egg' }, { key: 'salt' }] }] },
+  ];
+  const el = Object.assign(new EventTarget(), {
+    innerHTML: '',
+    focused: null,
+    querySelector(sel) {
+      if (!sel.includes('data-more') || !this.innerHTML.includes('data-more=')) return null;
+      const group = /data-group="([^"]+)"/.exec(sel)?.[1];
+      const kind = group === 'tags' ? 'tag' : group ?? /data-more="([^"]+)"/.exec(sel)?.[1];
+      if (!kind || !this.innerHTML.includes(`data-more="${kind}"`)) return null;
+      return { focus: () => { this.focused = kind; } };
+    },
+  });
+  const panel = filtersUi.mount(el, { recipes, persist: false, css: false, limit: 1, sections: ['without', 'tags'] });
+  assert.match(el.innerHTML, /data-more="without">Show all/);
+  assert.match(el.innerHTML, /data-more="tag">Show all/);
+
+  fire(el, 'click', { '[data-more]': { dataset: { more: 'without' } } });
+  assert.match(el.innerHTML, /data-more="without">Show fewer/);
+  assert.equal(el.focused, 'without', 'focus returns to the Without button that replaced the one just pressed');
+  assert.match(el.innerHTML, /data-more="tag">Show all/);
+
+  el.focused = null;
+  fire(el, 'click', { '[data-more]': { dataset: { more: 'tag' } } });
+  assert.equal(el.focused, 'tag');
+  panel.destroy();
+});
+
 test('scale "Original amounts" resets, although the section around it carries data-factor', () => {
   const el = fakeEl();
   const scaler = scaleUi.mount(el, { recipe: alpha, factor: 2, css: false });

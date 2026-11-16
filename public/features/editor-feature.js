@@ -121,6 +121,9 @@ export function install(rb, { mountEditor = realMountEditor } = {}) {
   // A saved recipe: re-read the bank (the server may also have removed its queue entry), then show it.
   document.addEventListener('recipe-bank:recipe-saved', async (e) => {
     const { id, created } = e.detail ?? {};
+    // #/new and #/edit/b are both editor routes, so the route name cannot tell this page from the
+    // next one. Remember the hash and open the recipe only when the reader is still here.
+    const hash = currentHash();
     try {
       await rb.reload();
     } catch {
@@ -128,7 +131,7 @@ export function install(rb, { mountEditor = realMountEditor } = {}) {
       return;
     }
     rb.toast(created ? 'Recipe saved' : 'Changes saved');
-    if (id) rb.navigate(`#/r/${encodeURIComponent(id)}`);
+    if (id && currentHash() === hash) rb.navigate(`#/r/${encodeURIComponent(id)}`);
   });
 
   document.addEventListener('recipe-bank:editor-cancel', (e) => {

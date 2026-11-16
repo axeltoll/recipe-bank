@@ -137,8 +137,13 @@ export function mount(el, options = {}) {
     }
     const more = e.target.closest('[data-more]');
     if (more) {
-      expanded[more.dataset.more] = !expanded[more.dataset.more];
-      return render();
+      const kind = more.dataset.more;
+      expanded[kind] = !expanded[kind];
+      render();
+      // The button that was focused was just replaced. Put focus on the new one in the same section.
+      const group = kind === 'tag' ? 'tags' : kind;
+      el.querySelector(`[data-group="${group}"] [data-more]`)?.focus();
+      return;
     }
     if (e.target.closest('[data-clear]')) {
       // Only what this panel shows: fields of sections that are not mounted here stay as they are.
