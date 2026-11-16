@@ -6,6 +6,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { allowedHosts, writeRefusal } from '../server.mjs';
+import { PAGES } from '../scripts/browser/selectors.mjs';
 
 const ROOT = resolve(import.meta.dirname, '..');
 const read = (rel) => readFile(join(ROOT, rel), 'utf8');
@@ -70,4 +71,22 @@ test('the roadmap total says what it adds up, and both figures match the items',
     if (m[1] === ' ') open += Number(m[2]);
   }
   assert.match(roadmap, new RegExp(`About ${all} hours in total, ticked items included; the open items add up to about ${open} hours\\.`));
+});
+
+test('CLAUDE.md names the routes the device check measures', async () => {
+  const claude = await read('CLAUDE.md');
+  const line = claude.split('\n').find((l) => l.includes('npm run device-check'));
+  assert.ok(line, 'the device-check command is documented');
+  const comment = line.slice(line.indexOf('#') + 1);
+  const measured = PAGES.map(([, hash]) => (typeof hash === 'function' ? '#/r/<id>' : hash));
+  assert.deepEqual(measured, ['#/', '#/r/<id>', '#/plan', '#/household', '#/packs', '#/new']);
+  assert.match(comment, /home page/);
+  assert.match(comment, /\ba recipe\b/);
+  for (const hash of ['#/plan', '#/household', '#/packs', '#/new']) {
+    assert.ok(comment.includes(hash), `the device-check line names ${hash}`);
+  }
+  const editor = await read('public/features/editor-feature.js');
+  assert.match(editor, /addRoute\('edit'/);
+  assert.equal(PAGES.some(([, hash]) => typeof hash === 'string' && hash.startsWith('#/edit')), false);
+  assert.doesNotMatch(comment, /every feature route/);
 });

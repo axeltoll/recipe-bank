@@ -15,7 +15,7 @@ npm run migrate    # dry run; `npm run migrate -- --write` upgrades recipe files
 npm run packs      # export / import recipe packs (scripts/pack.mjs; import is a dry run without --write)
 npm run doctor     # optional tools for the Recipe Agent
 npm run smoke      # browser smoke test, live and static (needs Chrome; skips without one)
-npm run device-check # layout audit of every dashboard page at five widths
+npm run device-check # layout audit of the home page, a recipe, #/plan, #/household, #/packs and #/new at 390, 768, 1280, 1920 and 2560 pixels
 npm run site       # the public website in site/ on port 4790
 ```
 
@@ -38,11 +38,13 @@ No dependencies. Node ≥ 22 (built-in `fetch`, `node:test`, `import.meta.dirnam
 | `lib/plan.mjs` | Week plan and the combined shopping list (merged by `key`, grouped by aisle via `AISLE_KEYS`). |
 | `lib/scale.mjs` | Serving scaling of plain-number amounts; words and rates stay untouched. |
 | `lib/household.mjs`, `lib/budget.mjs` | Household profile (servings per meal) and food budget (minor-unit money, ISO weeks, CSV). |
+| `lib/purchase.mjs` | Purchase amounts and pantry. |
+| `lib/prices.mjs` | Price snapshots, no live shop. |
 | `lib/draft.mjs` | Recipe editor logic: `emptyDraft`, `draftFromRecipe` / `recipeFromDraft` (round-trip safe, unknown fields kept), `checkDraft`, `slugify`, `parseTimestamp` / `formatTimestamp`. |
 | `lib/pack.mjs` | Recipe packs: export, read (untrusted input), plan an import, apply it, links. |
 | `server.mjs` | `node:http` server: static `public/` and `/lib/`, plus the JSON API. One factory, `createApp({ dataDir, recipesDir, queueFile, oembed, resolve })`; `server` and `handleRequest` are the default app (the smoke test listens on port 0). |
 | `public/` | Dashboard (vanilla ES modules + CSS, light/dark). `app.js` is boot and router; views are in `public/ui/`. Hash routes: `#/`, `#/r/<id>`, `#/q/<queueId>`, plus the feature routes `#/plan`, `#/household`, `#/packs`, `#/new[/<queueId>]`, `#/edit/<id>`. |
-| `public/features/` | Self-contained feature modules (`*.mjs`, `mount(el, options)`) and their installers (`*-feature.js`), listed in `features/index.js`. Contract: `docs/design/MOUNT-POINTS.md`; module docs: `INTEGRATION.md`, `HOUSEHOLD.md`, `EDITOR.md`, `PACKS.md`. |
+| `public/features/` | Self-contained feature modules (`*.mjs`, `mount(el, options)`) and their installers (`*-feature.js`), listed in `features/index.js`. Contract: `docs/design/MOUNT-POINTS.md`; module docs: `INTEGRATION.md`, `HOUSEHOLD.md`, `EDITOR.md`, `PACKS.md`, `PURCHASE.md`. |
 | `public/sw.js` | Offline service worker. Off unless the reader turns on the footer switch. |
 | `docs/design/` | `DESIGN.md` (tokens, layout contract, states, cook mode, timers), `AUDIT.md` (round 1), `ROUND2.md` (round 2), `MOUNT-POINTS.md`. Change `public/styles.css` and `DESIGN.md` together. |
 | `docs/ARCHITECTURE.md` | One page: modules, data flow, routes, API. |

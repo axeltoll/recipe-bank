@@ -101,7 +101,7 @@ Use the coding agent you already have to turn a supported video link into a cred
 |---|---|
 | `recipes/<id>.json` | One file per recipe. The format is documented in [CLAUDE.md](CLAUDE.md), enforced by `lib/recipe.mjs` and described in full by `schema/recipe.schema.json`. |
 | `data/queue.json` | Videos waiting for analysis. |
-| `lib/` | Shared by the server, the scripts and the browser: video-URL parsing (`video.mjs`), the recipe contract (`recipe.mjs`), migrations (`migrate.mjs`), filters (`filter.mjs`), dashboard queries (`catalog.mjs`), week plan and shopping list (`plan.mjs`), serving scaling (`scale.mjs`), household and budget (`household.mjs`, `budget.mjs`), the editor's drafts (`draft.mjs`), recipe packs (`pack.mjs`). |
+| `lib/` | Shared by the server, the scripts and the browser: video-URL parsing (`video.mjs`), the recipe contract (`recipe.mjs`), migrations (`migrate.mjs`), filters (`filter.mjs`), dashboard queries (`catalog.mjs`), week plan and shopping list (`plan.mjs`), serving scaling (`scale.mjs`), household and budget (`household.mjs`, `budget.mjs`), purchase amounts and pantry (`purchase.mjs`), price snapshots with no live shop (`prices.mjs`), the editor's drafts (`draft.mjs`), recipe packs (`pack.mjs`). |
 | `server.mjs` | Static files plus the JSON API: recipes (read, create, replace), the queue, pack import. |
 | `public/` | The dashboard: `app.js` (boot and router), views in `ui/`. |
 | `public/features/` | Self-contained feature modules and the small installers that put them in the dashboard. |

@@ -86,7 +86,7 @@ Content-Type: application/json
 ```
 
 - `201 { created: [ids], skipped: [{ index, id, reason }], counts }` when something was created, `200` with the same shape when nothing was.
-- `400` for a body that is not a usable pack (`error` says why), `415` without a JSON content type, `413` past about 2 MB.
+- `400` for a body that is not a usable pack (`error` says why), including one `readPack` refuses because its JSON text is over `MAX_PACK_CHARS` (2,000,000 characters), `415` without a JSON content type, and `413` when the request body is over `MAX_PACK_BYTES + 10_000` bytes. `MAX_PACK_BYTES` is three times `MAX_PACK_CHARS` (6,000,000).
 - The JSON content type is required on purpose: it makes browsers send a CORS preflight, which the server never grants, so other websites cannot write recipes through it.
 
 ### Command line

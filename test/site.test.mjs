@@ -431,6 +431,17 @@ test('site/data/features.json is valid and tells shipped, next and planned apart
   }
 });
 
+test('a README.md parenthesis in features.json names only text README.md contains', async () => {
+  const readme = await readFile(join(ROOT, 'README.md'), 'utf8');
+  for (const feature of data.features.features) {
+    for (const match of feature.source.matchAll(/README\.md \(([^)]*)\)/g)) {
+      for (const part of match[1].split(',').map((s) => s.trim()).filter(Boolean)) {
+        assert.ok(readme.includes(part), `${feature.id}: README.md does not name ${part}`);
+      }
+    }
+  }
+});
+
 test('validateFeatures names what is wrong', () => {
   const ok = { id: 'a', status: 'shipped', title: 'A', text: 'A.', source: 'README.md' };
   assert.deepEqual(validateFeatures({ features: [ok] }), []);
