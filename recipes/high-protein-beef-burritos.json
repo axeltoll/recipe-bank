@@ -1,0 +1,91 @@
+{
+  "id": "high-protein-beef-burritos",
+  "title": "High-Protein Beef Burritos",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "zrN7FKi4rU8",
+    "url": "https://www.youtube.com/shorts/zrN7FKi4rU8"
+  },
+  "creator": {
+    "name": "Louis Howard",
+    "handle": "@LouisHowardpt",
+    "url": "https://www.youtube.com/@LouisHowardpt"
+  },
+  "uploaded": "2026-11-16",
+  "analyzed": "2026-11-16",
+  "summary": "Lean minced beef cooked with diced white onion, bone broth, Taco Bell taco sauce, tomato paste and reduced-fat cream cheese until creamy, divided between eight high-protein wraps and finished with a sour-cream-and-Frank's-RedHot drizzle sauce. Louis Howard's review/recreation of a recipe credited to @Cookingforgains; he rates it 9.8/10.",
+  "serves": "8 burritos (description); narration drifts to 'gone for four' and 'coming off in pairs of two'",
+  "tags": ["beef", "burrito", "wrap", "mexican", "fakeaway", "high protein", "meal prep"],
+  "components": [
+    {
+      "name": "Beef filling",
+      "ingredients": [
+        {"item": "Lean minced beef", "key": "beef", "amount": "907g", "basis": "description", "note": "Spoken '2 lbs extra lean meat, beef' (0:16-0:17) — 2 lb ≈ 907g corroborates the written metric amount."},
+        {"item": "White onion, diced", "key": "onion", "amount": "1 (about 150g)", "basis": "description", "note": "Spoken 'Chop up a white onion' (0:10); mass only in the written list."},
+        {"item": "Bone broth", "key": "bone broth", "amount": "½ cup (about 120ml)", "basis": "description", "note": "Spoken garble 'half cut bone broth' (0:17) [sic — auto-caption]; the written '½ cup (about 120ml)' is the measurement, not the garble."},
+        {"item": "Taco Bell taco sauce (or salsa to taste)", "key": "taco sauce", "amount": "1 packet", "basis": "description", "note": "Spoken 'a packet of Taco Bell seasoning' (0:19) + 'taco' (0:21) and garble 'cowpiss' (0:19) [sic]. Description says 'taco sauce', narration says 'seasoning' — kept the written product; packet size/variant unstated."},
+        {"item": "Tomato paste", "key": "tomato paste", "amount": "60g", "basis": "description", "note": "Spoken 'tomato paste' (0:22); mass only in the written list."},
+        {"item": "Reduced-fat cream cheese (or light sour cream)", "key": "cream cheese", "amount": "60g", "basis": "description", "note": "Spoken '1/3 fat cream cheese' (0:22) [sic — auto-caption '1/3 fat']; description says 'reduced-fat cream cheese or light sour cream'. Fat fraction unspecified; kept the written amount."}
+      ],
+      "steps": [
+        {"text": "Cook the diced white onion in a pan over medium heat until it starts to brown.", "t": 14},
+        {"text": "Add the mince and cook it through. Add the bone broth, turn the heat low and stir in the taco sauce (or salsa), tomato paste and cream cheese. Mix until creamy.", "t": 16}
+      ]
+    },
+    {
+      "name": "Drizzle sauce",
+      "ingredients": [
+        {"item": "Light sour cream", "key": "sour cream", "amount": "120g", "basis": "description", "note": "DESCRIPTION spec. The narration instead describes 'Half a cup plain Greek yogurt' (0:38-0:39) — a different base; see notes/gaps, unresolved."},
+        {"item": "Frank's RedHot", "key": "hot sauce", "amount": "15g (about 1 tbsp)", "basis": "description", "note": "DESCRIPTION spec. Narration says 'Half tspoon hot sauce' (0:41-0:43) [sic] — different amount and unspecified brand; unresolved."},
+        {"item": "Smoked paprika", "key": "paprika", "amount": "½ tsp", "basis": "description", "note": "Spoken 'We got some paprika' (0:43); 'smoked' and the amount only in the written list."},
+        {"item": "Garlic powder", "key": "garlic powder", "amount": "½ tsp", "basis": "description", "note": "Spoken 'Garlic powder. Garlic.' (0:43-0:44); amount only in the written list."},
+        {"item": "Salt", "key": "salt", "amount": "1 pinch", "basis": "description", "note": "Spoken 'A pinch of salt' (0:44-0:47) — matches."},
+        {"item": "Lime juice", "key": "lime", "amount": "1 tsp", "basis": "description", "note": "Spoken 'A splash of lime juice' (0:47); the written '1 tsp' is the measurement."},
+        {"item": "Water, to thin", "key": "water", "amount": "a splash", "basis": "description", "note": "Spoken 'Add a little bit of water to make it more of a liquid' (0:47-0:48) — matches."}
+      ],
+      "steps": [
+        {"text": "In a bowl, mix the sour cream, Frank's, paprika, garlic powder, salt and lime juice. Add a little water until it is thin enough to drizzle.", "t": 36}
+      ]
+    },
+    {
+      "name": "To assemble",
+      "ingredients": [
+        {"item": "High-protein wraps", "key": "wrap", "amount": "8", "basis": "description", "note": "Description 'Makes 8 burritos' / '8 high-protein wraps'. Spoken 'eight wellness wraps. I've gone for four in case it tastes like' (0:50-0:54, garbled) and 'coming off in pairs of two' (1:01) — yield drift; kept the written 8. Brand/size unstated."}
+      ],
+      "steps": [
+        {"text": "Divide the beef between the eight wraps, drizzle over the sauce, fold in the sides and roll them up.", "t": 58}
+      ]
+    }
+  ],
+  "nutrition": {
+    "per": "burrito",
+    "basis": "description",
+    "calories": 288,
+    "protein_g": 33,
+    "carbs_g": 31,
+    "fat_g": 8.25,
+    "note": "Creator-reported estimate from the description: 'Estimated macros per burrito: 288 calories | 33g protein | 8.25g fat | 31g carbs. Macros will vary depending on the wraps and brands you use.' Narration corroborates: 'under 300 calories and 33 g of protein' (1:09-1:12). No legible on-screen macro card appears in any sampled frame (OCR raw + preprocessed returned noise; control-proven vision read vision/read-macros.txt confirms 'no legible macro numbers'), so all four figures rest on the description alone. Not independently calculated; the narration's divergent sauce base is not reconciled into these figures."
+  },
+  "notes": [
+    "Louis Howard's description credits @Cookingforgains ('Recipe inspired by @Cookingforgains'). This capture documents Louis's public review/recreation; the credited original was not independently audited.",
+    "Verdict: description 'Rating: 9.8/10'; spoken 'That's lovely. 10 out of 10. I'll be leaning closer to a 9.8, but still very good' (1:21-1:25).",
+    "Yield conflict: description 'Makes 8 burritos' and '8 high-protein wraps'; narration 'We're going to be using eight wellness wraps. I've gone for four in case it tastes like' (0:50-0:54, garbled) and 'These are coming off in pairs of two' (1:01). The written 8 is the spec; the spoken drift to four is recorded, not harmonized.",
+    "Sauce-base divergence (cross-surface conflict): the DESCRIPTION drizzle sauce is light sour cream + Frank's RedHot + smoked paprika + garlic powder + salt + lime juice + water. The NARRATION instead describes 'Half a cup plain Greek yogurt' (0:38-0:39), '1 tbsp of light mayo' (0:41), 'Half tspoon hot sauce' (0:41-0:43), paprika, garlic powder, 'A pinch of salt', 'A splash of lime juice' and water (0:43-0:48) — a Greek-yogurt-and-mayo base with no named Frank's. Both are preserved; which sauce was actually used is unknowable from the source. The recipe card follows the written description.",
+    "Auto-caption garbles preserved verbatim, not repaired: 'cowpiss' (0:19), 'half cut bone broth' (0:17), 'eight wellness wraps' (0:50), '1/3 fat cream cheese' (0:22), 'a packet of Taco Bell seasoning' (0:19, vs description 'taco sauce'), 'Half tspoon hot sauce' (0:41).",
+    "Marketing CTA, not recipe content: description 'Click the link in my bio, and I'll show you how to lose fat and keep it off in just 13 days!' and the spoken 13-day free-email pitch (0:26-0:36). Recorded as the creator's funnel claim; no affiliate link surface was captured.",
+    "No legible on-screen ingredient/quantity or macro cards in any sampled frame: the 24-frame base sweep plus dense filling (14-26s), sauce (36-50s) and macro/wrap (50-58s, 66-76s) windows OCR'd to noise on both raw and preprocessed passes; control-proven vision reads (vision/read-cards.txt, vision/read-macros.txt) confirm only product labels, no legible lists. The description is the sole measured spec surface."
+  ],
+  "gaps": [
+    "Taco Bell taco sauce packet size/variant unstated; the 'or salsa to taste' alternative is unmeasured.",
+    "High-protein wrap brand/size unstated; the creator explicitly warns macros vary by wrap and brand.",
+    "Sauce base unresolved: description sour cream + Frank's RedHot vs narration Greek yogurt + light mayo + unspecified hot sauce; the source does not settle which was used.",
+    "Spoken yield drift (four vs the written eight) unresolved; the description spec is eight.",
+    "Cream-cheese fat fraction unspecified ('reduced-fat' written vs '1/3 fat' spoken garble); the light-sour-cream alternative is unmeasured.",
+    "All ingredient amounts are description-only — no on-screen quantity card was legible to corroborate them.",
+    "Bone broth '½ cup (about 120ml)' is the written measure; the spoken 'half cut' garble is not a quantity."
+  ],
+  "source": {
+    "quantity_basis": "Measurements and estimated per-burrito macros from the public description (the sole measured spec surface). Method checked against 56 English automatic-caption segments and sampled source frames (24-frame base sweep + dense filling/sauce/macro windows). OCR raw + preprocessed passes returned noise — no legible on-screen quantity or macro cards; control-proven auxiliary vision reads (token delta +192; receipts in vision/) confirm only product labels. The narration's divergent Greek-yogurt-and-mayo sauce, the four-vs-eight yield drift and the auto-caption garbles are documented, not harmonized. No macro recalculation; the creator's 'macros will vary' caveat is preserved."
+  }
+}
