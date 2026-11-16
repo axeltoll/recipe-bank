@@ -164,6 +164,14 @@ test('a kept bracket does not take the plural of the container count', () => {
   assert.equal(scaleAmount('1 jar (about 1 clove) salsa', 2).amount, '2 jars (about 1 clove) salsa');
 });
 
+test('every number in one pack bracket stays with the first', () => {
+  assert.equal(scaleAmount('1 can (14 oz / 400 g)', 2).amount, '2 cans (14 oz / 400 g)');
+  assert.equal(scaleAmount('2 (14 oz / 400 g) cans', 2).amount, '4 (14 oz / 400 g) cans');
+  assert.equal(scaleAmount('1 pack (2 x 200g) halloumi', 2).amount, '2 packs (2 x 200g) halloumi');
+  // Two numbers in a bracket that is not a pack still both scale.
+  assert.equal(scaleAmount('2 tbsp (30 ml / 1 oz)', 2).amount, '4 tbsp (60 ml / 2 oz)');
+});
+
 test('a total, or a cup or spoon, scales even after a container', () => {
   const doubled = [
     ['2 cans (800g total)', '4 cans (1600g total)'],
