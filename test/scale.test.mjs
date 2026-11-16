@@ -158,6 +158,19 @@ test('a bracket scales unless it is a pack size', () => {
   assert.equal(scaleAmount('1 jar (500 g)', 2).amount, '2 jars (500 g)');
 });
 
+test('an adjective before a bracket still leaves the can size alone', () => {
+  const rows = [
+    ['1 large (28 oz) can', '2 large (28 oz) cans'],
+    ['1 small (8 oz) can tomato sauce', '2 small (8 oz) cans tomato sauce'],
+    ['1 big (400g) tin', '2 big (400g) tins'],
+  ];
+  for (const [input, expected] of rows) {
+    assert.equal(scaleAmount(input, 2).amount, expected, input);
+  }
+  // A weight after an adjective is the ingredient itself when no container follows.
+  assert.equal(scaleAmount('2 large (about 300g) potatoes', 2).amount, '4 large (about 600g) potatoes');
+});
+
 test('a pack size written "oz." stays the size of one can', () => {
   // The period is part of the unit, so the weight is not a second measure.
   assert.equal(scaleAmount('1 15 oz. can', 2).amount, '2 15 oz. cans');
