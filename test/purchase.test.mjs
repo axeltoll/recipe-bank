@@ -82,6 +82,23 @@ test('parseMeasure refuses words, rates, two measures, pack sizes and broken num
   }
 });
 
+test('cookie and brownie drop only the s; berry and cherry keep y', () => {
+  assert.equal(parseMeasure('2 cookies').one, 'cookie');
+  assert.equal(parseMeasure('2 cookies').many, 'cookies');
+  assert.equal(parseMeasure('1 cookie').one, 'cookie');
+  assert.equal(parseMeasure('2 brownies').one, 'brownie');
+  assert.equal(parseMeasure('2 berries').one, 'berry');
+  assert.equal(parseMeasure('2 cherries').one, 'cherry');
+  assert.equal(unitKey('cookies').base, 'cookie');
+  assert.equal(unitKey('berries').base, 'berry');
+
+  const baked = recipe('baked', '2', [ing('Cookies', 'cookie', '1 cookie')]);
+  const more = recipe('more', '2', [ing('Cookies', 'cookie', '2 cookies')]);
+  const p = purchaseList(plan('baked', 'more'), [baked, more], adults(2));
+  assert.equal(item(p, 'cookie').parts.length, 1);
+  assert.equal(item(p, 'cookie').amount, '3 cookies');
+});
+
 test('unitKey gives the base unit a price or amount adds up in', () => {
   assert.deepEqual(unitKey('kg'), { base: 'g', size: 1000 });
   assert.deepEqual(unitKey('g'), { base: 'g', size: 1 });
