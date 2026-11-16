@@ -1,5 +1,5 @@
-// scripts/validate.mjs on malformed recipe files and queue entries. A crash is a todo:
-// the script should print a report and exit 1, and these inputs currently throw first.
+// scripts/validate.mjs on malformed recipe files and queue entries.
+// The script prints a report and exits 1. It does not print a stack trace.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -186,7 +186,7 @@ test('a null or non-array component, ingredient or step is reported, not a stack
   assert.deepEqual(crashes, []);
 });
 
-test('a null queue entry is reported even when a recipe has no usable video', { todo: 'bug: null queue entry throws TypeError reading video when a recipe key is empty' }, async () => {
+test('a null queue entry is reported even when a recipe has no usable video', async () => {
   const dir = await tempBank([]);
   try {
     await writeFile(join(dir, 'recipes', 'a.json'), '{}\n');
@@ -202,7 +202,7 @@ test('a null queue entry is reported even when a recipe has no usable video', { 
   }
 });
 
-test('a data folder with no recipes directory is a reported problem', { todo: 'bug: missing recipes/ throws ENOENT and prints no report' }, async () => {
+test('a data folder with no recipes directory is a reported problem', async () => {
   const dir = await mkdtemp(join(tmpdir(), 'recipe-bank-test-'));
   try {
     await mkdir(join(dir, 'data'));
