@@ -21,17 +21,17 @@
     {
       "name": "Chicken kebabs",
       "ingredients": [
-        {"item": "Lean chicken mince (5% fat or less)", "key": "chicken", "amount": "1kg", "basis": "description", "note": "On-screen card reads '1000g ground chicken' (OCR f-007/f-008, dense chicken-006/008); spoken 'lean ground chicken'."},
-        {"item": "Brown onion, finely diced", "key": "onion", "amount": "1 medium", "basis": "description", "note": "Spoken 'onions'; variety and size only in the written list."},
+        {"item": "Lean chicken mince (5% fat or less)", "key": "chicken", "amount": "1kg", "basis": "description", "note": "On-screen card OCR fragments '1000g ground |' (dense chicken-006), '00g ﬁround chicken' (chicken-007), '1000g' + 'round chicke' (chicken-008, garbled); control-proven vision read of chicken-008 resolves '1000g ground chicken' (vision/read-spice-chicken.txt). Spoken 'lean ground chicken' (0:26)."},
+        {"item": "Brown onion, finely diced", "key": "onion", "amount": "1 medium", "basis": "description", "note": "Spoken 'Onions' (0:09); variety and size only in the written list."},
         {"item": "Red pepper, finely diced", "key": "red pepper", "amount": "1", "basis": "description", "note": "Spoken 'bell pepper'; no on-screen quantity card for the vegetables was legible."},
         {"item": "Garlic cloves, minced", "key": "garlic", "amount": "4 cloves", "basis": "description"},
-        {"item": "Fresh coriander, chopped", "key": "coriander", "amount": null, "basis": "unstated", "note": "No quantity given. On-screen card 'chopped coriander' (dense chicken-011). Louis swaps to parsley on screen ('The missus doesn't like coriander', 0:29-0:32; card 'parsley', dense chicken-017) — a personal substitution, not part of the written spec."},
-        {"item": "Paprika", "key": "paprika", "amount": "2 tsp", "basis": "description", "note": "On-screen spice card OCR (f-009): '2 tsp pup,r.ik/' [interpretation: paprika]; vision read '2 tsp paprika'."},
+        {"item": "Fresh coriander, chopped", "key": "coriander", "amount": null, "basis": "unstated", "note": "No quantity given. On-screen card 'chopped coriander' (preprocessed OCR pp/chicken-011.png; raw dense chicken-011 garbles to 'chopped commd'). Louis swaps to parsley on screen ('The missus doesn't like coriander', 0:29-0:32; card 'parsley', dense chicken-017 / pp chicken-017) — a personal substitution, not part of the written spec."},
+        {"item": "Paprika", "key": "paprika", "amount": "2 tsp", "basis": "description", "note": "On-screen spice card OCR (f-009) literal '2 tsp pup,r.ik/' (garbled); control-proven vision read '2 tsp paprika' (vision/read-spice-chicken.txt)."},
         {"item": "Cumin", "key": "cumin", "amount": "2 tsp", "basis": "description", "note": "On-screen spice card OCR (f-009): '2 tsp cumin'."},
-        {"item": "Salt", "key": "salt", "amount": "2 tsp", "basis": "description", "note": "On-screen spice card OCR (f-009): '2tsp alt' [interpretation: salt]."},
-        {"item": "Black pepper", "key": "black pepper", "amount": "2 tsp", "basis": "description", "note": "On-screen spice card OCR (f-009): '2tsp uﬁl' (garbled); vision read '2 tsp pepper'."},
-        {"item": "Chilli powder", "key": "chilli", "amount": "1 tsp", "basis": "description", "note": "On-screen spice card OCR (f-009): '1tsp ch powder' [interpretation: chilli powder]; vision read '1 tsp chilli powder'."},
-        {"item": "Turmeric", "key": "turmeric", "amount": "½ tsp", "basis": "description", "note": "On-screen spice card OCR (f-009): '1/21sp' (garbled); vision read '1/2 tsp turmeric'."},
+        {"item": "Salt", "key": "salt", "amount": "2 tsp", "basis": "description", "note": "On-screen spice card OCR (f-009) literals '2tsp' + 'alt *' (garbled); control-proven vision read '2 tsp salt' (vision/read-spice-chicken.txt)."},
+        {"item": "Black pepper", "key": "black pepper", "amount": "2 tsp", "basis": "description", "note": "On-screen spice card OCR (f-009) literals '2tsp' + 'uﬁl' (garbled); control-proven vision read '2 tsp pepper' (vision/read-spice-chicken.txt)."},
+        {"item": "Chilli powder", "key": "chilli", "amount": "1 tsp", "basis": "description", "note": "On-screen spice card OCR (f-009) literals '1tsp ch' + 'powder' (split/garbled); control-proven vision read '1 tsp chilli powder' (vision/read-spice-chicken.txt)."},
+        {"item": "Turmeric", "key": "turmeric", "amount": "½ tsp", "basis": "description", "note": "On-screen spice card OCR (f-009) literals '1/21sp' + 'A<' (garbled); control-proven vision read '1/2 tsp tumeric' [sic — vision spelling; description 'turmeric'] (vision/read-spice-chicken.txt)."},
         {"item": "Olive oil", "key": "olive oil", "amount": "1 tbsp", "basis": "description", "note": "Spoken 'and olive oil' (0:35); quantity only in the written list."}
       ],
       "steps": [
@@ -41,7 +41,7 @@
         {"text": "Mix thoroughly until the mixture changes colour.", "t": 35},
         {"text": "Spread the mixture onto a lined baking tray (spoken: 'a greased sheet pan'), pressing it into a flat, even layer and adding finger marks as demonstrated.", "t": 45},
         {"text": "Using a spatula, divide the sheet into eight kebabs.", "t": 52},
-        {"text": "Bake for 20–25 minutes at 190°C, draining any excess juices halfway through, until fully cooked and golden. On-screen card: 'OVEN BAKE 190C | 20-25 MINS'.", "t": 54},
+        {"text": "Bake for 20–25 minutes at 190°C, draining any excess juices halfway through, until fully cooked and golden. On-screen card: 'OVEN BAKE' / '190C | 20-25 MINS' (pp bake-014/016).", "t": 54},
         {"text": "Slice the baked chicken sheet into kebab-sized strips.", "t": null}
       ]
     },
@@ -55,7 +55,7 @@
         {"item": "Salt", "key": "salt", "amount": "½ tsp", "basis": "description", "note": "On-screen card: '1/2 tsp salt'."},
         {"item": "Black pepper", "key": "black pepper", "amount": "½ tsp", "basis": "description", "note": "On-screen card: '1/2 tsp pepper'."},
         {"item": "Lemon juice", "key": "lemon", "amount": "juice of ½ lemon", "basis": "description", "note": "On-screen card: '1/2 lemon juice'."},
-        {"item": "Water", "key": "water", "amount": "a splash", "basis": "description", "note": "Spoken 'with a splash of water to get the perfect consistency' (1:18-1:20). Not listed on the on-screen sauce card."}
+        {"item": "Water", "key": "water", "amount": "a splash", "basis": "description", "note": "Spoken 'with a splash of water to get the perfect consistency' (1:18-1:20, continuous across caption segments). Not listed on the on-screen sauce card."}
       ],
       "steps": [
         {"text": "Mix the Greek yoghurt, light mayo, garlic powder, dill, salt, pepper and lemon juice in a bowl.", "t": 73},
@@ -94,7 +94,7 @@
     "protein_g": 62,
     "carbs_g": 45,
     "fat_g": 16,
-    "note": "Approximate creator-reported figures from the description ('Approximate macros per kebab wrap'). The hook frame shows '62g PROTEIN' (vision read; OCR '62.') and the narration says 'over 60 grams of protein' — consistent with 62g. The end-of-video 'macros' panel never renders legible calorie/carb/fat digits in any sampled frame (t=104-126s, 57 dense frames + vision reads), so 586/45/16 rest on the description alone. Not independently calculated; the unquantified sweet-chilli jam addition and parsley swap are not included."
+    "note": "Approximate creator-reported figures from the description ('Approximate macros per kebab wrap'). The hook frame shows '62G PROTEIN' (control-proven vision read of f-002, vision/read-hook.txt; raw OCR '62.') and the narration says 'over 60 grams of protein' (0:03-0:05, continuous across caption segments) — consistent with 62g. The end-of-video 'macros' panel never renders legible calorie/carb/fat digits in any sampled frame (t=104-126s; vision/read-macros.txt confirms 'no legible macro numbers'), so 586/45/16 rest on the description alone. Not independently calculated; the unquantified sweet-chilli jam addition and parsley swap are not included."
   },
   "notes": [
     "Louis Howard's description credits @panaceapalm (YouTube channel 'Panacea Palm', resolved 200). This capture documents Louis's public review/recreation; the credited original was not independently audited.",
@@ -102,7 +102,7 @@
     "Personal substitutions demonstrated but NOT in the written spec: parsley instead of coriander in the chicken mix (0:29-0:32, on-screen 'parsley' card), sweet-chilli jam added to the wrap ('Sorry, I've got to add some sweet chili jam with this as well. It's begging for it.', 1:27-1:30), and blending the sauce instead of bowl-mixing (1:21).",
     "The tray is divided into 8 kebabs (spoken 0:52-0:54 + on-screen '8 KEBABS' card, OCR f-014/bake-005..010) and assembled 2 per wrap (spoken 'Two chicken kebabs', 1:30) — consistent with 4 wraps from 1kg mince.",
     "On-screen sauce card (t=72-79s) matches the written sauce list line-for-line except the splash of water, which is spoken only.",
-    "Recurring 'EMPLOYEE OF THE MONTH' watermark overlay appears across most frames; it is channel branding, not recipe content."
+    "Louis wears an 'EMPLOYEE OF THE MONTH' t-shirt throughout (recurring shirt text, confirmed by vision/read-macros.txt; raw OCR fragments 'EMPLOYEE OF', 'EMPLGYEE OF'); a separate 'macros' overlay label appears over the end panel. Both are channel/wardrobe branding, not recipe content."
   ],
   "gaps": [
     "Coriander quantities (chicken mix and salad) are unstated in every surface.",
@@ -113,6 +113,6 @@
     "Lebanese wrap brand/size unstated; the ~200 kcal each figure is creator-reported."
   ],
   "source": {
-    "quantity_basis": "Measurements and approximate per-wrap macros from the public description. Demonstrated steps checked against 83 English automatic-caption segments and sampled source frames (32-frame sweep + 78 + 57 + 22 dense frames). On-screen spice, sauce, bake and kebab-count cards OCR-verified; sauce card matches the written list. Louis's parsley swap, sweet-chilli jam and blender shortcut are distinguished from the written method. No macro recalculation; unreadable animated macro digits discarded, not guessed."
+    "quantity_basis": "Measurements and approximate per-wrap macros from the public description. Demonstrated steps checked against 83 English automatic-caption segments and sampled source frames (32-frame sweep + 78 + 57 + 22 dense frames + 15 preprocessed). On-screen spice, sauce, bake and kebab-count cards OCR-verified; garbled spice-card lines resolved by a control-proven vision read (token delta +192; receipts in vision/). Sauce card matches the written list line-for-line except the spoken-only splash of water. Louis's parsley swap, sweet-chilli jam and blender shortcut are distinguished from the written method. No macro recalculation; unreadable animated macro digits discarded, not guessed."
   }
 }
