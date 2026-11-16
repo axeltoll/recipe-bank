@@ -1,0 +1,65 @@
+{
+  "id": "parmesan-green-bean-fries",
+  "title": "Parmesan Green Bean Fries (F*ck or Suck Test)",
+  "status": "analyzed",
+  "video": { "platform": "youtube", "id": "kDy_y8eGm-8", "url": "https://www.youtube.com/shorts/kDy_y8eGm-8" },
+  "creator": { "name": "Matt West", "handle": "@mattwest_roadtoaesthetics", "url": "https://www.youtube.com/@mattwest_roadtoaesthetics" },
+  "uploaded": "2026-11-16",
+  "analyzed": "2026-11-16",
+  "summary": "Green beans tossed in beaten egg, grated parmesan and garlic powder, then oven-baked into crunchy 'fries' with no potato, no frying and no breadcrumbs. Matt West tests the recipe (credited to @abandon.your.bad.habits) in his F*ck or Suck format and approves it, with the caveat that they do not taste like french fries. The description carries the measured recipe; the narration drifts on units, temperature and protein — all preserved, not reconciled.",
+  "serves": "1 large batch (as stated; serving count not given)",
+  "tags": ["green bean", "oven", "high protein", "quick"],
+  "components": [
+    {
+      "name": "Parmesan green bean fries",
+      "ingredients": [
+        { "item": "Green beans, trimmed", "key": "green bean", "amount": "450g", "basis": "description", "note": "UNIT DRIFT: the narration says 'a pound of green beans' (~454g); the description says 450g. Both recorded; the written 450g is the spec." },
+        { "item": "Egg, beaten", "key": "egg", "amount": "1 large", "basis": "description", "note": "Narration agrees: 'one beaten egg'." },
+        { "item": "Parmesan cheese, finely grated", "key": "parmesan", "amount": "3 tbsp (15g)", "basis": "description", "note": "Narration says 'a jar of grated parmesan' with no quantity; the description's 3 tbsp (15g) is the spec." },
+        { "item": "Garlic powder", "key": "garlic powder", "amount": "1 tsp", "basis": "description", "note": "Named in the narration without a quantity." },
+        { "item": "Salt", "key": "salt", "amount": null, "basis": "unstated", "note": "Description says 'Salt & Pepper, to taste' — no quantity given." },
+        { "item": "Black pepper", "key": "black pepper", "amount": null, "basis": "unstated", "note": "Description says 'Salt & Pepper, to taste' — no quantity given." }
+      ],
+      "steps": [
+        { "text": "Preheat oven to 200°C and line a baking tray with baking paper. TEMPERATURE CONFLICT: the narration says 'bake them at 400°' with no unit (400°F ≈ 204°C is plausible but NOT certified by any surface); the description's explicit 200°C is the written spec. Oven mode (fan/conventional) is unstated." },
+        { "text": "Add the trimmed green beans to a bowl and toss with the beaten egg until evenly coated.", "t": 2.64 },
+        { "text": "Add the Parmesan, garlic powder, salt and pepper. Toss again until well coated. The narration describes shaking the beans 'in a jar' of parmesan and garlic powder — a jar-shake variant of the same coating step; the written method says bowl-toss.", "t": 5.12 },
+        { "text": "Spread the beans in a single layer on the baking tray, leaving a little space between them.", "t": 7.36 },
+        { "text": "Bake for 15–20 minutes, or until the beans are tender and the coating is golden and crispy. Serve warm. The bake time is description-only; the narration gives no time.", "t": 10.08 }
+      ]
+    }
+  ],
+  "nutrition": {
+    "per": "whole recipe (1 large batch)",
+    "basis": "description",
+    "calories": 285,
+    "protein_g": 23,
+    "carbs_g": 35,
+    "fat_g": 9,
+    "note": "Creator-reported, approximate, not independently calculated. Description: ~285 kcal | P 23g | C 35g | F 9g | Fibre 15g. PROTEIN CONFLICT: the narration AND the on-screen cards say '285 calories with over 20 g of protein', and the spoken breakdown (beans ~9g + egg ~6g + parmesan ~6g) sums to ~21g — not the description's 23g. Both readings retained; none chosen. Calories agree across all three surfaces (description, narration, on-screen card)."
+  },
+  "notes": [
+    "RECIPE CREDIT: the description credits @abandon.your.bad.habits. That handle is an INSTAGRAM account (Tavon; 362K followers / 33 posts per a logged-out profile snapshot 2026-11-16) — all YouTube handle variants 404. The original recipe was not independently audited; the opening picture-in-picture footage shows a different person preparing the beans, consistent with a credited original.",
+    "FORMAT: this is Matt West's 'F*ck or Suck' robot-recipe test — the narration calls the recipe source 'this robot' ('Let's see if this robot knows what he's talking about'), implying an AI-generated recipe, but NO AI tool is named, shown or screenshotted anywhere. AI provenance is creator framing, unverified.",
+    "VERDICT (creator claim): 'these beans 100% f*ck' — approved and '100% worthy of a save', with the explicit caveat: do not expect french-fry taste; they are a tasty way to eat greens. He claims the method generalizes to broccoli, cauliflower and carrots (untested claim).",
+    "Three cross-surface conflicts preserved: (1) beans 450g (description) vs 'a pound' (narration); (2) oven 200°C (description) vs '400°' unitless (narration); (3) protein 23g (description) vs 'over 20g' (narration + on-screen cards, breakdown ~21g).",
+    "On-screen macro cards confirmed by OCR + control-proven vision: '285 CALORIES' (~40–42s), '20G OF PROTEIN.' (~43–45s), '9G' beans (~58s), 'AROUND 6G' egg (~60.5s), '6G OF PROTEIN.' parmesan (~64.5–65s).",
+    "The protein segment doubles as a calorie-tracking PSA ('the importance of learning how to track your calories') — the macro defense is the video's middle act, not a footnote.",
+    "Capture-time metrics (1,611 views / 128 likes / 5 comments, ~5.7h after upload) are platform snapshots, not reach evidence. Channel: 42,600 subscribers. YouTube category 'Education' on a cooking Short — metadata quirk, not relied on.",
+    "Auto-caption profanity is censored by YouTube ('[ __ ]'); the title's 'F*ck or Suck' is the creator's own censoring. Preserved as-is."
+  ],
+  "gaps": [
+    "Oven mode (fan/conventional) and rack position unstated.",
+    "The narration's '400°' carries no unit; only the description's 200°C is explicit. The two are close but not certified equivalent.",
+    "Exact bake target within 15–20 minutes and any doneness cue beyond 'tender, golden and crispy' unstated.",
+    "Protein total unresolved: 23g (description) vs 'over 20g' (spoken + on-screen) vs ~21g (spoken component sum).",
+    "Serving count / portion size beyond '1 large batch' unstated, so per-serving macros cannot be derived.",
+    "The credited original's own recipe card/post was not fetched (Instagram login wall; no account action taken).",
+    "Which AI tool (if any) generated the recipe is unknown — 'robot' is narration framing only.",
+    "Salt and pepper quantities are 'to taste' — no amounts."
+  ],
+  "source": {
+    "evidence": "Public description (measured ingredient list + 5-step method + macro block + recipe credit), YouTube transcript-API (49 English auto-generated segments), public oEmbed, sanitized extractor metadata, ffprobe receipt, 30-frame sweep + 32-frame dense pass + 24-frame protein-window pass (tesseract), three control-proven auxiliary-vision batches confirming the macro cards and the credited-original inset footage, and an Instagram credit-handle probe. Master video not retained; SHA-256 and re-fetch command in the vault evidence bundle.",
+    "quantity_basis": "Quantities come from the creator's description (the spec surface). The narration supplies unit/temperature/protein drifts that are recorded as conflicts, never silently harmonized. 'To taste' salt and pepper are null-amount unstated rows. No amounts, times or temperatures were invented from generic cooking knowledge."
+  }
+}
