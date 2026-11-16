@@ -164,12 +164,30 @@ test('filters: one section per mount point on the home view, and a chip click up
   assert.equal(slots['filter-tags'].innerHTML, '');
 });
 
-test('scaling: scaled amounts replace the text and are marked; the creator\'s words come back', () => {
-  const span = (ci, ii, amount) => {
-    const text = { textContent: amount ?? 'amount not given' };
-    return { dataset: { ci: String(ci), ii: String(ii), amount: amount ?? '' }, text, querySelector: () => text };
+/** One .ing-amt hook: the amount text, plus any "not scaled" note applyAmounts appends. */
+function amtSpan(ci, ii, amount) {
+  const text = { textContent: amount ?? 'amount not given' };
+  const kids = [text];
+  return {
+    dataset: { ci: String(ci), ii: String(ii), amount: amount ?? '' },
+    text,
+    querySelector(sel) {
+      if (sel === '.ing-amt-text') return text;
+      if (String(sel).includes('not-scaled')) return kids.find((kid) => kid.dataset && Object.hasOwn(kid.dataset, 'notScaled')) ?? null;
+      return null;
+    },
+    append(child) {
+      child.remove = () => {
+        const at = kids.indexOf(child);
+        if (at >= 0) kids.splice(at, 1);
+      };
+      kids.push(child);
+    },
   };
-  const spans = [span(0, 0, '800g'), span(0, 1, 'a pinch'), span(0, 2, null)];
+}
+
+test('scaling: scaled amounts replace the text and are marked; the creator\'s words come back', () => {
+  const spans = [amtSpan(0, 0, '800g'), amtSpan(0, 1, 'a pinch'), amtSpan(0, 2, null)];
   const root = { querySelectorAll: () => spans };
 
   applyAmounts(root, scaleRecipe(alpha, 2));
@@ -183,6 +201,42 @@ test('scaling: scaled amounts replace the text and are marked; the creator\'s wo
   applyAmounts(root, null);
   assert.equal(spans[0].text.textContent, '800g');
   assert.equal(spans[0].dataset.scaled, undefined);
+});
+
+test('scaling: kept amounts are marked not scaled on the recipe page and in cook mode, and the mark goes at the original factor', () => {
+  const page = [amtSpan(0, 0, '800g'), amtSpan(0, 1, 'a pinch'), amtSpan(0, 2, null)];
+  const cook = [amtSpan(0, 0, '800g'), amtSpan(0, 1, 'a pinch'), amtSpan(0, 2, null)];
+  const pageRoot = { querySelectorAll: () => page };
+  const cookRoot = { querySelectorAll: () => cook };
+  const kept = (span) => span.querySelector('[data-not-scaled]');
+  const slot = fakeElement({ querySelector: (sel) => (sel === '[data-scale]' ? inner : null) });
+  const inner = fakeElement();
+  const rb = fakeRb({ recipes: [alpha], mount: (name) => (name === 'recipe-scaling' ? slot : null) });
+  installScale(rb);
+  rb.emit('view', { name: 'recipe', recipe: alpha, root: pageRoot });
+
+  inner.listeners.click({ target: { closest: (sel) => (sel === '[data-step]' ? { dataset: { step: '1' } } : null) } });
+  assert.equal(page[0].dataset.scaled, 'true');
+  assert.equal(kept(page[1])?.textContent, 'not scaled (given in words)');
+  assert.equal(kept(page[1])?.className, 'rbf-orig');
+  assert.equal(kept(page[2]), null, 'an unstated amount is not a kept amount');
+  assert.equal(page[1].text.textContent, 'a pinch');
+
+  rb.emit('cook', { recipe: alpha, open: true, root: cookRoot });
+  assert.equal(kept(cook[1])?.textContent, 'not scaled (given in words)');
+  assert.equal(kept(cook[0]), null, 'a scaled amount is not also marked not scaled');
+
+  const rate = [amtSpan(0, 1, '2 per person')];
+  applyAmounts({ querySelectorAll: () => rate }, scaleRecipe(beta, 2));
+  assert.equal(rate[0].querySelector('[data-not-scaled]')?.textContent, 'not scaled (already per person or per item)');
+  applyAmounts({ querySelectorAll: () => rate }, null);
+  assert.equal(rate[0].querySelector('[data-not-scaled]'), null);
+
+  inner.listeners.click({ target: { closest: (sel) => (sel === '[data-reset]' ? {} : null) } });
+  assert.equal(kept(page[1]), null);
+  assert.equal(kept(cook[1]), null);
+  assert.equal(page[0].dataset.scaled, undefined);
+  assert.equal(page[0].text.textContent, '800g');
 });
 
 test('scaling: the control goes into recipe-scaling on recipe pages only', () => {
