@@ -285,17 +285,17 @@ export function mount(element, options = {}) {
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ pack: packFromRead(state.read), include: [...state.include] }),
       });
-      if (destroyed) return;
       const body = await res.json().catch(() => ({}));
-      if (destroyed) return;
       if (!res.ok) {
-        setStatus('import-status', body.error ?? `Import failed (HTTP ${res.status}).`, 'error');
+        if (!destroyed) setStatus('import-status', body.error ?? `Import failed (HTTP ${res.status}).`, 'error');
         return;
       }
       const created = Array.isArray(body.created) ? body.created : [];
       const [message, kind] = importMessage(body);
       state.recipes = null; // reload so the plan shows the new recipes as already in the bank
+      // The bank reload is not a DOM write: leaving #/packs must still pick up the new files.
       options.onImported?.(created);
+      if (destroyed) return;
       state.busy = false;
       await showRead(state.read);
       // After the refresh, which clears the status line: what was imported and what was not, and why.

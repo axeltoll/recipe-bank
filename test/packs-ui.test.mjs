@@ -247,7 +247,7 @@ test('a late copy, import or open after leaving packs does not touch a removed s
   importer.panel.destroy();
   releaseImport();
   await new Promise((resolve) => setTimeout(resolve, 0));
-  assert.equal(imported, 0, 'a finished import must not apply after the page is gone');
+  assert.equal(imported, 1, 'a finished import still tells the page to reload the bank');
 
   let releaseText;
   const opener = removablePanel({ recipes: [] });
