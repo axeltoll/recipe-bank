@@ -143,7 +143,7 @@
       "status": "next",
       "title": "Versioned recipe contract",
       "text": "A schema version in every recipe file, a migration command, and a JSON Schema export of the file format.",
-      "source": "ROADMAP.md (Schema version and migration) and README.md (lib/recipe.mjs, lib/migrate.mjs, lib/json-schema.mjs, schema/recipe.schema.json, npm run migrate)"
+      "source": "ROADMAP.md (Schema version and migration) and README.md (lib/recipe.mjs, lib/migrate.mjs, schema/recipe.schema.json, npm run migrate) and lib/json-schema.mjs"
     },
     {
       "id": "more-platforms",
