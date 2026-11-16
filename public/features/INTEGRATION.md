@@ -60,13 +60,13 @@ const shop = mount(document.querySelector('#shop'), { recipes: state.recipes });
 
 By default it follows the stored week plan and re-renders on every `rb:plan-change` (from this tab) and on `storage` events (from other tabs). Pass `plan` to show a fixed set instead, for example "shopping list for these two recipes": `{ plan: { items: [{ recipe: 'a', day: null }, { recipe: 'b', day: null }] }, persist: false }`.
 
-Options: `recipes` (required); `plan`; `persist` (default `true`, ticked items in `'rb:shopping-checked'`); `planKey`; `checkedKey`; `title`; `href(recipeId)`; `copyChecked` (default `false`: ticked items are left out of the copied text); `css`.
+Options: `recipes` (required); `plan`; `household` (default `false`: purchase amounts for the household profile, see [PURCHASE.md](PURCHASE.md)); `persist` (default `true`, ticked items in `'rb:shopping-checked'`); `planKey`; `checkedKey`; `title`; `href(recipeId)`; `copyChecked` (default `false`: ticked items are left out of the copied text); `css`.
 
 Controller: `getList()` (the structure from `shoppingList()` in `lib/plan.mjs`), `getText()`, `update({ recipes, plan })`, `destroy()`.
 
 Events: `rb:shopping-check`, `detail: { checked: [keys] }`; `rb:shopping-copy`, `detail: { text, copied }`. When the clipboard is blocked, the list shows the text in a read-only box to copy by hand.
 
-What it shows: ingredients merged by their `key` and grouped by aisle (fruit and veg, meat and fish, dairy and eggs, bread and wraps, pasta/rice/baking, oils/sauces/tins, spices, drinks, other, and "check the cupboard" for salt, pepper, oil and water). Under each ingredient, every recipe's amount **in the creator's own words**: amounts are never added up or converted, and an unstated amount reads "amount not given". The aisle of a new key comes from the table in `lib/plan.mjs` (`AISLE_KEYS`), then from word rules; add new keys to the table.
+What it shows: ingredients merged by their `key` and grouped by aisle (fruit and veg, meat and fish, dairy and eggs, bread and wraps, pasta/rice/baking, oils/sauces/tins, spices, drinks, other, and "check the cupboard" for salt, pepper, oil and water). Under each ingredient, on the default list, every recipe's amount stays **in the creator's own words**: amounts are never added up or converted, and an unstated amount reads "amount not given". With `household` set, the list shows purchase amounts; see [PURCHASE.md](PURCHASE.md). The aisle of a new key comes from the table in `lib/plan.mjs` (`AISLE_KEYS`), then from word rules; add new keys to the table.
 
 ## scale.mjs
 
