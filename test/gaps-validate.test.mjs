@@ -159,7 +159,7 @@ test('a queue file that is not a list is one problem; a null entry next to a rea
   }
 });
 
-test('a null or non-array component, ingredient or step is reported, not a stack trace', { todo: 'bug: validate.mjs crashes with TypeError and prints no report' }, async () => {
+test('a null or non-array component, ingredient or step is reported, not a stack trace', async () => {
   const base = () => makeRecipe('a', 1);
   const shapes = {
     'null component': (() => { const r = base(); r.components = [null]; return r; })(),

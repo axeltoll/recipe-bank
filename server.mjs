@@ -292,6 +292,21 @@ export function writeRefusal(headers = {}, { hosts = [], method = 'POST', peer }
  *   resolve     async (video) => video, short-link resolution (default lib/video-resolver.mjs)
  *   hosts       host names besides loopback that writes may be addressed to (default: allowedHosts())
  */
+const MALFORMED_LIST = 'malformed recipe (a component, ingredient or step is not an object)';
+
+// A non-array list, or a null entry in one, used to throw inside validateRecipe. Strings and numbers
+// as entries do not: property access on them is undefined, and the contract reports that instead.
+function contractThrows(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return false;
+  const badList = (v) => v != null && !Array.isArray(v);
+  const hole = (v) => Array.isArray(v) && v.some((item) => item == null);
+  if (badList(body.components) || hole(body.components)) return true;
+  if (!Array.isArray(body.components)) return false;
+  return body.components.some((c) => c != null && typeof c === 'object' && !Array.isArray(c) && (
+    badList(c.ingredients) || hole(c.ingredients) || badList(c.steps) || hole(c.steps)
+  ));
+}
+
 export function createHandler({
   dataDir, recipesDir, queueFile, oembed: lookup = oembed, resolve: resolveVideo = resolveShortVideo,
   hosts = allowedHosts(),
@@ -339,9 +354,10 @@ export function createHandler({
     try {
       problems = validateRecipe(body, id ?? undefined);
     } catch {
-      // validateRecipe reads c.name, ing.item and s.text, so a null in one of those lists throws.
-      problems = ['malformed recipe (a component, ingredient or step is not an object)'];
+      problems = [MALFORMED_LIST];
     }
+    // These shapes used to throw inside validateRecipe. The 400 still names that one problem.
+    if (contractThrows(body)) problems = [MALFORMED_LIST];
     // Packs refuse prototype keys, so a recipe holding one could be saved but never shared.
     const forbidden = body && typeof body === 'object' ? forbiddenKey(body) : null;
     if (forbidden) problems = [...problems, `the recipe contains ${forbidden}`];

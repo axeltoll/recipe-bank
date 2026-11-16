@@ -1,5 +1,5 @@
 // validateRecipe edges the schema cross-check does not hit: several problems at once,
-// timestamps, a missing filename, and list shapes that currently throw.
+// timestamps, a missing filename, and list shapes that are not objects.
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -85,7 +85,7 @@ test('an unstated amount may be omitted; blank tags, a blank gap and a double hy
   assert.deepEqual(validateRecipe(keyed, 'alpha'), [], 'a lowercase key may contain a space');
 });
 
-test('a null or non-array component, ingredient or step is a problem list', { todo: 'bug: validateRecipe throws TypeError instead of returning problems' }, () => {
+test('a null or non-array component, ingredient or step is a problem list', () => {
   const base = () => makeRecipe('alpha', 1);
   const shapes = {
     'null component': (() => { const r = base(); r.components = [null]; return r; })(),
