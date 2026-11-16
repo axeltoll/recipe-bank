@@ -73,6 +73,30 @@ test('import is a dry run by default and --write only creates new files', async 
   assert.equal((await listFiles()).length, 4);
 });
 
+test('import --write does not leave a truncated recipe when the write stops halfway', async () => {
+  const file = join(dir, 'atomic-pack.json');
+  const recipe = makeRecipe('atomic', 40);
+  await writeFile(file, serializePack(exportPack([recipe], { title: 'Atomic' })));
+  const preload = join(import.meta.dirname, 'helpers', 'partial-write.mjs');
+  const stopped = await runScript('pack.mjs', ['import', file, '--write'], {
+    RECIPE_BANK_DIR: dir,
+    PARTIAL_JSON: '1',
+    NODE_OPTIONS: `--import ${preload}`,
+  });
+  const target = join(dir, 'recipes', 'atomic.json');
+  let body = null;
+  try {
+    body = await readFile(target, 'utf8');
+  } catch {
+    body = null;
+  }
+  if (body != null) assert.equal(body, recipeText(recipe), stopped.stderr);
+  const again = await pack('import', file, '--write');
+  assert.equal(again.code, 0, again.stderr);
+  assert.equal(await readFile(target, 'utf8'), recipeText(recipe));
+  await rm(target);
+});
+
 test('import reads pack links and refuses broken input', async () => {
   const link = packLink(exportPack([makeRecipe('zeta', 8)]), 'http://127.0.0.1:4780/');
   let r = await pack('import', link);

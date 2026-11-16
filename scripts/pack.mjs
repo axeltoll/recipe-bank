@@ -10,7 +10,7 @@
 
 import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { loadRecipes, dataPaths } from '../server.mjs';
+import { loadRecipes, dataPaths, createFileOnce } from '../server.mjs';
 import {
   exportPack, serializePack, packLink, packFromLink, hasPackLink, readPack, planImport, applyImport, PackError,
 } from '../lib/pack.mjs';
@@ -130,7 +130,7 @@ async function importCommand() {
   let created = 0;
   for (const f of files) {
     try {
-      await writeFile(join(RECIPES_DIR, `${f.id}.json`), f.contents, { flag: 'wx' });
+      await createFileOnce(join(RECIPES_DIR, `${f.id}.json`), f.contents);
       created++;
       console.log(`✓ recipes/${f.id}.json`);
     } catch (e) {
