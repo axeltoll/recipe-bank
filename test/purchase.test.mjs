@@ -82,6 +82,22 @@ test('parseMeasure refuses words, rates, two measures, pack sizes and broken num
   }
 });
 
+test('an -ie word drops only the s, so pies and pie are one line', () => {
+  for (const [many, one] of [
+    ['pies', 'pie'], ['smoothies', 'smoothie'], ['veggies', 'veggie'], ['chillies', 'chillie'], ['calories', 'calorie'],
+  ]) {
+    assert.equal(parseMeasure(`2 ${many}`).one, one, many);
+    assert.equal(parseMeasure(`1 ${one}`).one, one, one);
+  }
+  assert.equal(parseMeasure('2 berries').one, 'berry');
+  assert.equal(parseMeasure('2 cherries').one, 'cherry');
+  const baked = recipe('pies', '2', [ing('Pies', 'pie', '2 pies')]);
+  const slice = recipe('slice', '2', [ing('Pie', 'pie', '1 pie')]);
+  const p = purchaseList(plan('pies', 'slice'), [baked, slice], adults(2));
+  assert.equal(item(p, 'pie').parts.length, 1);
+  assert.equal(item(p, 'pie').amount, '3 pies');
+});
+
 test('cookie and brownie drop only the s; berry and cherry keep y', () => {
   assert.equal(parseMeasure('2 cookies').one, 'cookie');
   assert.equal(parseMeasure('2 cookies').many, 'cookies');
