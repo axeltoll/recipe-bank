@@ -216,8 +216,8 @@ test('readPack reports problems per recipe and survives malformed ones', () => {
   assert.match(p[2], /not a recipe object/);
   assert.match(p[3], /not a recipe object/);
   assert.match(p[4], /newer than this Recipe Bank/);
-  assert.match(p[5], /malformed recipe/);
-  assert.match(p[6], /malformed recipe/);
+  assert.match(p[5], /components\[0\] must be an object/);
+  assert.match(p[6], /ingredients must be an array/);
   assert.match(p[7], /title is required/);
   assert.match(p[7], /summary is required/);
   assert.deepEqual(read.entries.map((e) => e.recipe !== null), [true, false, false, false, false, false, false, false]);

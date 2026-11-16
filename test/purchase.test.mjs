@@ -82,6 +82,45 @@ test('parseMeasure refuses words, rates, two measures, pack sizes and broken num
   }
 });
 
+test('an -ie word drops only the s, so pies and pie are one line', () => {
+  for (const [many, one] of [
+    ['pies', 'pie'], ['smoothies', 'smoothie'], ['veggies', 'veggie'], ['chillies', 'chilli'], ['calories', 'calorie'],
+  ]) {
+    assert.equal(parseMeasure(`2 ${many}`).one, one, many);
+    assert.equal(parseMeasure(`1 ${one}`).one, one, one);
+  }
+  assert.equal(parseMeasure('2 berries').one, 'berry');
+  assert.equal(parseMeasure('2 cherries').one, 'cherry');
+  const baked = recipe('pies', '2', [ing('Pies', 'pie', '2 pies')]);
+  const slice = recipe('slice', '2', [ing('Pie', 'pie', '1 pie')]);
+  const p = purchaseList(plan('pies', 'slice'), [baked, slice], adults(2));
+  assert.equal(item(p, 'pie').parts.length, 1);
+  assert.equal(item(p, 'pie').amount, '3 pies');
+
+  const many = recipe('many', '4', [ing('Chillies', 'chilli', '2 chillies')]);
+  const one = recipe('one', '2', [ing('Chilli', 'chilli', '1 chilli')]);
+  const hot = purchaseList(plan('many', 'one'), [many, one], adults(2));
+  assert.equal(item(hot, 'chilli').parts.length, 1);
+  assert.equal(item(hot, 'chilli').amount, '2 chillies');
+});
+
+test('cookie and brownie drop only the s; berry and cherry keep y', () => {
+  assert.equal(parseMeasure('2 cookies').one, 'cookie');
+  assert.equal(parseMeasure('2 cookies').many, 'cookies');
+  assert.equal(parseMeasure('1 cookie').one, 'cookie');
+  assert.equal(parseMeasure('2 brownies').one, 'brownie');
+  assert.equal(parseMeasure('2 berries').one, 'berry');
+  assert.equal(parseMeasure('2 cherries').one, 'cherry');
+  assert.equal(unitKey('cookies').base, 'cookie');
+  assert.equal(unitKey('berries').base, 'berry');
+
+  const baked = recipe('baked', '2', [ing('Cookies', 'cookie', '1 cookie')]);
+  const more = recipe('more', '2', [ing('Cookies', 'cookie', '2 cookies')]);
+  const p = purchaseList(plan('baked', 'more'), [baked, more], adults(2));
+  assert.equal(item(p, 'cookie').parts.length, 1);
+  assert.equal(item(p, 'cookie').amount, '3 cookies');
+});
+
 test('unitKey gives the base unit a price or amount adds up in', () => {
   assert.deepEqual(unitKey('kg'), { base: 'g', size: 1000 });
   assert.deepEqual(unitKey('g'), { base: 'g', size: 1 });
@@ -254,6 +293,51 @@ test('serves that counts items, or is not a plain number, is not treated as serv
   for (const bad of [0, -1, 'x', null]) {
     assert.equal(purchaseList(plan('nuggets'), [nuggets], adults(2), { servesOverride: { nuggets: bad } }).recipes[0].flag, 'serves-items', String(bad));
   }
+});
+
+test('a factor that rounds back to the same text still adds the amount', () => {
+  const cups = recipe('cups', '6', [
+    ing('Milk', 'milk', '1 cup'),
+    ing('Salt', 'salt', '1 tsp'),
+    ing('Herbs', 'herb', 'a good amount'),
+  ]);
+  const people = { ...defaultProfile().people, adult: 7, child6to10: 1 };
+  const profile = { ...defaultProfile(), people, portionSize: 'light' };
+  const p = purchaseList(plan('cups'), [cups], profile);
+  assert.equal(p.servings, 6.1);
+  assert.equal(item(p, 'milk').sources[0].status, 'added');
+  assert.equal(item(p, 'salt').sources[0].status, 'added');
+  assert.equal(item(p, 'herb').sources[0].status, 'words');
+  assert.equal(item(p, 'milk').parts[0].kind, 'total');
+  assert.equal(item(p, 'salt').parts[0].kind, 'total');
+});
+
+test('a pack written "oz." stays one can when a plain can is on the same list', () => {
+  const sized = recipe('sized', '4', [ing('Tomatoes', 'tomato', '1 15 oz. can')]);
+  const plain = recipe('plain', '2', [ing('Tomatoes', 'tomato', '1 can')]);
+  const p = purchaseList(plan('sized', 'plain'), [sized, plain], adults(6));
+  assert.equal(p.servings, 6);
+  assert.equal(item(p, 'tomato').amount, '3 cans + 1½ 15 oz. cans');
+});
+
+test('a pack weight in the scaled text stays the pack weight', () => {
+  const tins = recipe('tins', '4', [
+    ing('Chopped tomatoes', 'tomato', '2 (400g) cans'),
+    ing('Chickpeas', 'chickpea', '2 cans (400g each)'),
+    ing('Tuna', 'tuna', '2 x 400g (14 oz)'),
+    ing('Coconut milk', 'coconut milk', '1 400g can'),
+  ]);
+  const p = purchaseList(plan('tins'), [tins], adults(2));
+  const source = (key) => item(p, key).sources[0].amount;
+  assert.equal(p.recipes[0].factor, 0.5);
+  assert.equal(source('tomato'), '1 (400g) can');
+  assert.equal(source('chickpea'), '1 can (400g each)');
+  assert.equal(source('tuna'), '1 x 400g (14 oz)');
+  assert.equal(source('coconut milk'), '½ 400g can');
+  assert.equal(item(p, 'tomato').amount, '1 can');
+  assert.equal(item(p, 'chickpea').amount, '1 can');
+  assert.equal(item(p, 'tuna').parts[0].kind, 'text');
+  assert.equal(item(p, 'coconut milk').parts[0].kind, 'text');
 });
 
 test('words, rates, unreadable numbers and amounts scaled but kept apart', () => {

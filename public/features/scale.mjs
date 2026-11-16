@@ -17,9 +17,13 @@ const DEFAULT_FACTORS = [0.5, 1, 2, 3];
  * One ingredient amount as HTML, marked by how it was scaled. Use it in your own ingredient
  * list with an ingredient from scaleRecipe(): `amountHtml(ing, factor)`.
  */
+const textChanged = (ing) => ing.scaled && ing.amount !== ing.originalAmount;
+
 export function amountHtml(ing, factor = 1) {
   if (ing.amount == null) return '<span class="rbf-amt rbf-unstated">amount not given</span>';
-  if (ing.scaled) {
+  // scaleAmount can report scaled when rounding prints the same text ("1 cup" × 6.1/6).
+  // The library flag stays, so a purchase list can still add it; the row itself did not change.
+  if (textChanged(ing)) {
     return `<span class="rbf-amt rbf-scaled" title="Scaled ${esc(formatFactor(factor))} from the creator’s “${esc(ing.originalAmount)}”">`
       + `<span class="rbf-badge" aria-hidden="true">${esc(formatFactor(factor))}</span> ${esc(ing.amount)}</span>`
       + `<span class="rbf-orig">creator: ${esc(ing.originalAmount)}</span>`;
@@ -36,6 +40,10 @@ export function renderScale(recipe, factor = 1, { list = true, factors = DEFAULT
   const serves = parseServes(recipe.serves);
   const scaled = scaleRecipe(recipe, factor);
   const s = scaled.scale;
+  const changed = scaled.components.reduce(
+    (n, c) => n + c.ingredients.filter((i) => textChanged(i)).length,
+    0,
+  );
   let control;
   if (serves) {
     const target = serves.count * factor;
@@ -52,7 +60,7 @@ export function renderScale(recipe, factor = 1, { list = true, factors = DEFAULT
   }
   const note = factor === 1
     ? (serves ? 'Amounts as the creator gave them.' : 'Amounts as the creator gave them. This recipe doesn’t give a plain serving count, so scale it by a factor.')
-    : `Scaled ${esc(formatFactor(factor))}: ${s.scaled} ${s.scaled === 1 ? 'amount' : 'amounts'} changed`
+    : `Scaled ${esc(formatFactor(factor))}: ${changed} ${changed === 1 ? 'amount' : 'amounts'} changed`
       + (s.kept ? `, ${s.kept} kept in the creator’s words` : '')
       + (s.unstated ? `, ${s.unstated} not given` : '')
       + '. Check anything marked “not scaled” yourself.';

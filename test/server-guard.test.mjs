@@ -100,6 +100,14 @@ test('the server binds to 127.0.0.1 unless HOST says otherwise', async () => {
   assert.match(source, /server\.listen\(PORT, HOST,/);
 });
 
+test('the request-handler comment sits directly above createHandler', async () => {
+  const source = await readFile(join(ROOT, 'server.mjs'), 'utf8');
+  const comment = source.indexOf('The request handler.');
+  const fn = source.indexOf('export function createHandler');
+  assert.ok(comment !== -1 && fn > comment);
+  assert.doesNotMatch(source.slice(comment, fn), /MALFORMED_LIST|function contractThrows/);
+});
+
 test('RECIPE_BANK_DIR picks the data folder, without depending on import order', () => {
   assert.equal(defaultDataDir({}), resolve(ROOT));
   assert.equal(defaultDataDir({ RECIPE_BANK_DIR: 'some/where' }), resolve('some/where'));

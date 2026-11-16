@@ -39,7 +39,12 @@ const warn = (where, message) => {
 };
 
 const schema = JSON.parse(await readFile(join(REPO, 'schema', 'recipe.schema.json'), 'utf8'));
-const files = (await readdir(join(ROOT, 'recipes'))).filter((f) => f.endsWith('.json')).sort();
+let files = [];
+try {
+  files = (await readdir(join(ROOT, 'recipes'))).filter((f) => f.endsWith('.json')).sort();
+} catch (e) {
+  fail('recipes', e.code === 'ENOENT' ? 'recipes/ is missing' : `recipes/ could not be read (${e.message})`);
+}
 const seen = new Map();
 for (const f of files) {
   let r;
@@ -84,9 +89,8 @@ queue.forEach((q, i) => {
   if (parsed?.id && q.video.id !== parsed.id) fail(at, `video.id must be "${parsed.id}"`);
   if (parsed && !parsed.id && q.video.id != null) fail(at, 'video.id must be null or omitted for web pages and unresolved short links');
   if (!STATUSES.includes(q?.status)) fail(at, `status must be one of ${STATUSES.join(', ')}`);
-  if (seen.has(videoKey(q?.video))) {
-    warn(at, `already analyzed as ${seen.get(videoKey(q.video))}; remove it from the queue`);
-  }
+  const key = videoKey(q?.video);
+  if (key && seen.has(key)) warn(at, `already analyzed as ${seen.get(key)}; remove it from the queue`);
 });
 
 if (asJson) {
