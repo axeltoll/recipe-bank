@@ -122,6 +122,18 @@ const kept = [
   ['   ', 'unstated'],
 ];
 
+test('a count next to a pack size scales only the count', () => {
+  // The weight is the size of one pack, so halving the recipe does not halve the tin.
+  assert.equal(scaleAmount('1 400g can', 0.5).amount, '½ 400g can');
+  assert.equal(scaleAmount('2 (400g) cans', 0.5).amount, '1 (400g) cans');
+  assert.equal(scaleAmount('2 cans (400g each)', 0.5).amount, '1 can (400g each)');
+  assert.equal(scaleAmount('2 x 400g (14 oz)', 0.5).amount, '1 x 400g (14 oz)');
+  // A measure and its bracketed equivalent still both scale, and a slash pack stays whole.
+  assert.equal(scaleAmount('2 x 400g/14oz', 0.5).amount, '1 x 400g/14oz');
+  assert.equal(scaleAmount('½ cup (about 110 g)', 0.5).amount, '¼ cup (about 55 g)');
+  assert.equal(scaleAmount('2 tbsp (30 ml)', 0.5).amount, '1 tbsp (15 ml)');
+});
+
 test('the count word agrees with the number as shown, after rounding', () => {
   assert.equal(scaleAmount('1½ cups', 0.67).amount, '1 cup'); // 1.005 is shown as 1
   assert.equal(scaleAmount('2 cans', 0.505).amount, '1 can');

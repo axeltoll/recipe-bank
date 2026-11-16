@@ -256,6 +256,26 @@ test('serves that counts items, or is not a plain number, is not treated as serv
   }
 });
 
+test('a pack weight in the scaled text stays the pack weight', () => {
+  const tins = recipe('tins', '4', [
+    ing('Chopped tomatoes', 'tomato', '2 (400g) cans'),
+    ing('Chickpeas', 'chickpea', '2 cans (400g each)'),
+    ing('Tuna', 'tuna', '2 x 400g (14 oz)'),
+    ing('Coconut milk', 'coconut milk', '1 400g can'),
+  ]);
+  const p = purchaseList(plan('tins'), [tins], adults(2));
+  const source = (key) => item(p, key).sources[0].amount;
+  assert.equal(p.recipes[0].factor, 0.5);
+  assert.equal(source('tomato'), '1 (400g) cans');
+  assert.equal(source('chickpea'), '1 can (400g each)');
+  assert.equal(source('tuna'), '1 x 400g (14 oz)');
+  assert.equal(source('coconut milk'), '½ 400g can');
+  assert.equal(item(p, 'tomato').amount, '1 can');
+  assert.equal(item(p, 'chickpea').amount, '1 can');
+  assert.equal(item(p, 'tuna').parts[0].kind, 'text');
+  assert.equal(item(p, 'coconut milk').parts[0].kind, 'text');
+});
+
 test('words, rates, unreadable numbers and amounts scaled but kept apart', () => {
   const delta = recipe('delta', '4', [
     ing('Parsley', 'parsley', 'a few sprigs'),
