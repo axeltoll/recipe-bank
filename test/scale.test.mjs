@@ -159,13 +159,35 @@ test('a bracket scales unless it is a pack size', () => {
 });
 
 test('a kept bracket does not take the plural of the container count', () => {
-  assert.equal(scaleAmount('2 jars (about 2 cups)', 0.5).amount, '1 jar (about 2 cups)');
-  assert.equal(scaleAmount('1 jar (about 1 cup) salsa', 2).amount, '2 jars (about 1 cup) salsa');
-  assert.equal(scaleAmount('1 bag (about 6 cups) spinach', 6.1 / 6).amount, '1 bag (about 6 cups) spinach');
-  assert.equal(scaleAmount('1 can (1½ cups) coconut milk', 0.5).amount, '½ can (1½ cups) coconut milk');
-  // The same agreement, on a word that is not a spoon or a cup.
+  // Cups and spoons scale (they are the whole amount). A clove inside the bracket stays as written.
   assert.equal(scaleAmount('2 jars (about 2 cloves)', 0.5).amount, '1 jar (about 2 cloves)');
   assert.equal(scaleAmount('1 jar (about 1 clove) salsa', 2).amount, '2 jars (about 1 clove) salsa');
+});
+
+test('a total, or a cup or spoon, scales even after a container', () => {
+  const doubled = [
+    ['2 cans (800g total)', '4 cans (1600g total)'],
+    ['2 packs (16 oz total)', '4 packs (32 oz total)'],
+    ['2 cans (800 g in total)', '4 cans (1600 g in total)'],
+    ['2 cans (800g altogether)', '4 cans (1600g altogether)'],
+    ['2 cans (800g combined)', '4 cans (1600g combined)'],
+    ['2 cans (800g in all)', '4 cans (1600g in all)'],
+    ['2 jars (about 2 cups)', '4 jars (about 4 cups)'],
+    ['2 tins (about 3 cups)', '4 tins (about 6 cups)'],
+    ['2 tubs (2 cups) ricotta', '4 tubs (4 cups) ricotta'],
+    ['1 can (1½ cups)', '2 cans (3 cups)'],
+    ['1 jar (about 1 cup) salsa', '2 jars (about 2 cups) salsa'],
+    ['2 cans (1 tsp)', '4 cans (2 tsp)'],
+    ['2 jars (1 tbsp)', '4 jars (2 tbsp)'],
+  ];
+  for (const [input, expected] of doubled) {
+    assert.equal(scaleAmount(input, 2).amount, expected, input);
+  }
+  assert.equal(scaleAmount('2 jars (about 2 cups)', 0.5).amount, '1 jar (about 1 cup)');
+  assert.equal(scaleAmount('1 can (1½ cups) coconut milk', 0.5).amount, '½ can (¾ cup) coconut milk');
+  assert.equal(scaleAmount('1 bag (about 6 cups) spinach', 6.1 / 6).amount, '1 bag (about 6.1 cups) spinach');
+  // "each" is still one container, so the cup stays.
+  assert.equal(scaleAmount('2 cans (1 cup each)', 2).amount, '4 cans (1 cup each)');
 });
 
 test('an adjective before a bracket still leaves the can size alone', () => {
