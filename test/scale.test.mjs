@@ -125,7 +125,9 @@ const kept = [
 test('a count next to a pack size scales only the count', () => {
   // The weight is the size of one pack, so halving the recipe does not halve the tin.
   assert.equal(scaleAmount('1 400g can', 0.5).amount, '½ 400g can');
-  assert.equal(scaleAmount('2 (400g) cans', 0.5).amount, '1 (400g) cans');
+  assert.equal(scaleAmount('1 400g can', 2).amount, '2 400g cans');
+  assert.equal(scaleAmount('2 (400g) cans', 0.5).amount, '1 (400g) can');
+  assert.equal(scaleAmount('1 (14 oz) can', 2).amount, '2 (14 oz) cans');
   assert.equal(scaleAmount('2 cans (400g each)', 0.5).amount, '1 can (400g each)');
   assert.equal(scaleAmount('2 x 400g (14 oz)', 0.5).amount, '1 x 400g (14 oz)');
   // A measure and its bracketed equivalent still both scale, and a slash pack stays whole.
@@ -158,12 +160,12 @@ test('a bracket scales unless it is a pack size', () => {
 
 test('a bare pack size keeps its weight when the unit is spelled out', () => {
   const rows = [
-    ['1 14-ounce can', '2 14-ounce can'],
-    ['1 14 ounce can', '2 14 ounce can'],
-    ['1 28-oz can', '2 28-oz can'],
+    ['1 14-ounce can', '2 14-ounce cans'],
+    ['1 14 ounce can', '2 14 ounce cans'],
+    ['1 28-oz can', '2 28-oz cans'],
     ['1 250g tub', '2 250g tub'],
     ['1 330ml bottle', '2 330ml bottle'],
-    ['1 large 800g tin', '2 large 800g tin'],
+    ['1 large 800g tin', '2 large 800g tins'],
   ];
   for (const [input, expected] of rows) {
     assert.equal(scaleAmount(input, 2).amount, expected, input);

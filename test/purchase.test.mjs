@@ -300,7 +300,7 @@ test('a pack weight in the scaled text stays the pack weight', () => {
   const p = purchaseList(plan('tins'), [tins], adults(2));
   const source = (key) => item(p, key).sources[0].amount;
   assert.equal(p.recipes[0].factor, 0.5);
-  assert.equal(source('tomato'), '1 (400g) cans');
+  assert.equal(source('tomato'), '1 (400g) can');
   assert.equal(source('chickpea'), '1 can (400g each)');
   assert.equal(source('tuna'), '1 x 400g (14 oz)');
   assert.equal(source('coconut milk'), '½ 400g can');
