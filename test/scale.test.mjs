@@ -156,6 +156,20 @@ test('a bracket scales unless it is a pack size', () => {
   assert.equal(scaleAmount('1 jar (500 g)', 2).amount, '2 jars (500 g)');
 });
 
+test('a bare pack size keeps its weight when the unit is spelled out', () => {
+  const rows = [
+    ['1 14-ounce can', '2 14-ounce can'],
+    ['1 14 ounce can', '2 14 ounce can'],
+    ['1 28-oz can', '2 28-oz can'],
+    ['1 250g tub', '2 250g tub'],
+    ['1 330ml bottle', '2 330ml bottle'],
+    ['1 large 800g tin', '2 large 800g tin'],
+  ];
+  for (const [input, expected] of rows) {
+    assert.equal(scaleAmount(input, 2).amount, expected, input);
+  }
+});
+
 test('the count word agrees with the number as shown, after rounding', () => {
   assert.equal(scaleAmount('1½ cups', 0.67).amount, '1 cup'); // 1.005 is shown as 1
   assert.equal(scaleAmount('2 cans', 0.505).amount, '1 can');
