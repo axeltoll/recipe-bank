@@ -247,6 +247,26 @@ test('amountHtml for each kind of amount', () => {
   assert.equal(scaleUi.amountHtml(same, 1), '<span class="rbf-amt">a pinch</span>');
 });
 
+test('an amount that rounds back to the same text is shown unchanged', () => {
+  const cups = {
+    id: 'cups', title: 'Cups', serves: '6',
+    components: [{ name: 'Main', steps: [], ingredients: [ing('Milk', 'milk', '1 cup'), ing('Flour', 'flour', '2 cups')] }],
+  };
+  const factor = 6.1 / 6;
+  const [milk, flour] = scaleRecipe(cups, factor).components[0].ingredients;
+  assert.equal(milk.amount, milk.originalAmount);
+  assert.equal(milk.scaled, true, 'purchase still needs scaled: true when the text did not change');
+  assert.equal(scaleUi.amountHtml(milk, factor), '<span class="rbf-amt">1 cup</span>');
+  const html = scaleUi.renderScale(cups, factor);
+  assert.match(html, /1 amount changed/);
+  assert.match(html, /<span class="rbf-item">Milk<\/span><span class="rbf-amts"><span class="rbf-amt">1 cup<\/span>/);
+  assert.doesNotMatch(html, /creator: 1 cup/);
+  assert.match(scaleUi.amountHtml(flour, factor), /rbf-scaled/);
+  const only = scaleUi.renderScale({ ...cups, components: [{ name: 'Main', steps: [], ingredients: [ing('Milk', 'milk', '1 cup')] }] }, factor);
+  assert.match(only, /0 amounts changed/);
+  assert.doesNotMatch(only, /rbf-scaled|creator:/);
+});
+
 test('filters render chips, numbers and a summary', () => {
   const recipes = [alpha, beta, evil];
   const html = filtersUi.renderFilters(recipes, { without: ['pork'], tags: ['quick'], minProtein: 40, q: 'ignored', keys: ['x'] });
