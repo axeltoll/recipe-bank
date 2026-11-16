@@ -256,6 +256,23 @@ test('serves that counts items, or is not a plain number, is not treated as serv
   }
 });
 
+test('a factor that rounds back to the same text still adds the amount', () => {
+  const cups = recipe('cups', '6', [
+    ing('Milk', 'milk', '1 cup'),
+    ing('Salt', 'salt', '1 tsp'),
+    ing('Herbs', 'herb', 'a good amount'),
+  ]);
+  const people = { ...defaultProfile().people, adult: 7, child6to10: 1 };
+  const profile = { ...defaultProfile(), people, portionSize: 'light' };
+  const p = purchaseList(plan('cups'), [cups], profile);
+  assert.equal(p.servings, 6.1);
+  assert.equal(item(p, 'milk').sources[0].status, 'added');
+  assert.equal(item(p, 'salt').sources[0].status, 'added');
+  assert.equal(item(p, 'herb').sources[0].status, 'words');
+  assert.equal(item(p, 'milk').parts[0].kind, 'total');
+  assert.equal(item(p, 'salt').parts[0].kind, 'total');
+});
+
 test('a pack weight in the scaled text stays the pack weight', () => {
   const tins = recipe('tins', '4', [
     ing('Chopped tomatoes', 'tomato', '2 (400g) cans'),

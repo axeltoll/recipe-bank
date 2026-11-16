@@ -151,6 +151,16 @@ test('leaves words, rates and missing amounts exactly as they were', () => {
   }
 });
 
+test('a number that rounds back to the same text was still scaled', () => {
+  for (const amount of ['1 cup', '1 tsp']) {
+    const r = scaleAmount(amount, 6.1 / 6);
+    assert.equal(r.amount, amount, amount);
+    assert.equal(r.reason, 'scaled', amount);
+    assert.equal(r.scaled, true, amount);
+  }
+  assert.equal(scaleAmount('a good amount', 6.1 / 6).reason, 'words');
+});
+
 test('factor 1 changes nothing; a bad factor throws', () => {
   assert.deepEqual(scaleAmount('800g', 1), { amount: '800g', original: '800g', scaled: false, reason: 'same' });
   for (const f of [0, -1, NaN, Infinity, '2', null]) assert.throws(() => scaleAmount('800g', f), RangeError, String(f));
