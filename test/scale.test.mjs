@@ -158,6 +158,16 @@ test('a bracket scales unless it is a pack size', () => {
   assert.equal(scaleAmount('1 jar (500 g)', 2).amount, '2 jars (500 g)');
 });
 
+test('a kept bracket does not take the plural of the container count', () => {
+  assert.equal(scaleAmount('2 jars (about 2 cups)', 0.5).amount, '1 jar (about 2 cups)');
+  assert.equal(scaleAmount('1 jar (about 1 cup) salsa', 2).amount, '2 jars (about 1 cup) salsa');
+  assert.equal(scaleAmount('1 bag (about 6 cups) spinach', 6.1 / 6).amount, '1 bag (about 6 cups) spinach');
+  assert.equal(scaleAmount('1 can (1½ cups) coconut milk', 0.5).amount, '½ can (1½ cups) coconut milk');
+  // The same agreement, on a word that is not a spoon or a cup.
+  assert.equal(scaleAmount('2 jars (about 2 cloves)', 0.5).amount, '1 jar (about 2 cloves)');
+  assert.equal(scaleAmount('1 jar (about 1 clove) salsa', 2).amount, '2 jars (about 1 clove) salsa');
+});
+
 test('an adjective before a bracket still leaves the can size alone', () => {
   const rows = [
     ['1 large (28 oz) can', '2 large (28 oz) cans'],
