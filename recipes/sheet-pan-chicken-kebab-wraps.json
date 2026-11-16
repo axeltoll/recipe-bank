@@ -1,0 +1,118 @@
+{
+  "id": "sheet-pan-chicken-kebab-wraps",
+  "title": "Sheet Pan Chicken Kebab Wraps with Garlic Sauce",
+  "status": "analyzed",
+  "video": {
+    "platform": "youtube",
+    "id": "qsOwoDJnjtA",
+    "url": "https://www.youtube.com/shorts/qsOwoDJnjtA"
+  },
+  "creator": {
+    "name": "Louis Howard",
+    "handle": "@LouisHowardpt",
+    "url": "https://www.youtube.com/@LouisHowardpt"
+  },
+  "uploaded": "2026-11-09",
+  "analyzed": "2026-11-16",
+  "summary": "Lean chicken mince mixed with diced onion, red pepper, garlic and spices, pressed flat on a lined tray, divided into eight kebabs and oven-baked, then wrapped in Lebanese wraps with a fresh tomato-cucumber-red-onion salad and a yoghurt-mayo garlic sauce. Louis Howard's review/recreation of a recipe credited to @panaceapalm; he rates it 10/10.",
+  "serves": "4 kebab wraps (description); the demonstrated tray is divided into 8 kebabs, 2 per wrap",
+  "tags": ["chicken", "kebab", "wrap", "flatbread", "garlic", "oven", "fakeaway", "high protein"],
+  "components": [
+    {
+      "name": "Chicken kebabs",
+      "ingredients": [
+        {"item": "Lean chicken mince (5% fat or less)", "key": "chicken", "amount": "1kg", "basis": "description", "note": "On-screen card reads '1000g ground chicken' (OCR f-007/f-008, dense chicken-006/008); spoken 'lean ground chicken'."},
+        {"item": "Brown onion, finely diced", "key": "onion", "amount": "1 medium", "basis": "description", "note": "Spoken 'onions'; variety and size only in the written list."},
+        {"item": "Red pepper, finely diced", "key": "red pepper", "amount": "1", "basis": "description", "note": "Spoken 'bell pepper'; no on-screen quantity card for the vegetables was legible."},
+        {"item": "Garlic cloves, minced", "key": "garlic", "amount": "4 cloves", "basis": "description"},
+        {"item": "Fresh coriander, chopped", "key": "coriander", "amount": null, "basis": "unstated", "note": "No quantity given. On-screen card 'chopped coriander' (dense chicken-011). Louis swaps to parsley on screen ('The missus doesn't like coriander', 0:29-0:32; card 'parsley', dense chicken-017) — a personal substitution, not part of the written spec."},
+        {"item": "Paprika", "key": "paprika", "amount": "2 tsp", "basis": "description", "note": "On-screen spice card OCR (f-009): '2 tsp pup,r.ik/' [interpretation: paprika]; vision read '2 tsp paprika'."},
+        {"item": "Cumin", "key": "cumin", "amount": "2 tsp", "basis": "description", "note": "On-screen spice card OCR (f-009): '2 tsp cumin'."},
+        {"item": "Salt", "key": "salt", "amount": "2 tsp", "basis": "description", "note": "On-screen spice card OCR (f-009): '2tsp alt' [interpretation: salt]."},
+        {"item": "Black pepper", "key": "black pepper", "amount": "2 tsp", "basis": "description", "note": "On-screen spice card OCR (f-009): '2tsp uﬁl' (garbled); vision read '2 tsp pepper'."},
+        {"item": "Chilli powder", "key": "chilli", "amount": "1 tsp", "basis": "description", "note": "On-screen spice card OCR (f-009): '1tsp ch powder' [interpretation: chilli powder]; vision read '1 tsp chilli powder'."},
+        {"item": "Turmeric", "key": "turmeric", "amount": "½ tsp", "basis": "description", "note": "On-screen spice card OCR (f-009): '1/21sp' (garbled); vision read '1/2 tsp turmeric'."},
+        {"item": "Olive oil", "key": "olive oil", "amount": "1 tbsp", "basis": "description", "note": "Spoken 'and olive oil' (0:35); quantity only in the written list."}
+      ],
+      "steps": [
+        {"text": "Preheat the oven to 190°C.", "t": null},
+        {"text": "Finely dice the brown onion and red pepper and mince the garlic; squeeze out excess water from the diced vegetables as demonstrated.", "t": 13},
+        {"text": "Add the vegetables to the lean chicken mince with the chopped coriander, all the seasonings and the olive oil.", "t": 26},
+        {"text": "Mix thoroughly until the mixture changes colour.", "t": 35},
+        {"text": "Spread the mixture onto a lined baking tray (spoken: 'a greased sheet pan'), pressing it into a flat, even layer and adding finger marks as demonstrated.", "t": 45},
+        {"text": "Using a spatula, divide the sheet into eight kebabs.", "t": 52},
+        {"text": "Bake for 20–25 minutes at 190°C, draining any excess juices halfway through, until fully cooked and golden. On-screen card: 'OVEN BAKE 190C | 20-25 MINS'.", "t": 54},
+        {"text": "Slice the baked chicken sheet into kebab-sized strips.", "t": null}
+      ]
+    },
+    {
+      "name": "Garlic sauce",
+      "ingredients": [
+        {"item": "0% Greek yoghurt", "key": "greek yoghurt", "amount": "120g", "basis": "description", "note": "On-screen sauce card OCR (sauce/s-011, s-017): '120g 0% Greek yoghurt' — matches the written list."},
+        {"item": "Light mayonnaise", "key": "mayonnaise", "amount": "30g", "basis": "description", "note": "On-screen card: '30g light mayo'."},
+        {"item": "Garlic powder", "key": "garlic powder", "amount": "1 tsp", "basis": "description", "note": "On-screen card: '1tsp garlic powder'."},
+        {"item": "Dried dill", "key": "dill", "amount": "1 tsp", "basis": "description", "note": "On-screen card: '1tsp dried dill'."},
+        {"item": "Salt", "key": "salt", "amount": "½ tsp", "basis": "description", "note": "On-screen card: '1/2 tsp salt'."},
+        {"item": "Black pepper", "key": "black pepper", "amount": "½ tsp", "basis": "description", "note": "On-screen card: '1/2 tsp pepper'."},
+        {"item": "Lemon juice", "key": "lemon", "amount": "juice of ½ lemon", "basis": "description", "note": "On-screen card: '1/2 lemon juice'."},
+        {"item": "Water", "key": "water", "amount": "a splash", "basis": "description", "note": "Spoken 'with a splash of water to get the perfect consistency' (1:18-1:20). Not listed on the on-screen sauce card."}
+      ],
+      "steps": [
+        {"text": "Mix the Greek yoghurt, light mayo, garlic powder, dill, salt, pepper and lemon juice in a bowl.", "t": 73},
+        {"text": "Add a splash of water until the sauce reaches a creamy consistency. Louis uses a blender because it is already out ('I'm feeling lazy', 1:21-1:22) — the written method says mix in a bowl.", "t": 78}
+      ]
+    },
+    {
+      "name": "Salad",
+      "ingredients": [
+        {"item": "Red onion, finely diced", "key": "red onion", "amount": "½", "basis": "description"},
+        {"item": "Cherry tomatoes, diced", "key": "tomato", "amount": "150g", "basis": "description"},
+        {"item": "Cucumber, diced", "key": "cucumber", "amount": "150g", "basis": "description"},
+        {"item": "Fresh coriander", "key": "coriander", "amount": null, "basis": "unstated", "note": "No quantity given in the written salad list."},
+        {"item": "Salt", "key": "salt", "amount": "to taste", "basis": "description"}
+      ],
+      "steps": [
+        {"text": "Combine the red onion, cherry tomatoes, cucumber, coriander and a little salt in a bowl.", "t": 92}
+      ]
+    },
+    {
+      "name": "To serve",
+      "ingredients": [
+        {"item": "Lebanese wraps", "key": "flatbread", "amount": "4", "basis": "description", "note": "Description states approximately 200 calories each; no brand or size given."}
+      ],
+      "steps": [
+        {"text": "Spread garlic sauce on each Lebanese wrap.", "t": 85},
+        {"text": "Add two chicken kebabs per wrap.", "t": 90},
+        {"text": "Add the salad and more garlic sauce, then wrap up.", "t": 92}
+      ]
+    }
+  ],
+  "nutrition": {
+    "per": "kebab wrap",
+    "basis": "description",
+    "calories": 586,
+    "protein_g": 62,
+    "carbs_g": 45,
+    "fat_g": 16,
+    "note": "Approximate creator-reported figures from the description ('Approximate macros per kebab wrap'). The hook frame shows '62g PROTEIN' (vision read; OCR '62.') and the narration says 'over 60 grams of protein' — consistent with 62g. The end-of-video 'macros' panel never renders legible calorie/carb/fat digits in any sampled frame (t=104-126s, 57 dense frames + vision reads), so 586/45/16 rest on the description alone. Not independently calculated; the unquantified sweet-chilli jam addition and parsley swap are not included."
+  },
+  "notes": [
+    "Louis Howard's description credits @panaceapalm (YouTube channel 'Panacea Palm', resolved 200). This capture documents Louis's public review/recreation; the credited original was not independently audited.",
+    "Louis's verdict: 'BLOODY LOVELY! 10/10!' — 'this is a 10 out of 10. Definitely give it a go.' (2:00).",
+    "Personal substitutions demonstrated but NOT in the written spec: parsley instead of coriander in the chicken mix (0:29-0:32, on-screen 'parsley' card), sweet-chilli jam added to the wrap ('Sorry, I've got to add some sweet chili jam with this as well. It's begging for it.', 1:27-1:30), and blending the sauce instead of bowl-mixing (1:21).",
+    "The tray is divided into 8 kebabs (spoken 0:52-0:54 + on-screen '8 KEBABS' card, OCR f-014/bake-005..010) and assembled 2 per wrap (spoken 'Two chicken kebabs', 1:30) — consistent with 4 wraps from 1kg mince.",
+    "On-screen sauce card (t=72-79s) matches the written sauce list line-for-line except the splash of water, which is spoken only.",
+    "Recurring 'EMPLOYEE OF THE MONTH' watermark overlay appears across most frames; it is channel branding, not recipe content."
+  ],
+  "gaps": [
+    "Coriander quantities (chicken mix and salad) are unstated in every surface.",
+    "Oven mode (fan/conventional) is unstated; 190°C is explicit in both the description and the on-screen card.",
+    "No on-screen quantity card for the diced vegetables (onion, red pepper, garlic) was legible; their amounts rest on the description.",
+    "Macro panel digits other than the hook's 62g protein never render legibly; calories/carbs/fat are description-only.",
+    "Sweet-chilli jam quantity is unstated and excluded from the reported macros.",
+    "Lebanese wrap brand/size unstated; the ~200 kcal each figure is creator-reported."
+  ],
+  "source": {
+    "quantity_basis": "Measurements and approximate per-wrap macros from the public description. Demonstrated steps checked against 83 English automatic-caption segments and sampled source frames (32-frame sweep + 78 + 57 + 22 dense frames). On-screen spice, sauce, bake and kebab-count cards OCR-verified; sauce card matches the written list. Louis's parsley swap, sweet-chilli jam and blender shortcut are distinguished from the written method. No macro recalculation; unreadable animated macro digits discarded, not guessed."
+  }
+}
