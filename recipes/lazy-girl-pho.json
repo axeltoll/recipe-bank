@@ -68,8 +68,8 @@
         { "item": "Onions, sliced", "key": "onion", "amount": null, "basis": "unstated" },
         { "item": "Bean sprouts", "key": "bean sprouts", "amount": null, "basis": "unstated" },
         { "item": "Chili oil", "key": "chili oil", "amount": null, "basis": "unstated", "note": "A jar labeled \"Ground Chili Garlic Sauce\" is visible at the assembly; whether that is the chili oil she means is not confirmed." },
-        { "item": "Sriracha", "key": "sriracha", "amount": null, "basis": "unstated", "note": "Huy Fong bottle (green nozzle) visible; squeezed over the bowl at 0:65." },
-        { "item": "Hoisin sauce", "key": "hoisin", "amount": null, "basis": "unstated", "note": "Dark sauce drizzled over the chicken at 0:66." }
+        { "item": "Sriracha", "key": "sriracha", "amount": null, "basis": "unstated", "note": "Huy Fong bottle (green nozzle) visible; squeezed over the bowl at 1:05." },
+        { "item": "Hoisin sauce", "key": "hoisin", "amount": null, "basis": "unstated", "note": "Dark sauce drizzled over the chicken at 1:06." }
       ],
       "steps": [
         { "text": "Assemble the bowls: noodles topped with the shredded chicken, sliced onion, cilantro, basil and jalapeño.", "t": 60 },
