@@ -1,0 +1,105 @@
+{
+  "id": "lazy-girl-pho",
+  "title": "Lazy Girl Pho (Rotisserie Chicken Pho)",
+  "status": "analyzed",
+  "video": {
+    "platform": "instagram",
+    "id": "DfGI52HPMzl",
+    "url": "https://www.instagram.com/reel/DfGI52HPMzl/"
+  },
+  "creator": {
+    "name": "Jayla",
+    "handle": "@jaylaskitchen__",
+    "url": "https://www.instagram.com/jaylaskitchen__/"
+  },
+  "uploaded": "2026-10-29",
+  "analyzed": "2026-11-20",
+  "summary": "A cheat-code chicken pho built on a store-bought rotisserie chicken: the picked-over bones simmer with charred onion, ginger, a bag of pho spices and a jarred chicken pho soup base, fish sauce and seasonings, then the broth is ladled over fresh rice noodles and the reserved shredded chicken with a full topping bar. The creator gives the ingredient list in a comment reply; the only quantity stated anywhere is 10–12 cups of water.",
+  "serves": null,
+  "tags": ["chicken", "vietnamese", "pho", "soup", "noodles", "quick", "rotisserie"],
+  "components": [
+    {
+      "name": "Rotisserie chicken broth",
+      "ingredients": [
+        { "item": "Rotisserie chicken bones (carcass after the meat is pulled off)", "key": "chicken", "amount": null, "basis": "unstated", "note": "One store-bought rotisserie chicken is picked apart on camera at 0:08–0:12; the meat is reserved for the bowls and the bones go into the broth. Her comment says \"rotisserie chicken bones\"." },
+        { "item": "Water", "key": "water", "amount": "10–12 cups", "basis": "description", "note": "The only quantity she states anywhere: \"10 to 12 cups of water\" in her ingredient-list comment reply." },
+        { "item": "Onion", "key": "onion", "amount": null, "basis": "unstated", "note": "Halved on the cutting board at 0:14; a charred onion is handled with tongs over the pan at 0:18. Count unstated." },
+        { "item": "Ginger", "key": "ginger", "amount": null, "basis": "unstated", "note": "Sliced at 0:14, added to the pot at 0:30. Whether it is charred like the onion is not clearly shown." },
+        { "item": "Fish sauce", "key": "fish sauce", "amount": null, "basis": "unstated", "note": "Squeezed straight from the bottle into the pot at 0:46–0:47; the label reads Three Crabs Brand Fish Sauce (Nước Mắm Nhỉ)." },
+        { "item": "Chicken pho soup base", "key": "pho soup base", "amount": null, "basis": "unstated", "note": "Jar shown at 0:48–0:49: \"Cốt Phở Gà — Chicken Flavored 'Phở' Soup Base\", NET WT 10 OZ (283 g). A thick light-brown paste spooned/poured into the broth at 0:49–0:50. The maker's name on the jar was not legible." },
+        { "item": "MSG", "key": "msg", "amount": null, "basis": "unstated", "note": "Named in her comment list; no distinct addition is identifiable in the frames." },
+        { "item": "Chicken bullion [sic]", "key": "chicken bouillon", "amount": null, "basis": "unstated", "note": "Her comment spelling preserved (\"bullion\"); form (cubes/powder) and amount unstated, addition not distinctly shown." },
+        { "item": "Rock sugar", "key": "sugar", "amount": null, "basis": "unstated", "note": "Named in her comment list; no distinct addition is identifiable in the frames." },
+        { "item": "A bag of pho spices", "key": "pho spices", "amount": null, "basis": "unstated", "note": "Packet held up at 0:20 reads Richin \"SPICE SEASONING / Gia Vị Nấu Phở Bắc\" (Northern-style pho spices), ingredients aniseed, cinnamon, coriander seeds, fennel, cloves; NET WT 1.5 OZ (43 g). The packet is labeled for beef pho (越南牛肉粉配料) but she uses it for this chicken version. Spices are spooned into a white spice bag at 0:24 and the tied bag simmers in the broth (visible at 0:33–0:35)." }
+      ],
+      "steps": [
+        { "text": "Pull the meat off a store-bought rotisserie chicken and set the shredded meat aside in a bowl; keep the bones/carcass for the broth.", "t": 8 },
+        { "text": "Halve the onion and slice the ginger.", "t": 14 },
+        { "text": "In a pan on the stove, work with the onion and ginger in some liquid; a charred onion is lifted with tongs at 0:18 (the charring step itself is not shown).", "t": 16 },
+        { "text": "Show the pho spice packet, then spoon its whole spices (anise, cinnamon, coriander, fennel, cloves) into a white spice bag and tie it.", "t": 20 },
+        { "text": "Put the chicken bones, onion and ginger into a large pot.", "t": 28 },
+        { "text": "Pour in the water (she states 10–12 cups in her comment).", "t": 32 },
+        { "text": "Add the tied spice bag and bring the broth to a simmer; skim/stir as it cooks.", "t": 33 },
+        { "text": "Lift the solids out with a mesh strainer, letting the broth drain back into the pot; the reserved shredded chicken sits in a separate bowl.", "t": 38 },
+        { "text": "Pour the pan's remaining liquid/drippings into the pot.", "t": 43 },
+        { "text": "Squeeze fish sauce into the broth.", "t": 46 },
+        { "text": "Spoon/pour in the chicken pho soup base paste from the jar.", "t": 49 },
+        { "text": "Stir the broth with a ladle. Her comment also lists MSG, chicken bullion and rock sugar for the broth; their exact addition moments are not identifiable on camera.", "t": 51 }
+      ]
+    },
+    {
+      "name": "Noodles",
+      "ingredients": [
+        { "item": "Fresh pho rice noodles", "key": "rice noodles", "amount": null, "basis": "unstated", "note": "VIDEO-ONLY: absent from her comment ingredient list. Package shown at 0:54–0:55 reads Sincere Orient Food Co. (新聯食品公司) \"BÁNH PHỞ TƯƠI / Fresh Rice Noodle\"." }
+      ],
+      "steps": [
+        { "text": "Drop a nest of the fresh rice noodles into a separate pot of boiling water.", "t": 54 },
+        { "text": "Lift the cooked noodles out with chopsticks/tongs and transfer them to serving bowls.", "t": 56 }
+      ]
+    },
+    {
+      "name": "To serve",
+      "ingredients": [
+        { "item": "Shredded rotisserie chicken (reserved from the broth prep)", "key": "chicken", "amount": null, "basis": "unstated" },
+        { "item": "Limes", "key": "lime", "amount": null, "basis": "unstated" },
+        { "item": "Cilantro", "key": "cilantro", "amount": null, "basis": "unstated" },
+        { "item": "Basil", "key": "basil", "amount": null, "basis": "unstated", "note": "Her comment says \"basil\"; variety (Thai vs sweet) unstated." },
+        { "item": "Jalapeños", "key": "jalapeno", "amount": null, "basis": "unstated" },
+        { "item": "Onions, sliced", "key": "onion", "amount": null, "basis": "unstated" },
+        { "item": "Bean sprouts", "key": "bean sprouts", "amount": null, "basis": "unstated" },
+        { "item": "Chili oil", "key": "chili oil", "amount": null, "basis": "unstated", "note": "A jar labeled \"Ground Chili Garlic Sauce\" is visible at the assembly; whether that is the chili oil she means is not confirmed." },
+        { "item": "Sriracha", "key": "sriracha", "amount": null, "basis": "unstated", "note": "Huy Fong bottle (green nozzle) visible; squeezed over the bowl at 0:65." },
+        { "item": "Hoisin sauce", "key": "hoisin", "amount": null, "basis": "unstated", "note": "Dark sauce drizzled over the chicken at 0:66." }
+      ],
+      "steps": [
+        { "text": "Assemble the bowls: noodles topped with the shredded chicken, sliced onion, cilantro, basil and jalapeño.", "t": 60 },
+        { "text": "Ladle the hot broth through a mesh strainer into each bowl.", "t": 63 },
+        { "text": "Finish with sriracha and hoisin; serve with lime, bean sprouts and chili oil on the side.", "t": 65 },
+        { "text": "Toss the noodles through the broth and eat.", "t": 69 }
+      ]
+    }
+  ],
+  "notes": [
+    "The written spec is her reply to @youngdaggerbree's ingredient request in the comments (screenshot supplied by Axel): \"rotisserie chicken bones, 10 to 12 cups of water, onion, ginger, fish sauce, chicken pho soup base, MSG, chicken bullion, rock sugar & a bag of pho spices!! Limes, cilantro, chicken, basil, jalapeños, onions, bean sprouts, chili oil, sriracha & hoisin sauce for toppings!\" Her spelling \"bullion\" is preserved.",
+    "The reel has no narration — local ASR over the full audio returned only the background song — and no on-screen ingredient/quantity cards (77-frame OCR sweep: only the \"Lazy girl pho\" watermark and product packaging). Steps and product identities come from control-proven vision reads of the frames.",
+    "Noodles are video-only: the fresh pho noodles are shown, cooked and plated but never named in her comment list. Recorded as a discrepancy, not silently merged into her written spec.",
+    "The Richin spice packet is labeled for Northern-style BEEF pho (Gia Vị Nấu Phở Bắc / 越南牛肉粉配料); she uses it in this chicken pho. Her comment just says \"a bag of pho spices\".",
+    "The soup-base jar reads \"Cốt Phở Gà — Chicken Flavored 'Phở' Soup Base\", 10 oz (283 g); the maker's name was not legible in any frame.",
+    "Fish sauce bottle reads Three Crabs Brand (Nước Mắm Nhỉ); sriracha is Huy Fong. Brands are what the frames show, not stated preferences.",
+    "Caption: \"I tried making some cheat code pho AND BABYYYY!! This was a 10/10 😩 So easy to make & so flavorful!! 😋\" — her own verdict, not an audited claim. No funnel/CTA surface in the caption or the captured comment thread."
+  ],
+  "gaps": [
+    "Only one quantity is stated anywhere (10–12 cups water, in the comment). Every other amount — bones, aromatics, fish sauce, soup base, MSG, bouillon, rock sugar, spices, noodles, toppings — is unstated.",
+    "No simmer time, heat level or doneness cue is given for the broth.",
+    "MSG, chicken bullion and rock sugar are named in the comment but no distinct addition moment is identifiable in the frames; form (cubes vs powder) and amounts unknown.",
+    "The onion/ginger charring is implied (a charred onion appears at 0:18) but the charring method is never shown; whether the ginger is charred is unclear.",
+    "Noodle cook time unstated; package net weight cut off in frame.",
+    "Serves/yield unstated.",
+    "The soup-base jar's maker name is not legible; the chili-oil jar reads \"Ground Chili Garlic Sauce\" — product identity unconfirmed.",
+    "Basil variety unstated; bean sprouts raw-vs-blanched not shown."
+  ],
+  "source": {
+    "evidence": "Logged-out yt-dlp metadata + bounded 540p proxy (77.4 s); local faster-whisper ASR (song only, no speech); tesseract sweep over all 77 one-second frames (watermark + packaging only); control-proven auxiliary vision reads (deepseek-v4-flash-vision-exp) of contact sheets and second-accurate stills; Axel-supplied screenshot of the author's comment reply transcribed verbatim. Evidence bundle: axels-vault research/findings/food-content-culture/evidence/jaylaskitchen-lazy-girl-pho/.",
+    "quantity_basis": "The author's comment reply is the written spec surface: it names every ingredient but quantifies only the water (10–12 cups, basis \"description\"). No narration exists and no on-screen quantity cards were found, so all other amounts are null with basis \"unstated\". Noodles are video-only and flagged as such."
+  }
+}
